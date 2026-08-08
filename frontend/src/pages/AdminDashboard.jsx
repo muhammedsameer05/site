@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Users, Calendar, Award, Shield, Layers, Play, CheckCircle, 
-  Clock, Trophy, TrendingUp, BarChart3, PieChart
+  Clock, Trophy, BarChart3, PieChart 
 } from 'lucide-react';
 import {
   Chart as ChartJS,
@@ -33,17 +33,69 @@ export default function AdminDashboard() {
     fetch('/api/reports/dashboard-stats')
       .then(res => res.json())
       .then(data => {
-        setStats(data);
+        if (data && data.cards) {
+          setStats(data);
+        } else {
+          setStats({
+            cards: {
+              totalStudents: 0,
+              totalPrograms: 0,
+              totalJudges: 0,
+              totalHouses: 0,
+              totalCategories: 0,
+              runningPrograms: 0,
+              completedPrograms: 0,
+              pendingPrograms: 0,
+              totalParticipants: 0
+            },
+            houses: [],
+            categoryStats: []
+          });
+        }
         setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch(() => {
+        setStats({
+          cards: {
+            totalStudents: 0,
+            totalPrograms: 0,
+            totalJudges: 0,
+            totalHouses: 0,
+            totalCategories: 0,
+            runningPrograms: 0,
+            completedPrograms: 0,
+            pendingPrograms: 0,
+            totalParticipants: 0
+          },
+          houses: [],
+          categoryStats: []
+        });
+        setLoading(false);
+      });
   }, []);
 
-  if (loading || !stats) {
-    return <div className="p-8 text-center text-amber-400 font-mono">Loading Dashboard Statistics...</div>;
+  if (loading) {
+    return (
+      <div className="p-12 text-center text-amber-400 font-mono text-xs flex items-center justify-center space-x-2">
+        <div className="w-5 h-5 border-2 border-amber-400 border-t-transparent rounded-full animate-spin"></div>
+        <span>Loading Admin Control Dashboard...</span>
+      </div>
+    );
   }
 
-  const { cards, houses, categoryStats } = stats;
+  const cards = stats?.cards || {
+    totalStudents: 0,
+    totalPrograms: 0,
+    totalJudges: 0,
+    totalHouses: 0,
+    totalCategories: 0,
+    runningPrograms: 0,
+    completedPrograms: 0,
+    pendingPrograms: 0,
+    totalParticipants: 0
+  };
+  const houses = stats?.houses || [];
+  const categoryStats = stats?.categoryStats || [];
 
   const cardConfig = [
     { title: 'Total Students', val: cards.totalStudents, icon: Users, color: 'text-emerald-400', bg: 'from-emerald-950/60 to-slate-900' },
@@ -59,12 +111,12 @@ export default function AdminDashboard() {
 
   // Chart 1 Data: House Points
   const houseChartData = {
-    labels: (houses || []).map(h => h.name),
+    labels: houses.map(h => h.name),
     datasets: [
       {
         label: 'Overall House Points',
-        data: (houses || []).map(h => h.total_points),
-        backgroundColor: (houses || []).map(h => h.color_hex || '#10b981'),
+        data: houses.map(h => h.total_points || 0),
+        backgroundColor: houses.map(h => h.color_hex || '#10b981'),
         borderColor: 'rgba(255, 255, 255, 0.2)',
         borderWidth: 1,
         borderRadius: 8
@@ -74,12 +126,12 @@ export default function AdminDashboard() {
 
   // Chart 2 Data: Programs by Category
   const categoryChartData = {
-    labels: (categoryStats || []).map(c => c.category_name),
+    labels: categoryStats.map(c => c.category_name),
     datasets: [
       {
         label: 'Program Count',
-        data: (categoryStats || []).map(c => c.program_count),
-        backgroundColor: ['#10B981', '#3B82F6', '#EF4444', '#F59E0B'],
+        data: categoryStats.map(c => c.program_count || 0),
+        backgroundColor: ['#10B981', '#3B82F6', '#EF4444', '#F59E0B', '#8B5CF6'],
         borderWidth: 0
       }
     ]
@@ -125,18 +177,22 @@ export default function AdminDashboard() {
             <BarChart3 className="w-4 h-4 text-slate-400" />
           </div>
           <div className="h-64 flex items-center justify-center">
-            <Bar 
-              data={houseChartData}
-              options={{
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: {
-                  x: { ticks: { color: '#94a3b8' }, grid: { display: false } },
-                  y: { ticks: { color: '#94a3b8' }, grid: { color: '#1e293b' } }
-                }
-              }}
-            />
+            {houses.length > 0 ? (
+              <Bar 
+                data={houseChartData}
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: { legend: { display: false } },
+                  scales: {
+                    x: { ticks: { color: '#94a3b8' }, grid: { display: false } },
+                    y: { ticks: { color: '#94a3b8' }, grid: { color: '#1e293b' } }
+                  }
+                }}
+              />
+            ) : (
+              <div className="text-xs text-slate-400">No house score data calculated yet.</div>
+            )}
           </div>
         </div>
 
@@ -149,16 +205,23 @@ export default function AdminDashboard() {
             </h3>
           </div>
           <div className="h-64 flex items-center justify-center">
-            <Doughnut 
-              data={categoryChartData}
-              options={{
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                  legend: { position: 'bottom', labels: { color: '#cbd5e1' } }
-                }
-              }}
-            />
+            {categoryStats.length > 0 ? (
+              <Doughnut 
+                data={categoryChartData}
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: { 
+                    legend: { 
+                      position: 'bottom',
+                      labels: { color: '#94a3b8', font: { size: 11 } }
+                    } 
+                  }
+                }}
+              />
+            ) : (
+              <div className="text-xs text-slate-400">No program categories registered yet.</div>
+            )}
           </div>
         </div>
 

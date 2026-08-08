@@ -682,4 +682,47 @@ router.delete('/gallery/:id', async (req, res) => {
   }
 });
 
+// -------------------------------------------------------------
+// DASHBOARD STATS
+// -------------------------------------------------------------
+router.get('/reports/dashboard-stats', async (req, res) => {
+  try {
+    const totalStudentsRes = await get('SELECT COUNT(*) as count FROM students');
+    const totalProgramsRes = await get('SELECT COUNT(*) as count FROM programs');
+    const totalJudgesRes = await get('SELECT COUNT(*) as count FROM judges');
+    const totalHousesRes = await get('SELECT COUNT(*) as count FROM houses');
+    const totalCategoriesRes = await get('SELECT COUNT(*) as count FROM categories');
+    const runningProgramsRes = await get("SELECT COUNT(*) as count FROM programs WHERE status='running'");
+    const completedProgramsRes = await get("SELECT COUNT(*) as count FROM programs WHERE status='completed'");
+    const pendingProgramsRes = await get("SELECT COUNT(*) as count FROM programs WHERE status='scheduled'");
+    const totalParticipantsRes = await get('SELECT COUNT(*) as count FROM program_participants');
+
+    const houses = await all('SELECT * FROM houses ORDER BY total_points DESC');
+    const categoryStats = await all(`
+      SELECT c.name as category_name, COUNT(p.id) as program_count
+      FROM categories c
+      LEFT JOIN programs p ON p.category_id = c.id
+      GROUP BY c.id
+    `);
+
+    res.json({
+      cards: {
+        totalStudents: totalStudentsRes?.count || 0,
+        totalPrograms: totalProgramsRes?.count || 0,
+        totalJudges: totalJudgesRes?.count || 0,
+        totalHouses: totalHousesRes?.count || 0,
+        totalCategories: totalCategoriesRes?.count || 0,
+        runningPrograms: runningProgramsRes?.count || 0,
+        completedPrograms: completedProgramsRes?.count || 0,
+        pendingPrograms: pendingProgramsRes?.count || 0,
+        totalParticipants: totalParticipantsRes?.count || 0
+      },
+      houses: houses || [],
+      categoryStats: categoryStats || []
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;
