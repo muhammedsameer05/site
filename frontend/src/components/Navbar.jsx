@@ -44,7 +44,7 @@ export default function Navbar({ activeTab, setActiveTab, onOpenSearch }) {
   });
 
   return (
-    <header className="sticky top-0 z-50 glass-panel border-b border-emerald-500/20 bg-slate-900/90 backdrop-blur-md">
+    <header className="sticky top-0 z-50 glass-panel border-b border-amber-400/30 bg-[#03241C]/95 backdrop-blur-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           

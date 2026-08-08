@@ -2,15 +2,18 @@
 
 @layer base {
   :root {
-    --color-primary: #065F46;
-    --color-primary-dark: #042F2E;
-    --color-gold: #D97706;
+    --color-primary: #0F523B;
+    --color-primary-dark: #031B15;
+    --color-gold: #DAA520;
     --color-gold-light: #F59E0B;
-    --color-gold-bright: #FBBF24;
+    --color-gold-bright: #FFE07D;
   }
 
   body {
-    @apply bg-slate-900 text-slate-100 font-sans antialiased min-h-screen selection:bg-emerald-500 selection:text-white;
+    background-color: #021B15;
+    color: #F3F4F6;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    min-height: 100vh;
   }
 }
 
@@ -20,40 +23,43 @@
   height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #0f172a;
+  background: #021B15;
 }
 ::-webkit-scrollbar-thumb {
-  background: #059669;
+  background: #0F523B;
+  border: 1px solid #D97706;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #10b981;
+  background: #10B981;
 }
 
-/* Islamic Geometric Pattern Backdrop */
+/* Islamic Geometric Pattern Backdrop matching Logo */
 .bg-islamic-pattern {
-  background-color: #042f2e;
-  background-image: radial-gradient(#059669 0.75px, transparent 0.75px), radial-gradient(#d97706 0.75px, #042f2e 0.75px);
-  background-size: 30px 30px;
-  background-position: 0 0, 15px 15px;
+  background-color: #031B15;
+  background-image: 
+    radial-gradient(#10B981 0.8px, transparent 0.8px), 
+    radial-gradient(#F59E0B 0.8px, #031B15 0.8px);
+  background-size: 32px 32px;
+  background-position: 0 0, 16px 16px;
 }
 
-/* Glassmorphism Cards */
+/* Glassmorphism Cards matching Logo Frame */
 .glass-panel {
-  background: rgba(15, 23, 42, 0.75);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  background: rgba(4, 38, 29, 0.85);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6);
 }
 
 .gold-gradient-text {
-  background: linear-gradient(135deg, #FBBF24 0%, #D97706 50%, #B45309 100%);
+  background: linear-gradient(135deg, #FFE07D 0%, #F59E0B 50%, #B45309 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .emerald-gradient-text {
-  background: linear-gradient(135deg, #34D399 0%, #10B981 50%, #059669 100%);
+  background: linear-gradient(135deg, #A7F3D0 0%, #10B981 50%, #047857 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }

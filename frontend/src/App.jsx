@@ -131,7 +131,7 @@ function MainContent() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between selection:bg-emerald-500 selection:text-white">
+    <div className="min-h-screen bg-[#021B15] text-slate-100 flex flex-col justify-between selection:bg-emerald-500 selection:text-white">
       
       <div>
         <Navbar 
