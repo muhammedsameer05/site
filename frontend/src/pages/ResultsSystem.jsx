@@ -16,8 +16,7 @@ export default function ResultsSystem() {
       .then(data => {
         const progs = Array.isArray(data) ? data : [];
         setPrograms(progs);
-        if (progs.length > 0) {
-          // Select first completed program or first available program
+        if (progs.length > 0 && !selectedProgramId) {
           const completed = progs.find(p => p.status === 'completed') || progs[0];
           setSelectedProgramId(completed.id);
         }
@@ -26,7 +25,7 @@ export default function ResultsSystem() {
   }, []);
 
   const loadResults = (pId) => {
-    setLoading(true);
+    if (!pId) return;
     fetch(`/api/results/program/${pId}`)
       .then(res => res.json())
       .then(data => {
@@ -39,6 +38,12 @@ export default function ResultsSystem() {
   useEffect(() => {
     if (selectedProgramId) {
       loadResults(selectedProgramId);
+
+      const interval = setInterval(() => {
+        loadResults(selectedProgramId);
+      }, 3000);
+
+      return () => clearInterval(interval);
     }
   }, [selectedProgramId]);
 

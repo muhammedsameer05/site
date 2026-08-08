@@ -3,13 +3,14 @@ import Hero from '../components/Hero';
 import { 
   Trophy, Calendar, Clock, ArrowRight, Award, Sparkles, Image as ImageIcon 
 } from 'lucide-react';
+import { io } from 'socket.io-client';
 
 export default function HomePage({ onNavigate }) {
   const [houses, setHouses] = useState([]);
   const [programs, setPrograms] = useState([]);
   const [gallery, setGallery] = useState([]);
 
-  useEffect(() => {
+  const loadData = () => {
     fetch('/api/houses')
       .then(res => res.json())
       .then(data => setHouses(Array.isArray(data) ? data : []))
@@ -17,13 +18,52 @@ export default function HomePage({ onNavigate }) {
 
     fetch('/api/programs')
       .then(res => res.json())
-      .then(data => setPrograms(Array.isArray(data) ? data.slice(0, 6) : []))
+      .then(data => setPrograms(Array.isArray(data) ? data : []))
       .catch(() => {});
 
     fetch('/api/gallery')
       .then(res => res.json())
-      .then(data => setGallery(Array.isArray(data) ? data.slice(0, 6) : []))
-      .catch(() => {});
+      .then(data => {
+        const backendItems = Array.isArray(data) ? data : [];
+        const localItems = JSON.parse(localStorage.getItem('milad_local_gallery') || '[]');
+        const deletedIds = JSON.parse(localStorage.getItem('milad_deleted_gallery_ids') || '[]');
+
+        const filteredBackend = backendItems.filter(item => !deletedIds.includes(String(item.id)));
+        const filteredLocal = localItems.filter(item => !deletedIds.includes(String(item.id)));
+
+        const combined = [...filteredLocal, ...filteredBackend];
+        const unique = Array.from(new Map(combined.map(item => [item.id || item.url, item])).values());
+        setGallery(unique.slice(0, 6));
+      })
+      .catch(() => {
+        const localItems = JSON.parse(localStorage.getItem('milad_local_gallery') || '[]');
+        const deletedIds = JSON.parse(localStorage.getItem('milad_deleted_gallery_ids') || '[]');
+        const filteredLocal = localItems.filter(item => !deletedIds.includes(String(item.id)));
+        setGallery(filteredLocal.slice(0, 6));
+      });
+  };
+
+  useEffect(() => {
+    loadData();
+
+    // Auto-refresh interval every 3 seconds for instant score sync
+    const interval = setInterval(() => {
+      loadData();
+    }, 3000);
+
+    // Socket.io real-time broadcast listener
+    const SERVER_URL = import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://site-lq13.onrender.com');
+    let socket;
+    try {
+      socket = io(SERVER_URL);
+      socket.on('score_updated', () => loadData());
+      socket.on('results_published', () => loadData());
+    } catch (e) {}
+
+    return () => {
+      clearInterval(interval);
+      if (socket) socket.disconnect();
+    };
   }, []);
 
   return (
@@ -40,7 +80,7 @@ export default function HomePage({ onNavigate }) {
               <Trophy className="w-6 h-6 text-amber-400" />
               <span>Live House Standings</span>
             </h2>
-            <p className="text-xs text-slate-400">Instant score tallies updated via WebSockets</p>
+            <p className="text-xs text-slate-400">Instant score tallies updated live</p>
           </div>
           <button
             onClick={() => onNavigate('live-scoring')}
@@ -163,7 +203,7 @@ export default function HomePage({ onNavigate }) {
         )}
       </section>
 
-      {/* Festival Photo Gallery Highlights Section (Moved to Last) */}
+      {/* Festival Photo Gallery Highlights Section */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between mb-6">
           <div>
