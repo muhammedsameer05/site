@@ -33,6 +33,13 @@ export default function ResultsSystem() {
         setLoading(false);
       })
       .catch(() => setLoading(false));
+
+    fetch('/api/programs')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) setPrograms(data);
+      })
+      .catch(() => {});
   };
 
   useEffect(() => {
