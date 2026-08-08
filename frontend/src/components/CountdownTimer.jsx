@@ -31,18 +31,18 @@ export default function CountdownTimer({ targetDate }) {
   }, [targetDate]);
 
   return (
-    <div className="grid grid-cols-4 gap-3 sm:gap-4 max-w-lg mx-auto">
+    <div className="grid grid-cols-4 gap-1.5 sm:gap-4 max-w-lg mx-auto px-1">
       {[
         { label: 'Days', val: timeLeft.days },
         { label: 'Hours', val: timeLeft.hours },
         { label: 'Minutes', val: timeLeft.minutes },
         { label: 'Seconds', val: timeLeft.seconds }
       ].map((item, idx) => (
-        <div key={idx} className="glass-panel p-3 sm:p-4 rounded-xl text-center border border-amber-400/30 bg-slate-900/80 shadow-lg">
-          <span className="block text-2xl sm:text-4xl font-extrabold gold-gradient-text font-mono">
+        <div key={idx} className="glass-panel p-2 sm:p-4 rounded-xl text-center border border-amber-400/30 bg-[#04261E] shadow-lg">
+          <span className="block text-xl sm:text-4xl font-extrabold gold-gradient-text font-mono leading-tight">
             {String(item.val).padStart(2, '0')}
           </span>
-          <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-emerald-300/80">
+          <span className="text-[9px] sm:text-xs font-semibold uppercase tracking-wider text-emerald-300/80 block mt-0.5">
             {item.label}
           </span>
         </div>
