@@ -3,27 +3,6 @@ import {
   Users, Calendar, Award, Shield, Layers, Play, CheckCircle, 
   Clock, Trophy, BarChart3, PieChart 
 } from 'lucide-react';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-  ArcElement
-} from 'chart.js';
-import { Bar, Doughnut } from 'react-chartjs-2';
-
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-  ArcElement
-);
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState(null);
@@ -109,33 +88,8 @@ export default function AdminDashboard() {
     { title: 'Total Participants', val: cards.totalParticipants, icon: Trophy, color: 'text-amber-300', bg: 'from-amber-950/60 to-slate-900' }
   ];
 
-  // Chart 1 Data: House Points
-  const houseChartData = {
-    labels: houses.map(h => h.name),
-    datasets: [
-      {
-        label: 'Overall House Points',
-        data: houses.map(h => h.total_points || 0),
-        backgroundColor: houses.map(h => h.color_hex || '#10b981'),
-        borderColor: 'rgba(255, 255, 255, 0.2)',
-        borderWidth: 1,
-        borderRadius: 8
-      }
-    ]
-  };
-
-  // Chart 2 Data: Programs by Category
-  const categoryChartData = {
-    labels: categoryStats.map(c => c.category_name),
-    datasets: [
-      {
-        label: 'Program Count',
-        data: categoryStats.map(c => c.program_count || 0),
-        backgroundColor: ['#10B981', '#3B82F6', '#EF4444', '#F59E0B', '#8B5CF6'],
-        borderWidth: 0
-      }
-    ]
-  };
+  const maxHousePoints = Math.max(...houses.map(h => h.total_points || 0), 100);
+  const maxCategoryPrograms = Math.max(...categoryStats.map(c => c.program_count || 0), 10);
 
   return (
     <div className="space-y-8">
@@ -164,65 +118,87 @@ export default function AdminDashboard() {
         })}
       </div>
 
-      {/* Dashboard Graphs Section */}
+      {/* Dashboard Analytics Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
         {/* House Points Leaderboard Bar Chart */}
         <div className="glass-panel p-6 rounded-2xl border border-amber-500/30">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-6">
             <h3 className="text-base font-bold text-white flex items-center space-x-2">
               <Trophy className="w-5 h-5 text-amber-400" />
-              <span>Overall House Championship Points</span>
+              <span>Overall House Championship Standings</span>
             </h3>
             <BarChart3 className="w-4 h-4 text-slate-400" />
           </div>
-          <div className="h-64 flex items-center justify-center">
-            {houses.length > 0 ? (
-              <Bar 
-                data={houseChartData}
-                options={{
-                  responsive: true,
-                  maintainAspectRatio: false,
-                  plugins: { legend: { display: false } },
-                  scales: {
-                    x: { ticks: { color: '#94a3b8' }, grid: { display: false } },
-                    y: { ticks: { color: '#94a3b8' }, grid: { color: '#1e293b' } }
-                  }
-                }}
-              />
-            ) : (
-              <div className="text-xs text-slate-400">No house score data calculated yet.</div>
-            )}
-          </div>
+          
+          {houses.length === 0 ? (
+            <div className="text-center py-8 text-xs text-slate-400">No house score tallies registered yet.</div>
+          ) : (
+            <div className="space-y-4">
+              {houses.map((h, idx) => {
+                const percentage = Math.min(100, Math.round(((h.total_points || 0) / maxHousePoints) * 100));
+                return (
+                  <div key={h.id || idx} className="space-y-1">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-extrabold text-white flex items-center space-x-2">
+                        <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ backgroundColor: h.color_hex || '#10b981' }} />
+                        <span>{h.name}</span>
+                      </span>
+                      <span className="font-mono font-black gold-gradient-text text-sm">{h.total_points || 0} pts</span>
+                    </div>
+                    <div className="w-full bg-slate-950 rounded-full h-3.5 p-0.5 overflow-hidden border border-slate-800">
+                      <div 
+                        className="h-full rounded-full transition-all duration-700" 
+                        style={{ 
+                          width: `${Math.max(percentage, 5)}%`, 
+                          backgroundColor: h.color_hex || '#10b981' 
+                        }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
 
-        {/* Programs by Category Doughnut */}
+        {/* Programs by Category Breakdown */}
         <div className="glass-panel p-6 rounded-2xl border border-emerald-500/30">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-6">
             <h3 className="text-base font-bold text-white flex items-center space-x-2">
               <PieChart className="w-5 h-5 text-emerald-400" />
               <span>Programs Distribution by Category</span>
             </h3>
           </div>
-          <div className="h-64 flex items-center justify-center">
-            {categoryStats.length > 0 ? (
-              <Doughnut 
-                data={categoryChartData}
-                options={{
-                  responsive: true,
-                  maintainAspectRatio: false,
-                  plugins: { 
-                    legend: { 
-                      position: 'bottom',
-                      labels: { color: '#94a3b8', font: { size: 11 } }
-                    } 
-                  }
-                }}
-              />
-            ) : (
-              <div className="text-xs text-slate-400">No program categories registered yet.</div>
-            )}
-          </div>
+
+          {categoryStats.length === 0 ? (
+            <div className="text-center py-8 text-xs text-slate-400">No category breakdown data available.</div>
+          ) : (
+            <div className="space-y-4">
+              {categoryStats.map((c, idx) => {
+                const percentage = Math.min(100, Math.round(((c.program_count || 0) / maxCategoryPrograms) * 100));
+                const colors = ['#10B981', '#3B82F6', '#EF4444', '#F59E0B', '#8B5CF6'];
+                const barColor = colors[idx % colors.length];
+                return (
+                  <div key={idx} className="space-y-1">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-bold text-slate-200">{c.category_name}</span>
+                      <span className="font-mono font-bold text-emerald-400">{c.program_count || 0} Programs</span>
+                    </div>
+                    <div className="w-full bg-slate-950 rounded-full h-3 p-0.5 overflow-hidden border border-slate-800">
+                      <div 
+                        className="h-full rounded-full transition-all duration-700" 
+                        style={{ 
+                          width: `${Math.max(percentage, 5)}%`, 
+                          backgroundColor: barColor 
+                        }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
 
       </div>
