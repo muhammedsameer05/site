@@ -28,18 +28,34 @@ export default function JudgePanel() {
   const [isFinalSubmitted, setIsFinalSubmitted] = useState(false);
   const [msg, setMsg] = useState(null);
 
-  // Load programs assigned to judge
+  // Load programs assigned to judge or all programs
   useEffect(() => {
     fetch(`/api/marks/judge/${judgeId}`)
       .then(res => res.json())
       .then(data => {
         const progs = Array.isArray(data) ? data : [];
-        setAssignedPrograms(progs);
         if (progs.length > 0) {
+          setAssignedPrograms(progs);
           selectProgram(progs[0].id);
+        } else {
+          fetch('/api/programs')
+            .then(res => res.json())
+            .then(allProgs => {
+              const list = Array.isArray(allProgs) ? allProgs : [];
+              setAssignedPrograms(list);
+              if (list.length > 0) selectProgram(list[0].id);
+            });
         }
       })
-      .catch(() => {});
+      .catch(() => {
+        fetch('/api/programs')
+          .then(res => res.json())
+          .then(allProgs => {
+            const list = Array.isArray(allProgs) ? allProgs : [];
+            setAssignedPrograms(list);
+            if (list.length > 0) selectProgram(list[0].id);
+          });
+      });
   }, [judgeId]);
 
   // Load participants and submitted marks for selected program
@@ -198,7 +214,7 @@ export default function JudgePanel() {
           <Award className="w-6 h-6 text-amber-400" />
           <span>Judge Evaluation & Scoring Panel</span>
         </h1>
-        <p className="text-xs text-slate-400 font-mono">Assigned Judge: {user?.name || 'Qari Zakariya Al-Hafiz'}</p>
+        <p className="text-xs text-slate-400 font-mono font-bold">Assigned Judge: {user?.name || 'Qari Zakariya Al-Hafiz'}</p>
       </div>
 
       {msg && (
@@ -219,7 +235,7 @@ export default function JudgePanel() {
           {/* Program Select */}
           <div className="glass-panel p-4 rounded-2xl border border-slate-800">
             <h3 className="text-xs font-bold text-amber-400 uppercase tracking-wider mb-2">Assigned Programs</h3>
-            <div className="space-y-1">
+            <div className="space-y-1 max-h-64 overflow-y-auto">
               {assignedPrograms.map(p => (
                 <button
                   key={p.id}
@@ -232,7 +248,7 @@ export default function JudgePanel() {
                 >
                   <div>
                     <span className="block font-bold">{p.name}</span>
-                    <span className="text-[10px] text-slate-400 font-mono">{p.code} | Stage {p.stage_number}</span>
+                    <span className="text-[10px] text-slate-400 font-mono">{p.category_name || p.code} | Stage {p.stage_number || 1}</span>
                   </div>
                   <ChevronRight className="w-4 h-4 text-amber-400" />
                 </button>

@@ -500,26 +500,15 @@ router.get('/judges', async (req, res) => {
 // -------------------------------------------------------------
 router.get('/marks/judge/:judgeId', async (req, res) => {
   try {
-    let assignedPrograms = await all(`
+    const allPrograms = await all(`
       SELECT p.*, c.name as category_name, v.name as venue_name
       FROM programs p
-      JOIN program_judges pj ON pj.program_id = p.id
       LEFT JOIN categories c ON p.category_id = c.id
       LEFT JOIN venues v ON p.venue_id = v.id
-      WHERE pj.judge_id = ?
-    `, [req.params.judgeId]);
+      ORDER BY p.id ASC
+    `);
 
-    if (!assignedPrograms || assignedPrograms.length === 0) {
-      assignedPrograms = await all(`
-        SELECT p.*, c.name as category_name, v.name as venue_name
-        FROM programs p
-        LEFT JOIN categories c ON p.category_id = c.id
-        LEFT JOIN venues v ON p.venue_id = v.id
-        ORDER BY p.id ASC
-      `);
-    }
-
-    res.json(assignedPrograms);
+    res.json(allPrograms);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
