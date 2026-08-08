@@ -20,8 +20,9 @@ export default function LiveScoring() {
   useEffect(() => {
     loadStandings();
 
-    // Connect WebSockets
-    const socket = io('http://localhost:5000');
+    // Connect WebSockets dynamically to Render server in production
+    const SERVER_URL = import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://site-lq13.onrender.com');
+    const socket = io(SERVER_URL);
 
     socket.on('connect', () => {
       console.log('Connected to Live Scoring WebSockets');
