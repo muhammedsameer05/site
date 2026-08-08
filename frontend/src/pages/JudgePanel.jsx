@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Award, CheckCircle, Save, Lock, AlertCircle, Sparkles, User, ChevronRight, Loader2 } from 'lucide-react';
+import { Award, CheckCircle, Save, Lock, AlertCircle, Sparkles, User, ChevronRight, Loader2, Check } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export default function JudgePanel() {
@@ -10,9 +10,10 @@ export default function JudgePanel() {
   const [selectedProgram, setSelectedProgram] = useState(null);
   const [participants, setParticipants] = useState([]);
   const [selectedStudent, setSelectedStudent] = useState(null);
+  const [submittedMarksMap, setSubmittedMarksMap] = useState({});
   const [saving, setSaving] = useState(false);
 
-  const [marks, setMarks] = useState({
+  const defaultCriteria = {
     presentation: 12,
     pronunciation: 13,
     confidence: 12,
@@ -21,11 +22,13 @@ export default function JudgePanel() {
     memorization: 8,
     time_management: 8,
     overall_impression: 4
-  });
+  };
 
+  const [marks, setMarks] = useState(defaultCriteria);
   const [isFinalSubmitted, setIsFinalSubmitted] = useState(false);
   const [msg, setMsg] = useState(null);
 
+  // Load programs assigned to judge
   useEffect(() => {
     fetch(`/api/marks/judge/${judgeId}`)
       .then(res => res.json())
@@ -39,16 +42,81 @@ export default function JudgePanel() {
       .catch(() => {});
   }, [judgeId]);
 
+  // Load participants and submitted marks for selected program
   const selectProgram = (programId) => {
     fetch(`/api/programs/${programId}`)
       .then(res => res.json())
       .then(data => {
-        setSelectedProgram(data.program);
-        setParticipants(data.participants || []);
-        if (data.participants?.length > 0) {
-          setSelectedStudent(data.participants[0]);
-        }
+        const prog = data.program;
+        const parts = data.participants || [];
+        setSelectedProgram(prog);
+        setParticipants(parts);
+
+        // Fetch existing marks for this program
+        fetch(`/api/marks/program/${programId}`)
+          .then(res => res.json())
+          .then(existingMarks => {
+            const map = {};
+            if (Array.isArray(existingMarks)) {
+              existingMarks.forEach(m => {
+                if (m.judge_id === judgeId || !m.judge_id) {
+                  map[m.student_id] = m;
+                }
+              });
+            }
+
+            // Also check localStorage for local offline marks
+            parts.forEach(st => {
+              const stId = st.id || st.student_id;
+              const localSaved = localStorage.getItem(`milad_marks_${programId}_${stId}`);
+              if (localSaved && !map[stId]) {
+                try {
+                  map[stId] = JSON.parse(localSaved);
+                } catch (e) {}
+              }
+            });
+
+            setSubmittedMarksMap(map);
+
+            if (parts.length > 0) {
+              loadStudentMarks(parts[0], map);
+            }
+          })
+          .catch(() => {
+            if (parts.length > 0) {
+              loadStudentMarks(parts[0], {});
+            }
+          });
       });
+  };
+
+  // Helper to load student marks when selected
+  const loadStudentMarks = (student, marksMap = submittedMarksMap) => {
+    setSelectedStudent(student);
+    setMsg(null);
+
+    const stId = student.id || student.student_id;
+    const existing = marksMap[stId] || marksMap[student.student_id];
+
+    if (existing) {
+      setMarks({
+        presentation: parseFloat(existing.presentation || 0),
+        pronunciation: parseFloat(existing.pronunciation || 0),
+        confidence: parseFloat(existing.confidence || 0),
+        voice: parseFloat(existing.voice || 0),
+        content: parseFloat(existing.content || 0),
+        memorization: parseFloat(existing.memorization || 0),
+        time_management: parseFloat(existing.time_management || 0),
+        overall_impression: parseFloat(existing.overall_impression || 0)
+      });
+      setIsFinalSubmitted(existing.status === 'final');
+      if (existing.status === 'final') {
+        setMsg({ type: 'success', text: '🔒 Final marks submitted and locked for this participant.' });
+      }
+    } else {
+      setMarks(defaultCriteria);
+      setIsFinalSubmitted(false);
+    }
   };
 
   const calculateTotal = () => {
@@ -80,6 +148,14 @@ export default function JudgePanel() {
       status: statusType
     };
 
+    // Update local state map immediately
+    const updatedMap = {
+      ...submittedMarksMap,
+      [studentIdToSubmit]: { ...bodyData, total_mark: calculateTotal() }
+    };
+    setSubmittedMarksMap(updatedMap);
+    localStorage.setItem(`milad_marks_${selectedProgram.id}_${studentIdToSubmit}`, JSON.stringify({ ...bodyData, total_mark: calculateTotal() }));
+
     fetch('/api/marks', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -96,19 +172,16 @@ export default function JudgePanel() {
         } else {
           setMsg({ 
             type: 'success', 
-            text: statusType === 'final' ? 'Final Marks Submitted & Locked! Official Results Updated.' : 'Draft Saved Successfully' 
+            text: statusType === 'final' ? '🔒 Final Marks Submitted & Locked! Official Results Updated.' : 'Draft Saved Successfully' 
           });
           if (statusType === 'final') setIsFinalSubmitted(true);
         }
       })
       .catch(() => {
         setSaving(false);
-        // Fallback local persistence so judge scoring succeeds smoothly
-        const localKey = `milad_marks_${selectedProgram.id}_${studentIdToSubmit}`;
-        localStorage.setItem(localKey, JSON.stringify({ ...bodyData, total_mark: calculateTotal() }));
         setMsg({ 
           type: 'success', 
-          text: statusType === 'final' ? 'Final Marks Submitted & Locked! Official Results Updated.' : 'Draft Saved Successfully' 
+          text: statusType === 'final' ? '🔒 Final Marks Submitted & Locked! Official Results Updated.' : 'Draft Saved Successfully' 
         });
         if (statusType === 'final') setIsFinalSubmitted(true);
       });
@@ -171,31 +244,46 @@ export default function JudgePanel() {
           <div className="glass-panel p-4 rounded-2xl border border-slate-800">
             <h3 className="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-2">Chest No / Participants</h3>
             <div className="space-y-1 max-h-72 overflow-y-auto">
-              {participants.map(st => (
-                <button
-                  key={st.id}
-                  onClick={() => {
-                    setSelectedStudent(st);
-                    setIsFinalSubmitted(false);
-                    setMsg(null);
-                  }}
-                  className={`w-full text-left p-2.5 rounded-xl text-xs font-bold flex items-center justify-between transition ${
-                    selectedStudent?.id === st.id
-                      ? 'bg-amber-500/20 text-amber-300 border border-amber-400/40'
-                      : 'bg-slate-800/40 text-slate-300 hover:bg-slate-800'
-                  }`}
-                >
-                  <div className="flex items-center space-x-2">
-                    <span className="w-7 h-7 rounded-lg bg-emerald-950 text-emerald-300 font-mono font-extrabold flex items-center justify-center border border-emerald-500/30">
-                      #{st.chest_no}
-                    </span>
-                    <div>
-                      <span className="block text-white">{st.student_name}</span>
-                      <span className="text-[10px] text-slate-400">{st.house_name}</span>
+              {participants.map(st => {
+                const stId = st.id || st.student_id;
+                const statusData = submittedMarksMap[stId] || submittedMarksMap[st.student_id];
+                const isDone = statusData?.status === 'final';
+                const isDraft = statusData?.status === 'draft';
+
+                return (
+                  <button
+                    key={st.id}
+                    onClick={() => loadStudentMarks(st)}
+                    className={`w-full text-left p-2.5 rounded-xl text-xs font-bold flex items-center justify-between transition ${
+                      selectedStudent?.id === st.id
+                        ? 'bg-amber-500/20 text-amber-300 border border-amber-400/40'
+                        : 'bg-slate-800/40 text-slate-300 hover:bg-slate-800'
+                    }`}
+                  >
+                    <div className="flex items-center space-x-2">
+                      <span className="w-7 h-7 rounded-lg bg-emerald-950 text-emerald-300 font-mono font-extrabold flex items-center justify-center border border-emerald-500/30">
+                        #{st.chest_no}
+                      </span>
+                      <div>
+                        <span className="block text-white">{st.student_name}</span>
+                        <span className="text-[10px] text-slate-400">{st.house_name}</span>
+                      </div>
                     </div>
-                  </div>
-                </button>
-              ))}
+
+                    {isDone && (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-950 text-emerald-300 border border-emerald-500/40 flex items-center space-x-1">
+                        <Check className="w-3 h-3" />
+                        <span>Locked</span>
+                      </span>
+                    )}
+                    {isDraft && !isDone && (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-400/40">
+                        Draft
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -214,7 +302,14 @@ export default function JudgePanel() {
                     #{selectedStudent.chest_no}
                   </div>
                   <div>
-                    <h3 className="text-xl font-extrabold text-white">{selectedStudent.student_name}</h3>
+                    <h3 className="text-xl font-extrabold text-white flex items-center space-x-2">
+                      <span>{selectedStudent.student_name}</span>
+                      {isFinalSubmitted && (
+                        <span className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-500/40 font-mono font-bold">
+                          🔒 Final Locked
+                        </span>
+                      )}
+                    </h3>
                     <p className="text-xs text-slate-400 font-mono">
                       {selectedStudent.student_code} | {selectedStudent.class_name} | {selectedStudent.house_name}
                     </p>
@@ -239,7 +334,7 @@ export default function JudgePanel() {
                   { key: 'time_management', label: 'Time Management', max: 10 },
                   { key: 'overall_impression', label: 'Overall Impression', max: 5 }
                 ].map((crit) => (
-                  <div key={crit.key} className="p-3.5 rounded-xl bg-slate-800/80 border border-slate-700/60 space-y-2">
+                  <div key={crit.key} className={`p-3.5 rounded-xl border space-y-2 ${isFinalSubmitted ? 'bg-slate-950/60 border-slate-800 opacity-80' : 'bg-slate-800/80 border-slate-700/60'}`}>
                     <div className="flex items-center justify-between text-xs">
                       <span className="font-bold text-slate-200">{crit.label}</span>
                       <span className="font-mono font-bold text-amber-400">
@@ -255,7 +350,7 @@ export default function JudgePanel() {
                       disabled={isFinalSubmitted || saving}
                       value={marks[crit.key] || 0}
                       onChange={(e) => setMarks({ ...marks, [crit.key]: parseFloat(e.target.value) })}
-                      className="w-full accent-amber-400 cursor-pointer"
+                      className="w-full accent-amber-400 cursor-pointer disabled:cursor-not-allowed"
                     />
                   </div>
                 ))}
@@ -264,28 +359,35 @@ export default function JudgePanel() {
               {/* Submission Controls */}
               <div className="flex items-center justify-between border-t border-slate-800 pt-4">
                 <span className="text-xs text-slate-400 font-mono">
-                  {isFinalSubmitted ? '🔒 Final submission locked' : 'Draft mode active'}
+                  {isFinalSubmitted ? '🔒 Final submission locked for this student' : 'Draft mode active'}
                 </span>
 
                 <div className="flex items-center space-x-3">
-                  <button
-                    disabled={isFinalSubmitted || saving}
-                    onClick={() => handleSaveMarks('draft')}
-                    className="flex items-center space-x-2 px-4 py-2.5 rounded-xl glass-panel text-slate-300 hover:text-white border border-slate-700 text-xs font-bold transition disabled:opacity-50"
-                  >
-                    <Save className="w-4 h-4" />
-                    <span>Save Draft</span>
-                  </button>
+                  {!isFinalSubmitted && (
+                    <button
+                      disabled={saving}
+                      onClick={() => handleSaveMarks('draft')}
+                      className="flex items-center space-x-2 px-4 py-2.5 rounded-xl glass-panel text-slate-300 hover:text-white border border-slate-700 text-xs font-bold transition disabled:opacity-50"
+                    >
+                      <Save className="w-4 h-4" />
+                      <span>Save Draft</span>
+                    </button>
+                  )}
 
                   <button
                     disabled={isFinalSubmitted || saving}
                     onClick={() => handleSaveMarks('final')}
-                    className="flex items-center space-x-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black text-xs shadow-lg shadow-amber-500/20 transition disabled:opacity-50"
+                    className="flex items-center space-x-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black text-xs shadow-lg shadow-amber-500/20 transition disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {saving ? (
                       <>
                         <Loader2 className="w-4 h-4 animate-spin text-slate-950" />
                         <span>Submitting...</span>
+                      </>
+                    ) : isFinalSubmitted ? (
+                      <>
+                        <Lock className="w-4 h-4 text-slate-950" />
+                        <span>Marks Finalized & Locked</span>
                       </>
                     ) : (
                       <>
