@@ -1,24 +1,21 @@
 @import "tailwindcss";
 
-@layer base {
-  :root {
-    --color-primary: #0F523B;
-    --color-primary-dark: #031B15;
-    --color-gold: #DAA520;
-    --color-gold-light: #F59E0B;
-    --color-gold-bright: #FFE07D;
-  }
+:root {
+  --color-primary: #0F523B;
+  --color-primary-dark: #031B15;
+  --color-gold: #DAA520;
+  --color-gold-light: #F59E0B;
+  --color-gold-bright: #FFE07D;
+}
 
-  html, body {
-    width: 100%;
-    max-width: 100vw;
-    overflow-x: hidden;
-    background-color: #021B15;
-    color: #F3F4F6;
-    font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    min-height: 100vh;
-    -webkit-tap-highlight-color: transparent;
-  }
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  background-color: #021B15;
+  color: #F3F4F6;
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  min-height: 100vh;
 }
 
 /* Custom Scrollbar across Desktop PC, Laptops & Mobile Browsers */
