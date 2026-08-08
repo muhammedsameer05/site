@@ -11,7 +11,7 @@ export default function Gallery() {
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
-    album_name: 'Qiraat & Speech Highlights',
+    album_name: 'Milad 2026',
     url: '',
     caption: ''
   });
@@ -42,7 +42,7 @@ export default function Gallery() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!formData.url) return alert('Please upload an image file or provide an image URL.');
+    if (!formData.url) return alert('Please choose an image file to upload.');
 
     fetch('/api/gallery', {
       method: 'POST',
@@ -52,7 +52,7 @@ export default function Gallery() {
       .then(res => res.json())
       .then(() => {
         setShowUploadModal(false);
-        setFormData({ title: '', album_name: 'Qiraat & Speech Highlights', url: '', caption: '' });
+        setFormData({ title: '', album_name: 'Milad 2026', url: '', caption: '' });
         setPreviewUrl('');
         loadGallery();
       });
@@ -124,9 +124,6 @@ export default function Gallery() {
               </div>
 
               <div className="p-4 bg-slate-900/90">
-                <span className="text-[10px] font-bold text-amber-400 uppercase tracking-widest block mb-1">
-                  {item.album_name}
-                </span>
                 <h4 className="text-sm font-bold text-white group-hover:text-amber-300 transition">{item.title}</h4>
                 {item.caption && <p className="text-xs text-slate-400 mt-1 line-clamp-2">{item.caption}</p>}
               </div>
@@ -163,49 +160,20 @@ export default function Gallery() {
               </div>
 
               <div>
-                <label className="block text-slate-300 font-semibold mb-1">Album / Category</label>
-                <select
-                  value={formData.album_name}
-                  onChange={e => setFormData({ ...formData, album_name: e.target.value })}
-                  className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white"
-                >
-                  <option value="Qiraat & Speech Highlights">Qiraat & Speech Highlights</option>
-                  <option value="Stage Performances">Stage Performances</option>
-                  <option value="Award Ceremony">Award Ceremony</option>
-                  <option value="Festival General Photos">Festival General Photos</option>
-                </select>
-              </div>
-
-              <div>
                 <label className="block text-slate-300 font-semibold mb-1">Upload Photo File</label>
                 <input
                   type="file"
                   accept="image/*"
+                  required
                   onChange={handleFileChange}
                   className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-300 text-xs file:mr-3 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-bold file:bg-amber-500 file:text-slate-950 hover:file:bg-amber-600"
-                />
-              </div>
-
-              <div className="text-center font-bold text-slate-400 text-[10px] my-1">OR</div>
-
-              <div>
-                <label className="block text-slate-300 font-semibold mb-1">Image Web URL</label>
-                <input
-                  type="url"
-                  value={formData.url.startsWith('data:') ? '' : formData.url}
-                  onChange={e => {
-                    setFormData({ ...formData, url: e.target.value });
-                    setPreviewUrl(e.target.value);
-                  }}
-                  placeholder="https://example.com/photo.jpg"
-                  className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white"
                 />
               </div>
 
               {previewUrl && (
                 <div className="mt-2 text-center">
                   <span className="text-[10px] text-slate-400 block mb-1">Image Preview:</span>
-                  <img src={previewUrl} alt="Preview" className="h-32 mx-auto object-cover rounded-lg border border-amber-400/40" />
+                  <img src={previewUrl} alt="Preview" className="h-36 mx-auto object-cover rounded-lg border border-amber-400/40" />
                 </div>
               )}
 
@@ -253,7 +221,6 @@ export default function Gallery() {
             </button>
             <img src={lightbox.url} alt={lightbox.title} className="w-full max-h-[70vh] object-contain rounded-xl mb-4" />
             <div className="text-center space-y-1">
-              <span className="text-xs font-bold text-amber-400 uppercase tracking-widest">{lightbox.album_name}</span>
               <h3 className="text-lg font-bold text-white">{lightbox.title}</h3>
               {lightbox.caption && <p className="text-xs text-slate-300">{lightbox.caption}</p>}
             </div>

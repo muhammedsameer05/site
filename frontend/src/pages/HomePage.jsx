@@ -202,9 +202,6 @@ export default function HomePage({ onNavigate }) {
                   />
                 </div>
                 <div className="p-4 bg-slate-900/90">
-                  <span className="text-[10px] font-bold text-amber-400 uppercase tracking-widest block mb-1">
-                    {item.album_name}
-                  </span>
                   <h4 className="text-sm font-bold text-white group-hover:text-amber-300 transition">{item.title}</h4>
                   {item.caption && <p className="text-xs text-slate-400 mt-1 line-clamp-1">{item.caption}</p>}
                 </div>
