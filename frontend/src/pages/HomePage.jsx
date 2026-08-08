@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Hero from '../components/Hero';
 import { 
-  Trophy, Calendar, Megaphone, Clock, ArrowRight 
+  Trophy, Calendar, Megaphone, Clock, ArrowRight, Award 
 } from 'lucide-react';
 
 export default function HomePage({ onNavigate }) {
@@ -17,7 +17,7 @@ export default function HomePage({ onNavigate }) {
 
     fetch('/api/programs')
       .then(res => res.json())
-      .then(data => setPrograms(Array.isArray(data) ? data.slice(0, 4) : []))
+      .then(data => setPrograms(Array.isArray(data) ? data.slice(0, 6) : []))
       .catch(() => {});
 
     fetch('/api/announcements')
@@ -104,15 +104,15 @@ export default function HomePage({ onNavigate }) {
         </div>
       </section>
 
-      {/* Upcoming Programs Grid */}
+      {/* Upcoming & Completed Programs Grid */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h2 className="text-2xl font-extrabold text-white flex items-center space-x-2">
               <Calendar className="w-6 h-6 text-emerald-400" />
-              <span>Upcoming Programs</span>
+              <span>Programs & Competition Results</span>
             </h2>
-            <p className="text-xs text-slate-400">Featured competitions scheduled for today</p>
+            <p className="text-xs text-slate-400">Featured competitions scheduled & official winners</p>
           </div>
           <button
             onClick={() => onNavigate('timetable')}
@@ -130,28 +130,61 @@ export default function HomePage({ onNavigate }) {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {programs.map((p) => (
-              <div key={p.id} className="glass-panel p-5 rounded-2xl border border-slate-800 flex items-center justify-between hover:border-amber-400/40 transition">
+              <div key={p.id} className="glass-panel p-5 rounded-2xl border border-slate-800 flex flex-col justify-between hover:border-amber-400/40 transition">
                 <div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-500/30 mb-2 inline-block">
-                    {p.category_name} ({p.age_group})
-                  </span>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-500/30 inline-block">
+                      {p.category_name} ({p.age_group})
+                    </span>
+                    <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase ${
+                      p.status === 'running' 
+                        ? 'bg-amber-500/20 text-amber-400 border border-amber-400/40 animate-pulse'
+                        : p.status === 'completed'
+                        ? 'bg-emerald-950 text-emerald-300 border border-emerald-500/40'
+                        : 'bg-slate-800 text-slate-300'
+                    }`}>
+                      {p.status}
+                    </span>
+                  </div>
+
                   <h4 className="text-base font-bold text-white mb-1">{p.name}</h4>
-                  <div className="flex items-center space-x-4 text-xs text-slate-400 font-mono">
+                  <div className="flex items-center space-x-4 text-xs text-slate-400 font-mono mb-2">
                     <span className="flex items-center space-x-1">
                       <Clock className="w-3.5 h-3.5 text-amber-400" />
                       <span>{p.start_time || '09:00 AM'}</span>
                     </span>
                     <span>Venue: {p.venue_name || 'Stage 1'}</span>
                   </div>
-                </div>
 
-                <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase ${
-                  p.status === 'running' 
-                    ? 'bg-amber-500/20 text-amber-400 border border-amber-400/40 animate-pulse'
-                    : 'bg-slate-800 text-slate-300'
-                }`}>
-                  {p.status}
-                </span>
+                  {/* Winners Podium Display on Home Page */}
+                  {p.winners && p.winners.length > 0 && (
+                    <div className="mt-3 p-3 rounded-xl bg-slate-900/90 border border-amber-400/40 space-y-2">
+                      <div className="flex items-center space-x-1.5 text-[10px] font-bold uppercase tracking-widest text-amber-400 border-b border-slate-800 pb-1.5">
+                        <Award className="w-3.5 h-3.5 text-amber-400" />
+                        <span>Official Winners Podium</span>
+                      </div>
+                      {p.winners.map((w, idx) => (
+                        <div key={idx} className="flex items-center justify-between text-xs">
+                          <div className="flex items-center space-x-2">
+                            <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase ${
+                              w.prize === '1st' ? 'bg-amber-500 text-slate-950 shadow' :
+                              w.prize === '2nd' ? 'bg-slate-300 text-slate-950 shadow' :
+                              'bg-amber-700 text-white shadow'
+                            }`}>
+                              {w.prize === '1st' ? '🥇 1st' : w.prize === '2nd' ? '🥈 2nd' : '🥉 3rd'}
+                            </span>
+                            <span className="text-white font-bold">{w.student_name}</span>
+                            <span className="text-[10px] font-bold px-1.5 py-0.2 rounded border" style={{ color: w.house_color || '#10b981', borderColor: `${w.house_color || '#10b981'}80` }}>
+                              {w.house_name}
+                            </span>
+                          </div>
+                          <span className="font-mono text-emerald-400 text-xs font-black">{w.total_score} pts</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                </div>
               </div>
             ))}
           </div>
