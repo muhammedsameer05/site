@@ -17,15 +17,15 @@ async function calculateProgramResults(programId, io) {
         AVG(presentation) as avg_pres,
         AVG(pronunciation) as avg_pron
       FROM marks 
-      WHERE program_id = ?
+      WHERE (program_id = ? OR CAST(program_id AS TEXT) = CAST(? AS TEXT))
       GROUP BY student_id
       ORDER BY avg_score DESC, avg_pres DESC, avg_pron DESC
-    `, [programId]);
+    `, [programId, programId]);
 
-    if (!studentScores || studentScores.length === 0) return;
+    if (!studentScores || studentScores.length === 0) return 0;
 
     // Clear existing results for this program
-    await run('DELETE FROM results WHERE program_id = ?', [programId]);
+    await run('DELETE FROM results WHERE (program_id = ? OR CAST(program_id AS TEXT) = CAST(? AS TEXT))', [programId, programId]);
 
     const prizes = [
       { prize: '1st', points: 10 },
@@ -33,34 +33,40 @@ async function calculateProgramResults(programId, io) {
       { prize: '3rd', points: 5 }
     ];
 
-    // Reset house totals to recalculate accurately
-    await run('UPDATE houses SET total_points = 0');
-
     for (let i = 0; i < studentScores.length; i++) {
-      const s = studentScores[i];
+      const sScore = studentScores[i];
       const p = prizes[i] || { prize: 'participation', points: 3 };
       
+      // Resolve exact student record from database
+      const studentObj = await get(`
+        SELECT id FROM students 
+        WHERE id = ? OR student_id = ? OR admission_no = ? OR CAST(id AS TEXT) = CAST(? AS TEXT)
+      `, [sScore.student_id, sScore.student_id, sScore.student_id, sScore.student_id]);
+
+      const targetStudentDbId = studentObj ? studentObj.id : sScore.student_id;
+
       await run(`
         INSERT INTO results (program_id, student_id, total_score, prize, points_awarded)
         VALUES (?, ?, ?, ?, ?)
-      `, [programId, s.student_id, s.avg_score, p.prize, p.points]);
+      `, [programId, targetStudentDbId, sScore.avg_score, p.prize, p.points]);
     }
 
-    // Recalculate house total points across all results
-    const allResults = await all('SELECT r.points_awarded, s.house_id FROM results r JOIN students s ON (r.student_id = s.id OR r.student_id = s.student_id)');
+    // Reset and recalculate house total points across all results
+    await run('UPDATE houses SET total_points = 0');
+    const allResults = await all('SELECT r.points_awarded, s.house_id FROM results r JOIN students s ON (r.student_id = s.id OR r.student_id = s.student_id OR CAST(r.student_id AS TEXT) = CAST(s.id AS TEXT))');
     for (let r of allResults) {
       if (r.house_id) {
         await run('UPDATE houses SET total_points = total_points + ? WHERE id = ?', [r.points_awarded, r.house_id]);
       }
     }
 
-    await run("UPDATE programs SET status = 'completed' WHERE id = ?", [programId]);
+    await run("UPDATE programs SET status = 'completed' WHERE (id = ? OR CAST(id AS TEXT) = CAST(? AS TEXT))", [programId, programId]);
 
     if (io) {
       io.emit('results_published', { programId });
       io.emit('score_updated', { programId });
     }
-    return studentScores ? studentScores.length : 0;
+    return studentScores.length;
   } catch (err) {
     console.error('[DB ERROR] Failed to calculate program results:', err);
     return 0;
