@@ -32,32 +32,6 @@ export default function HomePage({ onNavigate }) {
       {/* Hero Section */}
       <Hero onNavigate={onNavigate} />
 
-      {/* Welcome Message */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="glass-panel p-8 rounded-3xl border border-emerald-500/30 bg-gradient-to-r from-slate-900 via-emerald-950/40 to-slate-900 shadow-2xl relative overflow-hidden">
-          <div className="max-w-3xl">
-            <span className="text-xs font-bold uppercase tracking-widest text-amber-400 block mb-2">
-              Principal's Welcome Note
-            </span>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-white mb-4">
-              Inspiring Eloquence, Tajweed & Virtuous Leadership
-            </h2>
-            <p className="text-slate-300 text-sm sm:text-base leading-relaxed mb-6">
-              "We welcome all students, parents, honorable judges, and guests to the Jamalulleyli Madrasa Annual Milad Festival 2026. This platform is dedicated to showcasing our students' dedication to Qiraat, Islamic speeches, nasheeds, and academic art."
-            </p>
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 rounded-full bg-amber-500 flex items-center justify-center font-serif text-slate-950 font-bold text-lg">
-                ج
-              </div>
-              <div>
-                <span className="text-sm font-bold text-amber-300 block">Usthad Sayyid Muhammed</span>
-                <span className="text-xs text-emerald-400">Principal & Milad Fest Chairman</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Live Leaderboard Snippet */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between mb-6">
