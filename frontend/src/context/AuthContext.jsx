@@ -1,46 +1,71 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
-const AUTH_VERSION = 'v3_force_logout_clean';
+const AUTH_VERSION = 'v4_bulletproof_auth';
 
-// Automatically clear any old leftover admin sessions stored in browser cache from earlier versions
-if (typeof window !== 'undefined' && localStorage.getItem('milad_auth_version') !== AUTH_VERSION) {
-  localStorage.removeItem('milad_user');
-  localStorage.removeItem('milad_token');
-  localStorage.setItem('milad_auth_version', AUTH_VERSION);
+// Safe localStorage getter
+const safeGetItem = (key) => {
+  try {
+    return typeof window !== 'undefined' ? localStorage.getItem(key) : null;
+  } catch (e) {
+    return null;
+  }
+};
+
+const safeSetItem = (key, val) => {
+  try {
+    if (typeof window !== 'undefined') localStorage.setItem(key, val);
+  } catch (e) {}
+};
+
+const safeRemoveItem = (key) => {
+  try {
+    if (typeof window !== 'undefined') localStorage.removeItem(key);
+  } catch (e) {}
+};
+
+// Clear stale keys safely
+if (safeGetItem('milad_auth_version') !== AUTH_VERSION) {
+  safeRemoveItem('milad_user');
+  safeRemoveItem('milad_token');
+  safeSetItem('milad_auth_version', AUTH_VERSION);
 }
 
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {
-    const saved = localStorage.getItem('milad_user');
-    return saved ? JSON.parse(saved) : null;
+    try {
+      const saved = safeGetItem('milad_user');
+      return saved ? JSON.parse(saved) : null;
+    } catch (e) {
+      safeRemoveItem('milad_user');
+      return null;
+    }
   });
 
-  const [token, setToken] = useState(() => localStorage.getItem('milad_token') || null);
+  const [token, setToken] = useState(() => safeGetItem('milad_token') || null);
 
   useEffect(() => {
     if (user) {
-      localStorage.setItem('milad_user', JSON.stringify(user));
+      safeSetItem('milad_user', JSON.stringify(user));
     } else {
-      localStorage.removeItem('milad_user');
+      safeRemoveItem('milad_user');
     }
   }, [user]);
 
   const login = (userData, userToken) => {
     setUser(userData);
     setToken(userToken);
-    localStorage.setItem('milad_token', userToken || 'jwt-auth-token');
+    safeSetItem('milad_token', userToken || 'jwt-auth-token');
   };
 
   const logout = () => {
     setUser(null);
     setToken(null);
-    localStorage.removeItem('milad_token');
-    localStorage.removeItem('milad_user');
+    safeRemoveItem('milad_token');
+    safeRemoveItem('milad_user');
   };
 
-  // Switch Role for demonstration
   const switchRole = (newRole) => {
     if (!newRole || newRole === 'public') {
       logout();
