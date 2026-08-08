@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sparkles, Trophy, Calendar, ArrowRight, ShieldCheck } from 'lucide-react';
+import { Sparkles, Trophy, Calendar, ArrowRight } from 'lucide-react';
 import CountdownTimer from './CountdownTimer';
 import { useLanguage } from '../context/LanguageContext';
 
@@ -7,7 +7,7 @@ export default function Hero({ onNavigate }) {
   const { t } = useLanguage();
 
   return (
-    <div className="relative overflow-hidden bg-slate-950 py-12 sm:py-20 border-b border-amber-500/20">
+    <div className="relative overflow-hidden bg-[#021B15] py-12 sm:py-20 border-b border-amber-500/20">
       
       {/* Background Watermark Image Overlay */}
       <div 
@@ -34,7 +34,7 @@ export default function Hero({ onNavigate }) {
         {/* Featured Official Milad Logo Card */}
         <div className="my-6 max-w-sm sm:max-w-md mx-auto">
           <div className="relative p-2 rounded-3xl bg-gradient-to-b from-amber-400 via-emerald-600 to-amber-500 shadow-2xl shadow-emerald-950/80 transform hover:scale-105 transition-transform duration-300">
-            <div className="bg-slate-950 rounded-[22px] p-4 flex flex-col items-center border border-amber-400/30">
+            <div className="bg-[#021B15] rounded-[22px] p-4 flex flex-col items-center border border-amber-400/30">
               <img 
                 src="/milad-logo.jpg" 
                 alt="വൈബ് ഓഫ് മദീന 2K26 - Jamalulleyli Madrasa" 
@@ -88,24 +88,6 @@ export default function Hero({ onNavigate }) {
             <Calendar className="w-4 h-4 text-amber-400" />
             <span>View Program Timetable</span>
           </button>
-        </div>
-
-        {/* Feature Pill Highlights */}
-        <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto text-left">
-          {[
-            { title: 'Real-Time WebSockets', desc: 'Instant live leaderboard updates' },
-            { title: '8-Criteria Judge Panel', desc: 'Transparent automated total scores' },
-            { title: 'QR Code ID Cards', desc: 'Instant student check-in & badges' },
-            { title: 'Dynamic PDF Reports', desc: 'Certificates & Excel data export' }
-          ].map((item, idx) => (
-            <div key={idx} className="glass-panel p-3.5 rounded-xl border border-emerald-500/20 bg-slate-900/60">
-              <div className="flex items-center space-x-2 text-emerald-400 text-xs font-bold mb-1">
-                <ShieldCheck className="w-4 h-4 text-amber-400 shrink-0" />
-                <span>{item.title}</span>
-              </div>
-              <p className="text-[11px] text-slate-400 leading-normal">{item.desc}</p>
-            </div>
-          ))}
         </div>
 
       </div>
