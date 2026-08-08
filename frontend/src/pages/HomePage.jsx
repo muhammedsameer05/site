@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Hero from '../components/Hero';
 import { 
-  Trophy, Calendar, Megaphone, Image as ImageIcon, Sparkles, 
-  MapPin, Phone, Mail, Award, Clock, ArrowRight, ShieldCheck 
+  Trophy, Calendar, Megaphone, Clock, ArrowRight 
 } from 'lucide-react';
 
 export default function HomePage({ onNavigate }) {
@@ -44,11 +43,11 @@ export default function HomePage({ onNavigate }) {
               Inspiring Eloquence, Tajweed & Virtuous Leadership
             </h2>
             <p className="text-slate-300 text-sm sm:text-base leading-relaxed mb-6">
-              "We welcome all students, parents, honorable judges, and guests to the Madrasa Milad-un-Nabi Festival 2026. This platform is dedicated to showcasing our students' dedication to Qiraat, Islamic speeches, nasheeds, and academic art."
+              "We welcome all students, parents, honorable judges, and guests to the Jamalulleyli Madrasa Annual Milad Festival 2026. This platform is dedicated to showcasing our students' dedication to Qiraat, Islamic speeches, nasheeds, and academic art."
             </p>
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 rounded-full bg-amber-500 flex items-center justify-center font-serif text-slate-950 font-bold text-lg">
-                S
+                ج
               </div>
               <div>
                 <span className="text-sm font-bold text-amber-300 block">Usthad Sayyid Muhammed</span>
@@ -124,33 +123,39 @@ export default function HomePage({ onNavigate }) {
           </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {programs.map((p) => (
-            <div key={p.id} className="glass-panel p-5 rounded-2xl border border-slate-800 flex items-center justify-between hover:border-amber-400/40 transition">
-              <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-500/30 mb-2 inline-block">
-                  {p.category_name} ({p.age_group})
-                </span>
-                <h4 className="text-base font-bold text-white mb-1">{p.name}</h4>
-                <div className="flex items-center space-x-4 text-xs text-slate-400 font-mono">
-                  <span className="flex items-center space-x-1">
-                    <Clock className="w-3.5 h-3.5 text-amber-400" />
-                    <span>{p.start_time || '09:00 AM'}</span>
+        {programs.length === 0 ? (
+          <div className="glass-panel p-8 text-center rounded-2xl border border-slate-800 text-slate-400 text-xs">
+            No scheduled competition programs added yet. Admin can create new programs in Program Management.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {programs.map((p) => (
+              <div key={p.id} className="glass-panel p-5 rounded-2xl border border-slate-800 flex items-center justify-between hover:border-amber-400/40 transition">
+                <div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-500/30 mb-2 inline-block">
+                    {p.category_name} ({p.age_group})
                   </span>
-                  <span>Venue: {p.venue_name || 'Stage 1'}</span>
+                  <h4 className="text-base font-bold text-white mb-1">{p.name}</h4>
+                  <div className="flex items-center space-x-4 text-xs text-slate-400 font-mono">
+                    <span className="flex items-center space-x-1">
+                      <Clock className="w-3.5 h-3.5 text-amber-400" />
+                      <span>{p.start_time || '09:00 AM'}</span>
+                    </span>
+                    <span>Venue: {p.venue_name || 'Stage 1'}</span>
+                  </div>
                 </div>
-              </div>
 
-              <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase ${
-                p.status === 'running' 
-                  ? 'bg-amber-500/20 text-amber-400 border border-amber-400/40 animate-pulse'
-                  : 'bg-slate-800 text-slate-300'
-              }`}>
-                {p.status}
-              </span>
-            </div>
-          ))}
-        </div>
+                <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase ${
+                  p.status === 'running' 
+                    ? 'bg-amber-500/20 text-amber-400 border border-amber-400/40 animate-pulse'
+                    : 'bg-slate-800 text-slate-300'
+                }`}>
+                  {p.status}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
       </section>
 
       {/* Latest Announcements */}
@@ -160,29 +165,24 @@ export default function HomePage({ onNavigate }) {
             <Megaphone className="w-5 h-5 text-amber-400" />
             <span>Latest Announcements & Emergency Notices</span>
           </h2>
-          <div className="space-y-4">
-            {announcements.map((item) => (
-              <div key={item.id} className="p-4 rounded-xl bg-slate-800/80 border-l-4 border-amber-400 space-y-1">
-                <div className="flex items-center justify-between">
-                  <h4 className="text-sm font-bold text-amber-300">{item.title}</h4>
-                  <span className="text-[10px] text-slate-400 font-mono">{item.posted_by}</span>
-                </div>
-                <p className="text-xs text-slate-300 leading-relaxed">{item.content}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
-      {/* Sponsors & Contact */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center py-6">
-        <h3 className="text-xs font-bold text-amber-400 uppercase tracking-widest mb-4">Official Sponsors & Patrons</h3>
-        <div className="flex flex-wrap items-center justify-center gap-6 opacity-75">
-          {['Al-Huda Educational Trust', 'Zamzam Book Stall', 'Calicut Islamic Printing Press', 'Madrasa Alumni Association'].map((sp, idx) => (
-            <span key={idx} className="px-4 py-2 rounded-xl glass-panel text-xs font-bold text-slate-300 border border-slate-800">
-              {sp}
-            </span>
-          ))}
+          {announcements.length === 0 ? (
+            <div className="p-6 text-center text-slate-400 text-xs">
+              No active announcements. Admin can post notices on the Notice Board.
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {announcements.map((item) => (
+                <div key={item.id} className="p-4 rounded-xl bg-slate-800/80 border-l-4 border-amber-400 space-y-1">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-sm font-bold text-amber-300">{item.title}</h4>
+                    <span className="text-[10px] text-slate-400 font-mono">{item.posted_by}</span>
+                  </div>
+                  <p className="text-xs text-slate-300 leading-relaxed">{item.content}</p>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
