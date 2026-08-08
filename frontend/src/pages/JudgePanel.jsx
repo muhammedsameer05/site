@@ -214,7 +214,6 @@ export default function JudgePanel() {
           <Award className="w-6 h-6 text-amber-400" />
           <span>Judge Evaluation & Scoring Panel</span>
         </h1>
-        <p className="text-xs text-slate-400 font-mono font-bold">Assigned Judge: {user?.name || 'Qari Zakariya Al-Hafiz'}</p>
       </div>
 
       {msg && (
@@ -234,7 +233,7 @@ export default function JudgePanel() {
           
           {/* Program Select */}
           <div className="glass-panel p-4 rounded-2xl border border-slate-800">
-            <h3 className="text-xs font-bold text-amber-400 uppercase tracking-wider mb-2">Assigned Programs</h3>
+            <h3 className="text-xs font-bold text-amber-400 uppercase tracking-wider mb-2">Festival Programs</h3>
             <div className="space-y-1 max-h-64 overflow-y-auto">
               {assignedPrograms.map(p => (
                 <button

@@ -103,7 +103,6 @@ export default function Timetable() {
                 <th className="p-4">Venue / Stage</th>
                 <th className="p-4">Program & Code</th>
                 <th className="p-4">Category & Age</th>
-                <th className="p-4">Assigned Judges</th>
                 <th className="p-4 text-center">Status</th>
               </tr>
             </thead>
@@ -124,9 +123,6 @@ export default function Timetable() {
                     <span className="px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">
                       {p.category_name} ({p.age_group})
                     </span>
-                  </td>
-                  <td className="p-4 text-slate-300">
-                    {(p.assigned_judges || []).map(j => j.name).join(', ') || 'Qari Zakariya / Dr. Luqman'}
                   </td>
                   <td className="p-4 text-center">
                     <span className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase ${

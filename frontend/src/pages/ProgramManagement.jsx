@@ -192,7 +192,7 @@ export default function ProgramManagement() {
 
             {/* Status Controls */}
             <div className="flex items-center justify-between border-t border-slate-800 pt-3">
-              <span className="text-[11px] text-slate-400">Judges: {p.assigned_judges?.length || 0}</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">Status: {p.status}</span>
 
               <div className="flex items-center space-x-1">
                 {p.status !== 'running' && (
