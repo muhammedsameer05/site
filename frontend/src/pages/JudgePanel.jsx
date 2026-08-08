@@ -84,10 +84,10 @@ export default function JudgePanel() {
 
             // Also check localStorage for local offline marks
             parts.forEach(st => {
-              const stId = st.id || st.student_id;
+              const stId = st.student_id || st.id;
               const localSaved = 
                 localStorage.getItem(`milad_marks_${programId}_${stId}`) ||
-                localStorage.getItem(`milad_marks_${programId}_${st.student_id}`) ||
+                localStorage.getItem(`milad_marks_${programId}_${st.id}`) ||
                 localStorage.getItem(`milad_marks_${programId}_${st.chest_no}`);
               if (localSaved) {
                 try {
@@ -119,10 +119,13 @@ export default function JudgePanel() {
     setSelectedStudent(student);
     setMsg(null);
 
+    const targetStudentId = student.student_id || student.id;
+
     const existing = 
-      marksMap[student.id] || 
-      marksMap[String(student.id)] || 
+      marksMap[targetStudentId] || 
+      marksMap[String(targetStudentId)] || 
       marksMap[student.student_id] || 
+      marksMap[student.id] || 
       marksMap[student.student_code] || 
       marksMap[student.chest_no];
 
@@ -172,7 +175,7 @@ export default function JudgePanel() {
     setSaving(true);
     setMsg(null);
 
-    const studentIdToSubmit = selectedStudent.id || selectedStudent.student_id;
+    const studentIdToSubmit = selectedStudent.student_id || selectedStudent.id;
 
     const bodyData = {
       program_id: selectedProgram.id,
@@ -282,10 +285,12 @@ export default function JudgePanel() {
             <h3 className="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-2">Chest No / Participants</h3>
             <div className="space-y-1 max-h-72 overflow-y-auto">
               {participants.map(st => {
+                const targetStudentId = st.student_id || st.id;
                 const statusData = 
-                  submittedMarksMap[st.id] || 
-                  submittedMarksMap[String(st.id)] || 
+                  submittedMarksMap[targetStudentId] || 
+                  submittedMarksMap[String(targetStudentId)] || 
                   submittedMarksMap[st.student_id] || 
+                  submittedMarksMap[st.id] || 
                   submittedMarksMap[st.student_code] || 
                   submittedMarksMap[st.chest_no];
 
@@ -294,10 +299,10 @@ export default function JudgePanel() {
 
                 return (
                   <button
-                    key={st.id}
+                    key={st.id || st.student_id}
                     onClick={() => loadStudentMarks(st)}
                     className={`w-full text-left p-2.5 rounded-xl text-xs font-bold flex items-center justify-between transition ${
-                      selectedStudent?.id === st.id
+                      (selectedStudent?.student_id || selectedStudent?.id) === targetStudentId
                         ? 'bg-amber-500/20 text-amber-300 border border-amber-400/40'
                         : 'bg-slate-800/40 text-slate-300 hover:bg-slate-800'
                     }`}
