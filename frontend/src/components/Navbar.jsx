@@ -21,9 +21,7 @@ export default function Navbar({ activeTab, setActiveTab, onOpenSearch }) {
     { id: 'programs', label: t('programs'), icon: Calendar, roles: ['super_admin', 'admin', 'stage_coordinator'] },
     { id: 'timetable', label: t('timetable'), icon: Calendar, roles: ['all'] },
     { id: 'judge', label: t('judge_panel'), icon: Award, roles: ['super_admin', 'admin', 'judge'] },
-    { id: 'live-scoring', label: t('live_scoring'), icon: Trophy, roles: ['all'] },
     { id: 'results', label: t('results'), icon: Trophy, roles: ['all'] },
-    { id: 'certificates', label: t('certificates'), icon: Award, roles: ['super_admin', 'admin', 'student'] },
     { id: 'reports', label: t('reports'), icon: Layers, roles: ['super_admin', 'admin'] },
     { id: 'gallery', label: t('gallery'), icon: Sparkles, roles: ['all'] },
     { id: 'notice', label: t('notice_board'), icon: BookOpen, roles: ['all'] },
@@ -35,7 +33,7 @@ export default function Navbar({ activeTab, setActiveTab, onOpenSearch }) {
       return ['judge', 'timetable', 'live-scoring'].includes(item.id);
     }
     if (role === 'student') {
-      return ['students', 'certificates', 'live-scoring'].includes(item.id);
+      return ['students', 'results', 'live-scoring'].includes(item.id);
     }
     if (role === 'public') {
       return ['home', 'timetable', 'live-scoring', 'results', 'gallery', 'notice'].includes(item.id);
