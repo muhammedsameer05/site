@@ -349,24 +349,24 @@ router.get('/programs', async (req, res) => {
       let winners = await all(`
         SELECT r.prize, r.total_score, r.points_awarded, s.name as student_name, s.admission_no, h.name as house_name, h.color_hex as house_color
         FROM results r
-        JOIN students s ON (r.student_id = s.id OR r.student_id = s.student_id)
+        JOIN students s ON (r.student_id = s.id OR r.student_id = s.student_id OR CAST(r.student_id AS TEXT) = CAST(s.id AS TEXT))
         LEFT JOIN houses h ON s.house_id = h.id
-        WHERE r.program_id = ?
+        WHERE (r.program_id = ? OR CAST(r.program_id AS TEXT) = CAST(? AS TEXT))
         ORDER BY r.total_score DESC
         LIMIT 3
-      `, [p.id]);
+      `, [p.id, p.id]);
 
       if (!winners || winners.length === 0) {
         await calculateProgramResults(p.id);
         winners = await all(`
           SELECT r.prize, r.total_score, r.points_awarded, s.name as student_name, s.admission_no, h.name as house_name, h.color_hex as house_color
           FROM results r
-          JOIN students s ON (r.student_id = s.id OR r.student_id = s.student_id)
+          JOIN students s ON (r.student_id = s.id OR r.student_id = s.student_id OR CAST(r.student_id AS TEXT) = CAST(s.id AS TEXT))
           LEFT JOIN houses h ON s.house_id = h.id
-          WHERE r.program_id = ?
+          WHERE (r.program_id = ? OR CAST(r.program_id AS TEXT) = CAST(? AS TEXT))
           ORDER BY r.total_score DESC
           LIMIT 3
-        `, [p.id]);
+        `, [p.id, p.id]);
       }
 
       p.assigned_judges = judges;
@@ -579,10 +579,9 @@ router.post('/marks', async (req, res) => {
 
     const io = req.app.get('io');
 
-    // Automatically calculate & publish 1st, 2nd, 3rd results whenever a final mark is submitted!
-    if (status === 'final') {
-      await calculateProgramResults(program_id, io);
-    } else if (io) {
+    // Automatically calculate & publish 1st, 2nd, 3rd results whenever marks are submitted/updated!
+    await calculateProgramResults(program_id, io);
+    if (io) {
       io.emit('score_updated', { program_id, student_id, total_mark });
     }
 
