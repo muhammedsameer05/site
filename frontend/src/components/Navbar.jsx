@@ -30,9 +30,18 @@ export default function Navbar({ activeTab, setActiveTab, onOpenSearch }) {
     { id: 'settings', label: t('settings'), icon: Shield, roles: ['super_admin', 'admin'] }
   ];
 
-  const visibleNav = navItems.filter(item => 
-    item.roles.includes('all') || item.roles.includes(role)
-  );
+  const visibleNav = navItems.filter(item => {
+    if (role === 'judge') {
+      return ['judge', 'timetable', 'live-scoring'].includes(item.id);
+    }
+    if (role === 'student') {
+      return ['students', 'certificates', 'live-scoring'].includes(item.id);
+    }
+    if (role === 'public') {
+      return ['home', 'timetable', 'live-scoring', 'results', 'gallery', 'notice'].includes(item.id);
+    }
+    return item.roles.includes('all') || item.roles.includes(role);
+  });
 
   return (
     <header className="sticky top-0 z-50 glass-panel border-b border-emerald-500/20 bg-slate-900/90 backdrop-blur-md">
@@ -104,7 +113,7 @@ export default function Navbar({ activeTab, setActiveTab, onOpenSearch }) {
               <div className="flex items-center space-x-2">
                 <div className="px-3 py-1.5 rounded-lg bg-emerald-950 border border-emerald-500/40 text-xs font-medium text-amber-300 hidden sm:flex items-center space-x-1.5">
                   <Shield className="w-3.5 h-3.5 text-amber-400" />
-                  <span className="capitalize">{role.replace('_', ' ')}</span>
+                  <span className="capitalize font-bold">{role.replace('_', ' ')} Portal</span>
                 </div>
                 <button
                   onClick={() => {
@@ -120,7 +129,7 @@ export default function Navbar({ activeTab, setActiveTab, onOpenSearch }) {
             ) : (
               <button
                 onClick={() => setActiveTab('login')}
-                className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black text-xs shadow hover:brightness-110 transition"
+                className="flex items-center space-x-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black text-xs shadow hover:brightness-110 transition"
               >
                 <Lock className="w-3.5 h-3.5" />
                 <span>Portal Login</span>

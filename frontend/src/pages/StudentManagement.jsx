@@ -1,25 +1,32 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  User, Plus, Search, QrCode, Edit, Trash2, Shield, Eye, Award, CheckCircle
+  User, Plus, Search, QrCode, Edit, Trash2, Shield, Eye, Award, CheckCircle, Save
 } from 'lucide-react';
 import QRCodeModal from '../components/QRCodeModal';
+import { useAuth } from '../context/AuthContext';
 
 export default function StudentManagement() {
+  const { user } = useAuth();
+  const role = user?.role || 'public';
+  const isAdmin = ['super_admin', 'admin', 'stage_coordinator'].includes(role);
+  const isStudent = role === 'student';
+
   const [students, setStudents] = useState([]);
   const [houses, setHouses] = useState([]);
   const [search, setSearch] = useState('');
-  const [selectedStudent, setSelectedStudent] = useState(null);
   const [qrStudent, setQrStudent] = useState(null);
   const [showForm, setShowForm] = useState(false);
+  const [savedSuccess, setSavedSuccess] = useState(false);
+
   const [formData, setFormData] = useState({
     id: null,
-    admission_no: '',
+    admission_no: `ADM-${Date.now().toString().slice(-4)}`,
     name: '',
     arabic_name: '',
     gender: 'male',
-    dob: '',
-    age: 10,
-    class_name: 'Class 5',
+    dob: '2014-05-10',
+    age: 12,
+    class_name: 'Class 6',
     division: 'A',
     house_id: 1,
     parent_name: '',
@@ -57,7 +64,8 @@ export default function StudentManagement() {
       .then(res => res.json())
       .then(() => {
         setShowForm(false);
-        setFormData({ id: null, admission_no: '', name: '', arabic_name: '', gender: 'male', dob: '', age: 10, class_name: 'Class 5', division: 'A', house_id: 1, parent_name: '', phone: '', email: '', address: '' });
+        setSavedSuccess(true);
+        setTimeout(() => setSavedSuccess(false), 3000);
         loadData();
       });
   };
@@ -75,6 +83,151 @@ export default function StudentManagement() {
     (s.arabic_name && s.arabic_name.includes(search))
   );
 
+  // Dedicated Student Portal View (Student role)
+  if (isStudent) {
+    const currentStudent = students.find(s => s.email === user.email || s.id === 1) || {
+      student_id: 'STU-1001',
+      admission_no: 'ADM-2024-01',
+      name: 'Muhammed Danish',
+      arabic_name: 'محمد دانش',
+      class_name: 'Class 8',
+      division: 'A',
+      house_name: 'Green House',
+      house_color: '#10B981',
+      age: 14,
+      phone: '+91 9123456789',
+      parent_name: 'Ibrahim K.T.'
+    };
+
+    return (
+      <div className="max-w-3xl mx-auto space-y-6">
+        <div className="glass-panel p-6 rounded-3xl border border-amber-400/40 bg-slate-900 text-white shadow-2xl">
+          <div className="flex items-center justify-between border-b border-slate-800 pb-4 mb-6">
+            <div>
+              <h1 className="text-2xl font-black emerald-gradient-text">Student Details & Profile Portal</h1>
+              <p className="text-xs text-slate-400 font-mono">Manage your personal details and view official Milad QR badge</p>
+            </div>
+            <button
+              onClick={() => setQrStudent(currentStudent)}
+              className="flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs shadow"
+            >
+              <QrCode className="w-4 h-4" />
+              <span>View QR ID Badge</span>
+            </button>
+          </div>
+
+          {savedSuccess && (
+            <div className="p-3 mb-4 rounded-xl bg-emerald-950 text-emerald-300 border border-emerald-500/40 text-xs font-bold flex items-center space-x-2">
+              <CheckCircle className="w-4 h-4" />
+              <span>Student details updated successfully!</span>
+            </div>
+          )}
+
+          <form onSubmit={handleSave} className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+            <div>
+              <label className="block text-slate-300 font-bold mb-1">Full Name (English)</label>
+              <input
+                type="text"
+                required
+                value={formData.name || currentStudent.name}
+                onChange={e => setFormData({ ...formData, name: e.target.value })}
+                className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white font-bold"
+              />
+            </div>
+
+            <div>
+              <label className="block text-slate-300 font-bold mb-1">Arabic Name (الاسم بالعربية)</label>
+              <input
+                type="text"
+                value={formData.arabic_name || currentStudent.arabic_name}
+                onChange={e => setFormData({ ...formData, arabic_name: e.target.value })}
+                className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white font-serif text-sm"
+              />
+            </div>
+
+            <div>
+              <label className="block text-slate-300 font-bold mb-1">Class</label>
+              <input
+                type="text"
+                value={formData.class_name || currentStudent.class_name}
+                onChange={e => setFormData({ ...formData, class_name: e.target.value })}
+                className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white"
+              />
+            </div>
+
+            <div>
+              <label className="block text-slate-300 font-bold mb-1">Division</label>
+              <input
+                type="text"
+                value={formData.division || currentStudent.division}
+                onChange={e => setFormData({ ...formData, division: e.target.value })}
+                className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white"
+              />
+            </div>
+
+            <div>
+              <label className="block text-slate-300 font-bold mb-1">House Selection</label>
+              <select
+                value={formData.house_id}
+                onChange={e => setFormData({ ...formData, house_id: e.target.value })}
+                className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white font-bold"
+              >
+                {houses.map(h => (
+                  <option key={h.id} value={h.id}>{h.name}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-slate-300 font-bold mb-1">Parent Name</label>
+              <input
+                type="text"
+                value={formData.parent_name || currentStudent.parent_name}
+                onChange={e => setFormData({ ...formData, parent_name: e.target.value })}
+                className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white"
+              />
+            </div>
+
+            <div>
+              <label className="block text-slate-300 font-bold mb-1">Parent Phone Number</label>
+              <input
+                type="text"
+                value={formData.phone || currentStudent.phone}
+                onChange={e => setFormData({ ...formData, phone: e.target.value })}
+                className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white"
+              />
+            </div>
+
+            <div>
+              <label className="block text-slate-300 font-bold mb-1">Address</label>
+              <input
+                type="text"
+                value={formData.address || 'Calicut Road'}
+                onChange={e => setFormData({ ...formData, address: e.target.value })}
+                className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white"
+              />
+            </div>
+
+            <div className="sm:col-span-2 flex justify-end pt-4 border-t border-slate-800">
+              <button
+                type="submit"
+                className="flex items-center space-x-2 px-6 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:brightness-110 text-slate-950 font-black text-xs shadow-lg transition"
+              >
+                <Save className="w-4 h-4" />
+                <span>Save My Details</span>
+              </button>
+            </div>
+          </form>
+        </div>
+
+        {qrStudent && (
+          <QRCodeModal student={qrStudent} onClose={() => setQrStudent(null)} />
+        )}
+      </div>
+    );
+  }
+
+  // Admin / Full View
   return (
     <div className="space-y-6">
       
@@ -88,16 +241,18 @@ export default function StudentManagement() {
           <p className="text-xs text-slate-400 font-mono">Manage student records, Arabic names, QR codes, and profiles</p>
         </div>
 
-        <button
-          onClick={() => {
-            setFormData({ id: null, admission_no: `ADM-${Date.now().toString().slice(-4)}`, name: '', arabic_name: '', gender: 'male', dob: '2014-05-10', age: 12, class_name: 'Class 6', division: 'A', house_id: 1, parent_name: '', phone: '', email: '', address: '' });
-            setShowForm(true);
-          }}
-          className="flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs shadow-lg transition"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Add New Student</span>
-        </button>
+        {isAdmin && (
+          <button
+            onClick={() => {
+              setFormData({ id: null, admission_no: `ADM-${Date.now().toString().slice(-4)}`, name: '', arabic_name: '', gender: 'male', dob: '2014-05-10', age: 12, class_name: 'Class 6', division: 'A', house_id: 1, parent_name: '', phone: '', email: '', address: '' });
+              setShowForm(true);
+            }}
+            className="flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs shadow-lg transition"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Add New Student</span>
+          </button>
+        )}
       </div>
 
       {/* Filter Bar */}
@@ -159,21 +314,25 @@ export default function StudentManagement() {
                     >
                       <QrCode className="w-4 h-4" />
                     </button>
-                    <button
-                      onClick={() => {
-                        setFormData(s);
-                        setShowForm(true);
-                      }}
-                      className="p-1.5 rounded-lg bg-slate-800 text-amber-400 hover:bg-slate-700"
-                    >
-                      <Edit className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(s.id)}
-                      className="p-1.5 rounded-lg bg-red-950/60 text-red-400 hover:bg-red-900"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                    {isAdmin && (
+                      <>
+                        <button
+                          onClick={() => {
+                            setFormData(s);
+                            setShowForm(true);
+                          }}
+                          className="p-1.5 rounded-lg bg-slate-800 text-amber-400 hover:bg-slate-700"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(s.id)}
+                          className="p-1.5 rounded-lg bg-red-950/60 text-red-400 hover:bg-red-900"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </>
+                    )}
                   </td>
                 </tr>
               ))}
