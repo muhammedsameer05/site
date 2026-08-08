@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Plus, Users, Award, Play, CheckCircle, Clock, MapPin, Edit, Trash2 } from 'lucide-react';
+import { Calendar, Plus, Users, Clock, MapPin, Edit, Trash2 } from 'lucide-react';
 
 export default function ProgramManagement() {
   const [programs, setPrograms] = useState([]);
@@ -7,10 +7,11 @@ export default function ProgramManagement() {
   const [venues, setVenues] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({
+    id: null,
     code: '',
     name: '',
     category_id: 1,
-    age_group: 'Junior',
+    age_group: 'Sub Junior',
     type: 'individual',
     venue_id: 1,
     program_date: '2026-08-15',
@@ -41,19 +42,29 @@ export default function ProgramManagement() {
     loadData();
   }, []);
 
-  const handleCreate = (e) => {
+  const handleSave = (e) => {
     e.preventDefault();
-    fetch('/api/programs', {
-      method: 'POST',
+    const method = formData.id ? 'PUT' : 'POST';
+    const url = formData.id ? `/api/programs/${formData.id}` : '/api/programs';
+
+    fetch(url, {
+      method,
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(formData)
     })
       .then(res => res.json())
       .then(() => {
         setShowModal(false);
-        setFormData({ code: '', name: '', category_id: 1, age_group: 'Junior', type: 'individual', venue_id: 1, program_date: '2026-08-15', start_time: '09:00', end_time: '10:30', max_participants: 15, status: 'pending' });
+        setFormData({ id: null, code: '', name: '', category_id: 1, age_group: 'Sub Junior', type: 'individual', venue_id: 1, program_date: '2026-08-15', start_time: '09:00', end_time: '10:30', max_participants: 15, status: 'pending' });
         loadData();
       });
+  };
+
+  const handleDelete = (id) => {
+    if (window.confirm('Are you sure you want to delete this program?')) {
+      fetch(`/api/programs/${id}`, { method: 'DELETE' })
+        .then(() => loadData());
+    }
   };
 
   const updateStatus = (id, newStatus) => {
@@ -74,12 +85,12 @@ export default function ProgramManagement() {
             <Calendar className="w-6 h-6 text-amber-400" />
             <span>Program & Competition Management</span>
           </h1>
-          <p className="text-xs text-slate-400 font-mono">Create programs, allocate venues, assign judges, and manage live execution status</p>
+          <p className="text-xs text-slate-400 font-mono">Create, edit programs, allocate venues, assign judges, and manage live execution status</p>
         </div>
 
         <button
           onClick={() => {
-            setFormData({ code: `PRG-${100 + programs.length + 1}`, name: '', category_id: 1, age_group: 'Junior', type: 'individual', venue_id: 1, program_date: '2026-08-15', start_time: '09:00', end_time: '10:30', max_participants: 15, status: 'pending' });
+            setFormData({ id: null, code: `PRG-${100 + programs.length + 1}`, name: '', category_id: 1, age_group: 'Sub Junior', type: 'individual', venue_id: 1, program_date: '2026-08-15', start_time: '09:00', end_time: '10:30', max_participants: 15, status: 'pending' });
             setShowModal(true);
           }}
           className="flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs shadow-lg transition"
@@ -99,15 +110,50 @@ export default function ProgramManagement() {
                 <span className="text-[10px] font-bold font-mono px-2 py-0.5 rounded bg-slate-800 text-amber-300 border border-slate-700">
                   {p.code}
                 </span>
-                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase ${
-                  p.status === 'running' 
-                    ? 'bg-amber-500/20 text-amber-400 border border-amber-400/40 animate-pulse'
-                    : p.status === 'completed'
-                    ? 'bg-emerald-950 text-emerald-300 border border-emerald-500/40'
-                    : 'bg-slate-800 text-slate-400'
-                }`}>
-                  {p.status}
-                </span>
+                <div className="flex items-center space-x-2">
+                  <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase ${
+                    p.status === 'running' 
+                      ? 'bg-amber-500/20 text-amber-400 border border-amber-400/40 animate-pulse'
+                      : p.status === 'completed'
+                      ? 'bg-emerald-950 text-emerald-300 border border-emerald-500/40'
+                      : 'bg-slate-800 text-slate-400'
+                  }`}>
+                    {p.status}
+                  </span>
+
+                  {/* Edit & Delete Action Icons */}
+                  <button
+                    onClick={() => {
+                      setFormData({
+                        id: p.id,
+                        code: p.code,
+                        name: p.name,
+                        category_id: p.category_id || 1,
+                        age_group: p.age_group || 'Sub Junior',
+                        type: p.type || 'individual',
+                        venue_id: p.venue_id || 1,
+                        program_date: p.program_date || '2026-08-15',
+                        start_time: p.start_time || '09:00',
+                        end_time: p.end_time || '10:30',
+                        max_participants: p.max_participants || 15,
+                        status: p.status || 'pending'
+                      });
+                      setShowModal(true);
+                    }}
+                    className="p-1 rounded bg-slate-800 text-amber-400 hover:bg-slate-700 transition"
+                    title="Edit Program"
+                  >
+                    <Edit className="w-3.5 h-3.5" />
+                  </button>
+
+                  <button
+                    onClick={() => handleDelete(p.id)}
+                    className="p-1 rounded bg-red-950/60 text-red-400 hover:bg-red-900 transition"
+                    title="Delete Program"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
               </div>
 
               <h3 className="text-lg font-bold text-white mb-1">{p.name}</h3>
@@ -159,13 +205,15 @@ export default function ProgramManagement() {
         ))}
       </div>
 
-      {/* Create Program Modal */}
+      {/* Create / Edit Program Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
-          <div className="glass-panel w-full max-w-lg rounded-2xl border border-amber-400/40 p-6 shadow-2xl bg-slate-900 text-white">
-            <h3 className="text-lg font-bold emerald-gradient-text mb-4">Create New Program</h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4 overflow-y-auto">
+          <div className="glass-panel w-full max-w-lg rounded-2xl border border-amber-400/40 p-6 shadow-2xl bg-slate-900 text-white my-8">
+            <h3 className="text-lg font-bold emerald-gradient-text mb-4">
+              {formData.id ? 'Edit Program Details' : 'Create New Program'}
+            </h3>
             
-            <form onSubmit={handleCreate} className="grid grid-cols-2 gap-4 text-xs">
+            <form onSubmit={handleSave} className="grid grid-cols-2 gap-4 text-xs">
               <div>
                 <label className="block text-slate-400 mb-1">Program Code</label>
                 <input
@@ -209,10 +257,11 @@ export default function ProgramManagement() {
                   onChange={e => setFormData({ ...formData, age_group: e.target.value })}
                   className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-white"
                 >
-                  <option value="Kids">Kids (Class 1-3)</option>
-                  <option value="Sub Junior">Sub Junior (Class 4-6)</option>
-                  <option value="Junior">Junior (Class 7-9)</option>
-                  <option value="Senior">Senior (Class 10+)</option>
+                  <option value="Kiddies">Kiddies</option>
+                  <option value="Sub Junior">Sub Junior</option>
+                  <option value="Junior">Junior</option>
+                  <option value="Senior">Senior</option>
+                  <option value="Super Senior">Super Senior</option>
                 </select>
               </div>
 
@@ -259,7 +308,20 @@ export default function ProgramManagement() {
                 />
               </div>
 
-              <div className="col-span-2 flex justify-end space-x-3 pt-2">
+              <div>
+                <label className="block text-slate-400 mb-1">Execution Status</label>
+                <select
+                  value={formData.status}
+                  onChange={e => setFormData({ ...formData, status: e.target.value })}
+                  className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-white font-bold"
+                >
+                  <option value="pending">Pending</option>
+                  <option value="running">Running (Live)</option>
+                  <option value="completed">Completed</option>
+                </select>
+              </div>
+
+              <div className="col-span-2 flex justify-end space-x-3 pt-2 border-t border-slate-800">
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
@@ -271,7 +333,7 @@ export default function ProgramManagement() {
                   type="submit"
                   className="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold"
                 >
-                  Create Program
+                  {formData.id ? 'Save Program Changes' : 'Create Program'}
                 </button>
               </div>
             </form>

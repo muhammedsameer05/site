@@ -363,6 +363,33 @@ router.put('/programs/:id/status', async (req, res) => {
   }
 });
 
+router.put('/programs/:id', async (req, res) => {
+  try {
+    const { code, name, category_id, age_group, type, venue_id, program_date, start_time, end_time, max_participants, status } = req.body;
+    await run(`
+      UPDATE programs 
+      SET code = ?, name = ?, category_id = ?, age_group = ?, type = ?, venue_id = ?, program_date = ?, start_time = ?, end_time = ?, max_participants = ?, status = ?
+      WHERE id = ?
+    `, [code, name, category_id, age_group, type, venue_id, program_date, start_time, end_time, max_participants, status, req.params.id]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.delete('/programs/:id', async (req, res) => {
+  try {
+    await run('DELETE FROM programs WHERE id = ?', [req.params.id]);
+    await run('DELETE FROM program_judges WHERE program_id = ?', [req.params.id]);
+    await run('DELETE FROM program_participants WHERE program_id = ?', [req.params.id]);
+    await run('DELETE FROM marks WHERE program_id = ?', [req.params.id]);
+    await run('DELETE FROM results WHERE program_id = ?', [req.params.id]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // -------------------------------------------------------------
 // CATEGORIES & VENUES & JUDGES
 // -------------------------------------------------------------
