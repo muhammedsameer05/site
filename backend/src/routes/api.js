@@ -47,7 +47,7 @@ async function calculateProgramResults(programId, io) {
     }
 
     // Recalculate house total points across all results
-    const allResults = await all('SELECT r.points_awarded, s.house_id FROM results r JOIN students s ON r.student_id = s.id');
+    const allResults = await all('SELECT r.points_awarded, s.house_id FROM results r JOIN students s ON (r.student_id = s.id OR r.student_id = s.student_id)');
     for (let r of allResults) {
       if (r.house_id) {
         await run('UPDATE houses SET total_points = total_points + ? WHERE id = ?', [r.points_awarded, r.house_id]);
