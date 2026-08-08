@@ -28,7 +28,7 @@ export default function JudgePanel() {
   const [isFinalSubmitted, setIsFinalSubmitted] = useState(false);
   const [msg, setMsg] = useState(null);
 
-  // Load programs assigned to judge or all programs
+  // Load programs
   useEffect(() => {
     fetch(`/api/marks/judge/${judgeId}`)
       .then(res => res.json())
@@ -75,19 +75,27 @@ export default function JudgePanel() {
             const map = {};
             if (Array.isArray(existingMarks)) {
               existingMarks.forEach(m => {
-                if (m.judge_id === judgeId || !m.judge_id) {
-                  map[m.student_id] = m;
-                }
+                map[m.student_id] = m;
+                map[String(m.student_id)] = m;
+                if (m.chest_no) map[m.chest_no] = m;
+                if (m.student_code) map[m.student_code] = m;
               });
             }
 
             // Also check localStorage for local offline marks
             parts.forEach(st => {
               const stId = st.id || st.student_id;
-              const localSaved = localStorage.getItem(`milad_marks_${programId}_${stId}`);
-              if (localSaved && !map[stId]) {
+              const localSaved = 
+                localStorage.getItem(`milad_marks_${programId}_${stId}`) ||
+                localStorage.getItem(`milad_marks_${programId}_${st.student_id}`) ||
+                localStorage.getItem(`milad_marks_${programId}_${st.chest_no}`);
+              if (localSaved) {
                 try {
-                  map[stId] = JSON.parse(localSaved);
+                  const parsed = JSON.parse(localSaved);
+                  map[stId] = parsed;
+                  map[String(stId)] = parsed;
+                  if (st.chest_no) map[st.chest_no] = parsed;
+                  if (st.student_code) map[st.student_code] = parsed;
                 } catch (e) {}
               }
             });
@@ -95,24 +103,30 @@ export default function JudgePanel() {
             setSubmittedMarksMap(map);
 
             if (parts.length > 0) {
-              loadStudentMarks(parts[0], map);
+              loadStudentMarks(parts[0], map, prog);
             }
           })
           .catch(() => {
             if (parts.length > 0) {
-              loadStudentMarks(parts[0], {});
+              loadStudentMarks(parts[0], {}, prog);
             }
           });
       });
   };
 
   // Helper to load student marks when selected
-  const loadStudentMarks = (student, marksMap = submittedMarksMap) => {
+  const loadStudentMarks = (student, marksMap = submittedMarksMap, program = selectedProgram) => {
     setSelectedStudent(student);
     setMsg(null);
 
-    const stId = student.id || student.student_id;
-    const existing = marksMap[stId] || marksMap[student.student_id];
+    const existing = 
+      marksMap[student.id] || 
+      marksMap[String(student.id)] || 
+      marksMap[student.student_id] || 
+      marksMap[student.student_code] || 
+      marksMap[student.chest_no];
+
+    const isProgramCompleted = program?.status === 'completed';
 
     if (existing) {
       setMarks({
@@ -125,13 +139,17 @@ export default function JudgePanel() {
         time_management: parseFloat(existing.time_management || 0),
         overall_impression: parseFloat(existing.overall_impression || 0)
       });
-      setIsFinalSubmitted(existing.status === 'final');
-      if (existing.status === 'final') {
-        setMsg({ type: 'success', text: '🔒 Final marks submitted and locked for this participant.' });
+      const isLocked = existing.status === 'final' || isProgramCompleted;
+      setIsFinalSubmitted(isLocked);
+      if (isLocked) {
+        setMsg({ type: 'success', text: '🔒 Marks submitted and locked for this participant.' });
       }
     } else {
       setMarks(defaultCriteria);
-      setIsFinalSubmitted(false);
+      setIsFinalSubmitted(isProgramCompleted);
+      if (isProgramCompleted) {
+        setMsg({ type: 'error', text: '🔒 This program is completed and locked for scoring.' });
+      }
     }
   };
 
@@ -167,8 +185,12 @@ export default function JudgePanel() {
     // Update local state map immediately
     const updatedMap = {
       ...submittedMarksMap,
-      [studentIdToSubmit]: { ...bodyData, total_mark: calculateTotal() }
+      [studentIdToSubmit]: { ...bodyData, total_mark: calculateTotal() },
+      [String(studentIdToSubmit)]: { ...bodyData, total_mark: calculateTotal() }
     };
+    if (selectedStudent.chest_no) updatedMap[selectedStudent.chest_no] = { ...bodyData, total_mark: calculateTotal() };
+    if (selectedStudent.student_code) updatedMap[selectedStudent.student_code] = { ...bodyData, total_mark: calculateTotal() };
+
     setSubmittedMarksMap(updatedMap);
     localStorage.setItem(`milad_marks_${selectedProgram.id}_${studentIdToSubmit}`, JSON.stringify({ ...bodyData, total_mark: calculateTotal() }));
 
@@ -260,10 +282,15 @@ export default function JudgePanel() {
             <h3 className="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-2">Chest No / Participants</h3>
             <div className="space-y-1 max-h-72 overflow-y-auto">
               {participants.map(st => {
-                const stId = st.id || st.student_id;
-                const statusData = submittedMarksMap[stId] || submittedMarksMap[st.student_id];
-                const isDone = statusData?.status === 'final';
-                const isDraft = statusData?.status === 'draft';
+                const statusData = 
+                  submittedMarksMap[st.id] || 
+                  submittedMarksMap[String(st.id)] || 
+                  submittedMarksMap[st.student_id] || 
+                  submittedMarksMap[st.student_code] || 
+                  submittedMarksMap[st.chest_no];
+
+                const isDone = statusData?.status === 'final' || selectedProgram?.status === 'completed';
+                const isDraft = statusData?.status === 'draft' && !isDone;
 
                 return (
                   <button
