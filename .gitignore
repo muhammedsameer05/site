@@ -1,0 +1,25 @@
+# Node modules
+node_modules/
+**/node_modules/
+
+# SQLite Database
+*.sqlite
+*.sqlite3
+*.db
+backend/database/*.sqlite
+
+# Logs & Environment
+*.log
+.env
+.env.local
+
+# Build output
+dist/
+build/
+**/dist/
+
+# IDE & OS
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
