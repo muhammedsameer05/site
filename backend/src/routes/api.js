@@ -177,7 +177,7 @@ router.get('/students/:id', async (req, res) => {
 router.post('/students', async (req, res) => {
   try {
     const {
-      admission_no, name, arabic_name, gender, dob, age, class_name,
+      admission_no, name, category_name, arabic_name, gender, dob, age, class_name,
       division, house_id, parent_name, phone, email, address
     } = req.body;
 
@@ -185,9 +185,9 @@ router.post('/students', async (req, res) => {
     const student_id = `STU-${1000 + count.c + 1}`;
 
     const result = await run(`
-      INSERT INTO students (student_id, admission_no, name, arabic_name, gender, dob, age, class_name, division, house_id, parent_name, phone, email, address)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `, [student_id, admission_no, name, arabic_name, gender || 'male', dob, age || 10, class_name, division, house_id, parent_name, phone, email, address]);
+      INSERT INTO students (student_id, admission_no, name, category_name, arabic_name, gender, dob, age, class_name, division, house_id, parent_name, phone, email, address)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `, [student_id, admission_no, name, category_name || 'Kiddies', arabic_name || '', gender || 'male', dob, age || 10, class_name, division || 'A', house_id, parent_name || '', phone || '', email || '', address || '']);
 
     res.json({ success: true, id: result.id, student_id });
   } catch (err) {
@@ -197,12 +197,13 @@ router.post('/students', async (req, res) => {
 
 router.put('/students/:id', async (req, res) => {
   try {
-    const { name, arabic_name, gender, dob, age, class_name, division, house_id, parent_name, phone, email, address } = req.body;
+    const { name, category_name, arabic_name, gender, dob, age, class_name, division, house_id, parent_name, phone, email, address, admission_no } = req.body;
     await run(`
       UPDATE students 
-      SET name=?, arabic_name=?, gender=?, dob=?, age=?, class_name=?, division=?, house_id=?, parent_name=?, phone=?, email=?, address=?
-      WHERE id=?
-    `, [name, arabic_name, gender, dob, age, class_name, division, house_id, parent_name, phone, email, address, req.params.id]);
+      SET name = ?, category_name = ?, arabic_name = ?, gender = ?, dob = ?, age = ?, class_name = ?, division = ?, house_id = ?, parent_name = ?, phone = ?, email = ?, address = ?, admission_no = COALESCE(?, admission_no)
+      WHERE id = ?
+    `, [name, category_name || 'Kiddies', arabic_name || '', gender || 'male', dob, age || 10, class_name, division || 'A', house_id, parent_name || '', phone || '', email || '', address || '', admission_no, req.params.id]);
+    
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });

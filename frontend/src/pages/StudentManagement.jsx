@@ -18,10 +18,13 @@ export default function StudentManagement() {
   const [showForm, setShowForm] = useState(false);
   const [savedSuccess, setSavedSuccess] = useState(false);
 
+  const categories = ['Kiddies', 'Sub Junior', 'Junior', 'Senior', 'Super Senior'];
+
   const [formData, setFormData] = useState({
     id: null,
     admission_no: `ADM-${Date.now().toString().slice(-4)}`,
     name: '',
+    category_name: 'Kiddies',
     class_name: 'Class 6',
     house_id: 1
   });
@@ -79,6 +82,7 @@ export default function StudentManagement() {
   const filtered = students.filter(s => 
     s.name.toLowerCase().includes(search.toLowerCase()) || 
     s.student_id.toLowerCase().includes(search.toLowerCase()) ||
+    (s.category_name && s.category_name.toLowerCase().includes(search.toLowerCase())) ||
     (s.admission_no && s.admission_no.toLowerCase().includes(search.toLowerCase()))
   );
 
@@ -88,6 +92,7 @@ export default function StudentManagement() {
       student_id: 'STU-1001',
       admission_no: 'ADM-2024-01',
       name: 'Muhammed Danish',
+      category_name: 'Junior',
       class_name: 'Class 8',
       house_name: 'Green House',
       house_color: '#10B981'
@@ -138,6 +143,19 @@ export default function StudentManagement() {
                 onChange={e => setFormData({ ...formData, name: e.target.value })}
                 className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white font-bold"
               />
+            </div>
+
+            <div>
+              <label className="block text-slate-300 font-bold mb-1">Category</label>
+              <select
+                value={formData.category_name || currentStudent.category_name}
+                onChange={e => setFormData({ ...formData, category_name: e.target.value })}
+                className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white font-bold"
+              >
+                {categories.map((cat, idx) => (
+                  <option key={idx} value={cat}>{cat}</option>
+                ))}
+              </select>
             </div>
 
             <div>
@@ -194,13 +212,13 @@ export default function StudentManagement() {
             <User className="w-6 h-6 text-amber-400" />
             <span>Student Directory</span>
           </h1>
-          <p className="text-xs text-slate-400 font-mono">Manage student records, house assignments, and QR badges</p>
+          <p className="text-xs text-slate-400 font-mono">Manage student records, category assignments, and QR badges</p>
         </div>
 
         {isAdmin && (
           <button
             onClick={() => {
-              setFormData({ id: null, admission_no: `ADM-${Date.now().toString().slice(-4)}`, name: '', class_name: 'Class 6', house_id: 1 });
+              setFormData({ id: null, admission_no: `ADM-${Date.now().toString().slice(-4)}`, name: '', category_name: 'Kiddies', class_name: 'Class 6', house_id: 1 });
               setShowForm(true);
             }}
             className="flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs shadow-lg transition"
@@ -219,7 +237,7 @@ export default function StudentManagement() {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by student name or admission ID..."
+            placeholder="Search by student name, category, or admission ID..."
             className="w-full bg-slate-900 border border-slate-700 rounded-xl pl-10 pr-4 py-2 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-amber-400"
           />
         </div>
@@ -234,6 +252,7 @@ export default function StudentManagement() {
               <tr>
                 <th className="p-4">Admission No</th>
                 <th className="p-4">Student Name</th>
+                <th className="p-4">Category</th>
                 <th className="p-4">Class</th>
                 <th className="p-4">House</th>
                 <th className="p-4 text-right">Actions</th>
@@ -244,6 +263,11 @@ export default function StudentManagement() {
                 <tr key={s.id} className="hover:bg-slate-800/40 transition">
                   <td className="p-4 font-mono text-emerald-400 font-bold">{s.admission_no || s.student_id}</td>
                   <td className="p-4 font-bold text-white text-sm">{s.name}</td>
+                  <td className="p-4 font-semibold text-amber-300">
+                    <span className="px-2.5 py-1 rounded-lg bg-amber-500/10 border border-amber-400/30 text-amber-300 text-[11px] font-bold">
+                      {s.category_name || 'Kiddies'}
+                    </span>
+                  </td>
                   <td className="p-4 font-semibold">{s.class_name}</td>
                   <td className="p-4">
                     <span 
@@ -273,6 +297,7 @@ export default function StudentManagement() {
                               id: s.id,
                               admission_no: s.admission_no || s.student_id,
                               name: s.name,
+                              category_name: s.category_name || 'Kiddies',
                               class_name: s.class_name,
                               house_id: s.house_id || 1
                             });
@@ -298,7 +323,7 @@ export default function StudentManagement() {
         </div>
       </div>
 
-      {/* Simplified Add / Edit Modal */}
+      {/* Simplified Add / Edit Modal with Category */}
       {showForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4 overflow-y-auto">
           <div className="glass-panel w-full max-w-lg rounded-3xl border border-amber-400/40 p-6 sm:p-8 shadow-2xl bg-slate-900 text-white my-8">
@@ -328,6 +353,19 @@ export default function StudentManagement() {
                   placeholder="Student Full Name"
                   className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white font-bold"
                 />
+              </div>
+
+              <div>
+                <label className="block text-slate-300 font-bold mb-1">Category</label>
+                <select
+                  value={formData.category_name}
+                  onChange={e => setFormData({ ...formData, category_name: e.target.value })}
+                  className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white font-bold"
+                >
+                  {categories.map((cat, idx) => (
+                    <option key={idx} value={cat}>{cat}</option>
+                  ))}
+                </select>
               </div>
 
               <div>

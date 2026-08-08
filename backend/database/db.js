@@ -80,13 +80,14 @@ async function initDb() {
     student_id TEXT UNIQUE NOT NULL,
     admission_no TEXT UNIQUE NOT NULL,
     name TEXT NOT NULL,
+    category_name TEXT DEFAULT 'Kiddies',
     arabic_name TEXT,
     photo TEXT,
     gender TEXT DEFAULT 'male',
     dob DATE,
     age INTEGER DEFAULT 10,
     class_name TEXT NOT NULL,
-    division TEXT NOT NULL,
+    division TEXT NOT NULL DEFAULT 'A',
     house_id INTEGER,
     parent_name TEXT,
     phone TEXT,
@@ -96,6 +97,13 @@ async function initDb() {
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (house_id) REFERENCES houses(id)
   )`);
+
+  // Migration: add category_name column if missing in existing table
+  try {
+    await run("ALTER TABLE students ADD COLUMN category_name TEXT DEFAULT 'Kiddies'");
+  } catch (e) {
+    // Column already exists
+  }
 
   await run(`CREATE TABLE IF NOT EXISTS judges (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -224,19 +232,17 @@ async function initDb() {
       (1, 'H-GRN', 'Green House', '#10B981', 'Courage and Devotion in Faith', 'Captain 1', 0),
       (2, 'H-BLU', 'Blue House', '#3B82F6', 'Knowledge is Light and Guidance', 'Captain 2', 0)`);
   } else {
-    // Reset points to 0 for clean production start
     await run('UPDATE houses SET total_points = 0');
   }
 
-  // Ensure categories exist
-  const catCount = await get('SELECT COUNT(*) as count FROM categories');
-  if (catCount && catCount.count === 0) {
-    await run(`INSERT INTO categories (id, name, min_age, max_age, description) VALUES
-      (1, 'Kids', 5, 8, 'Class 1 to Class 3'),
-      (2, 'Sub Junior', 9, 11, 'Class 4 to Class 6'),
-      (3, 'Junior', 12, 14, 'Class 7 to Class 9'),
-      (4, 'Senior', 15, 18, 'Class 10 to Higher Secondary')`);
-  }
+  // Categories: Kiddies, Sub Junior, Junior, Senior, Super Senior
+  await run('DELETE FROM categories');
+  await run(`INSERT INTO categories (id, name, min_age, max_age, description) VALUES
+    (1, 'Kiddies', 5, 7, 'Kiddies Category'),
+    (2, 'Sub Junior', 8, 10, 'Sub Junior Category'),
+    (3, 'Junior', 11, 13, 'Junior Category'),
+    (4, 'Senior', 14, 16, 'Senior Category'),
+    (5, 'Super Senior', 17, 20, 'Super Senior Category')`);
 
   // Ensure venues exist
   const venueCount = await get('SELECT COUNT(*) as count FROM venues');
@@ -257,18 +263,7 @@ async function initDb() {
       (3, 'judge1', 'judge1@madrasa.org', '${passHash}', 'Qari Zakariya Al-Hafiz', 'judge')`);
   }
 
-  // Purge any old example/mock data for clean database start
-  await run('DELETE FROM students');
-  await run('DELETE FROM programs');
-  await run('DELETE FROM program_judges');
-  await run('DELETE FROM program_participants');
-  await run('DELETE FROM marks');
-  await run('DELETE FROM results');
-  await run('DELETE FROM certificates');
-  await run('DELETE FROM announcements');
-  await run('DELETE FROM gallery');
-
-  console.log('[DB] Database cleaned & ready for real production data!');
+  console.log('[DB] Database initialized with 5 Categories (Kiddies, Sub Junior, Junior, Senior, Super Senior)!');
 }
 
 module.exports = {
