@@ -164,34 +164,6 @@ export default function HomePage({ onNavigate }) {
         )}
       </section>
 
-      {/* Latest Announcements */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="glass-panel p-6 sm:p-8 rounded-3xl border border-amber-500/30 bg-slate-900/90">
-          <h2 className="text-xl font-extrabold text-white mb-6 flex items-center space-x-2">
-            <Megaphone className="w-5 h-5 text-amber-400" />
-            <span>Latest Announcements & Emergency Notices</span>
-          </h2>
-
-          {announcements.length === 0 ? (
-            <div className="p-6 text-center text-slate-400 text-xs">
-              No active announcements. Admin can post notices on the Notice Board.
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {announcements.map((item) => (
-                <div key={item.id} className="p-4 rounded-xl bg-slate-800/80 border-l-4 border-amber-400 space-y-1">
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-sm font-bold text-amber-300">{item.title}</h4>
-                    <span className="text-[10px] text-slate-400 font-mono">{item.posted_by}</span>
-                  </div>
-                  <p className="text-xs text-slate-300 leading-relaxed">{item.content}</p>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
-
     </div>
   );
 }
