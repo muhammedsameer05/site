@@ -648,4 +648,38 @@ router.post('/announcements', async (req, res) => {
   }
 });
 
+// -------------------------------------------------------------
+// GALLERY MANAGEMENT
+// -------------------------------------------------------------
+router.get('/gallery', async (req, res) => {
+  try {
+    const items = await all('SELECT * FROM gallery ORDER BY id DESC');
+    res.json(items);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.post('/gallery', async (req, res) => {
+  try {
+    const { album_name, title, media_type, url, caption } = req.body;
+    const result = await run(`
+      INSERT INTO gallery (album_name, title, media_type, url, caption)
+      VALUES (?, ?, ?, ?, ?)
+    `, [album_name || 'Milad 2026', title, media_type || 'photo', url, caption || '']);
+    res.json({ success: true, id: result.id });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.delete('/gallery/:id', async (req, res) => {
+  try {
+    await run('DELETE FROM gallery WHERE id = ?', [req.params.id]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;
