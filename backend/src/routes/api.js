@@ -60,8 +60,6 @@ async function calculateProgramResults(programId, io) {
       }
     }
 
-    await run("UPDATE programs SET status = 'completed' WHERE (id = ? OR CAST(id AS TEXT) = CAST(? AS TEXT))", [programId, programId]);
-
     if (io) {
       io.emit('results_published', { programId });
       io.emit('score_updated', { programId });

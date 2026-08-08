@@ -129,7 +129,7 @@ export default function JudgePanel() {
       marksMap[student.student_code] || 
       marksMap[student.chest_no];
 
-    const isProgramCompleted = program?.status === 'completed';
+    const isLocked = existing?.status === 'final';
 
     if (existing) {
       setMarks({
@@ -142,17 +142,13 @@ export default function JudgePanel() {
         time_management: parseFloat(existing.time_management || 0),
         overall_impression: parseFloat(existing.overall_impression || 0)
       });
-      const isLocked = existing.status === 'final' || isProgramCompleted;
       setIsFinalSubmitted(isLocked);
       if (isLocked) {
         setMsg({ type: 'success', text: '🔒 Marks submitted and locked for this participant.' });
       }
     } else {
       setMarks(defaultCriteria);
-      setIsFinalSubmitted(isProgramCompleted);
-      if (isProgramCompleted) {
-        setMsg({ type: 'error', text: '🔒 This program is completed and locked for scoring.' });
-      }
+      setIsFinalSubmitted(false);
     }
   };
 
@@ -294,7 +290,7 @@ export default function JudgePanel() {
                   submittedMarksMap[st.student_code] || 
                   submittedMarksMap[st.chest_no];
 
-                const isDone = statusData?.status === 'final' || selectedProgram?.status === 'completed';
+                const isDone = statusData?.status === 'final';
                 const isDraft = statusData?.status === 'draft' && !isDone;
 
                 return (
