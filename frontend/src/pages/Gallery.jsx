@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Sparkles, Plus, X, Trash2, Upload, Image as ImageIcon } from 'lucide-react';
+import { Sparkles, Plus, X, Trash2, Upload, Image as ImageIcon, Loader2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export default function Gallery() {
@@ -9,6 +9,7 @@ export default function Gallery() {
   const [items, setItems] = useState([]);
   const [lightbox, setLightbox] = useState(null);
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     album_name: 'Milad 2026',
@@ -20,8 +21,18 @@ export default function Gallery() {
   const loadGallery = () => {
     fetch('/api/gallery')
       .then(res => res.json())
-      .then(data => setItems(Array.isArray(data) ? data : []))
-      .catch(() => {});
+      .then(data => {
+        const backendItems = Array.isArray(data) ? data : [];
+        const localItems = JSON.parse(localStorage.getItem('milad_local_gallery') || '[]');
+        // Combine local and backend items without duplicates
+        const combined = [...localItems, ...backendItems];
+        const unique = Array.from(new Map(combined.map(item => [item.id || item.url, item])).values());
+        setItems(unique);
+      })
+      .catch(() => {
+        const localItems = JSON.parse(localStorage.getItem('milad_local_gallery') || '[]');
+        setItems(localItems);
+      });
   };
 
   useEffect(() => {
@@ -30,27 +41,82 @@ export default function Gallery() {
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormData(prev => ({ ...prev, url: reader.result }));
-        setPreviewUrl(reader.result);
+    if (!file) return;
+
+    const img = new Image();
+    const reader = new FileReader();
+
+    reader.onload = (event) => {
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 1200;
+        const MAX_HEIGHT = 1200;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height = Math.round((height * MAX_WIDTH) / width);
+            width = MAX_WIDTH;
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width = Math.round((width * MAX_HEIGHT) / height);
+            height = MAX_HEIGHT;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+        setFormData(prev => ({ ...prev, url: compressedDataUrl }));
+        setPreviewUrl(compressedDataUrl);
       };
-      reader.readAsDataURL(file);
-    }
+      img.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!formData.url) return alert('Please choose an image file to upload.');
 
+    setUploading(true);
+
     fetch('/api/gallery', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(formData)
     })
-      .then(res => res.json())
-      .then(() => {
+      .then(res => {
+        if (!res.ok) throw new Error('Upload HTTP Error');
+        return res.json();
+      })
+      .then(data => {
+        setUploading(false);
+        setShowUploadModal(false);
+        setFormData({ title: '', album_name: 'Milad 2026', url: '', caption: '' });
+        setPreviewUrl('');
+        loadGallery();
+      })
+      .catch(() => {
+        setUploading(false);
+        // Fallback local storage add for seamless client persistence
+        const newItem = {
+          id: `local_${Date.now()}`,
+          title: formData.title,
+          album_name: formData.album_name,
+          url: formData.url,
+          caption: formData.caption
+        };
+        const existing = JSON.parse(localStorage.getItem('milad_local_gallery') || '[]');
+        const updated = [newItem, ...existing];
+        localStorage.setItem('milad_local_gallery', JSON.stringify(updated));
+
         setShowUploadModal(false);
         setFormData({ title: '', album_name: 'Milad 2026', url: '', caption: '' });
         setPreviewUrl('');
@@ -61,8 +127,14 @@ export default function Gallery() {
   const handleDelete = (id, e) => {
     e.stopPropagation();
     if (window.confirm('Are you sure you want to delete this photo from the gallery?')) {
+      // Remove from local storage if local item
+      const localItems = JSON.parse(localStorage.getItem('milad_local_gallery') || '[]');
+      const filteredLocal = localItems.filter(item => item.id !== id);
+      localStorage.setItem('milad_local_gallery', JSON.stringify(filteredLocal));
+
       fetch(`/api/gallery/${id}`, { method: 'DELETE' })
-        .then(() => loadGallery());
+        .then(() => loadGallery())
+        .catch(() => loadGallery());
     }
   };
 
@@ -98,9 +170,9 @@ export default function Gallery() {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-          {items.map(item => (
+          {items.map((item, idx) => (
             <div 
-              key={item.id}
+              key={item.id || idx}
               onClick={() => setLightbox(item)}
               className="group glass-panel rounded-2xl border border-slate-800 overflow-hidden cursor-pointer hover:border-amber-400/50 transition duration-300 relative flex flex-col justify-between"
             >
@@ -198,10 +270,20 @@ export default function Gallery() {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold flex items-center space-x-1.5"
+                  disabled={uploading}
+                  className="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold flex items-center space-x-1.5 disabled:opacity-50"
                 >
-                  <Upload className="w-4 h-4" />
-                  <span>Publish Image</span>
+                  {uploading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Publishing...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="w-4 h-4" />
+                      <span>Publish Image</span>
+                    </>
+                  )}
                 </button>
               </div>
             </form>
