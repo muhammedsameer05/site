@@ -39,15 +39,36 @@ function MainContent() {
       return <LoginPage onLoginSuccess={(targetTab) => setActiveTab(targetTab)} />;
     }
 
-    if (role === 'judge') {
-      if (['dashboard', 'houses', 'programs', 'reports', 'settings'].includes(activeTab)) {
+    // Public / Unauthenticated User Restriction Guard
+    if (role === 'public') {
+      const protectedTabs = ['dashboard', 'students', 'houses', 'programs', 'judge', 'reports', 'settings'];
+      if (protectedTabs.includes(activeTab)) {
         return (
-          <div className="glass-panel p-8 text-center rounded-3xl border border-red-500/40 max-w-lg mx-auto my-12">
+          <div className="glass-panel p-8 text-center rounded-3xl border border-amber-500/40 max-w-lg mx-auto my-12 bg-slate-900 shadow-2xl">
+            <h3 className="text-xl font-bold text-amber-400 mb-2">Portal Authentication Required</h3>
+            <p className="text-xs text-slate-300 mb-6">You must log in to access the {activeTab.toUpperCase()} module. Please select your portal below.</p>
+            <button
+              onClick={() => setActiveTab('login')}
+              className="px-6 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:brightness-110 text-slate-950 font-black text-xs shadow-lg transition"
+            >
+              Go to Portal Login Page
+            </button>
+          </div>
+        );
+      }
+    }
+
+    // Judge Portal Guard
+    if (role === 'judge') {
+      const judgeForbiddenTabs = ['dashboard', 'students', 'houses', 'programs', 'reports', 'settings'];
+      if (judgeForbiddenTabs.includes(activeTab)) {
+        return (
+          <div className="glass-panel p-8 text-center rounded-3xl border border-red-500/40 max-w-lg mx-auto my-12 bg-slate-900 shadow-2xl">
             <h3 className="text-xl font-bold text-red-400 mb-2">Access Restricted (Judge Portal)</h3>
-            <p className="text-xs text-slate-300 mb-4">Judges are restricted exclusively to the Judge Evaluation Marks Panel.</p>
+            <p className="text-xs text-slate-300 mb-6">Judges are restricted exclusively to the Judge Evaluation Marks Panel.</p>
             <button
               onClick={() => setActiveTab('judge')}
-              className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs"
+              className="px-6 py-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs"
             >
               Go to Judge Panel
             </button>
@@ -56,17 +77,19 @@ function MainContent() {
       }
     }
 
+    // Student Portal Guard
     if (role === 'student') {
-      if (['dashboard', 'houses', 'programs', 'judge', 'reports', 'settings'].includes(activeTab)) {
+      const studentForbiddenTabs = ['dashboard', 'houses', 'programs', 'judge', 'reports', 'settings'];
+      if (studentForbiddenTabs.includes(activeTab)) {
         return (
-          <div className="glass-panel p-8 text-center rounded-3xl border border-blue-500/40 max-w-lg mx-auto my-12">
+          <div className="glass-panel p-8 text-center rounded-3xl border border-blue-500/40 max-w-lg mx-auto my-12 bg-slate-900 shadow-2xl">
             <h3 className="text-xl font-bold text-blue-400 mb-2">Access Restricted (Student Portal)</h3>
-            <p className="text-xs text-slate-300 mb-4">Students are restricted to Student Details entry & certificates view.</p>
+            <p className="text-xs text-slate-300 mb-6">Students are restricted to Student Details entry & certificates view.</p>
             <button
               onClick={() => setActiveTab('students')}
-              className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs"
+              className="px-6 py-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs"
             >
-              Go to Student Details
+              Go to My Student Details
             </button>
           </div>
         );
