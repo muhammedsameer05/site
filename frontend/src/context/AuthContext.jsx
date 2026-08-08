@@ -1,5 +1,14 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
+const AUTH_VERSION = 'v3_force_logout_clean';
+
+// Automatically clear any old leftover admin sessions stored in browser cache from earlier versions
+if (typeof window !== 'undefined' && localStorage.getItem('milad_auth_version') !== AUTH_VERSION) {
+  localStorage.removeItem('milad_user');
+  localStorage.removeItem('milad_token');
+  localStorage.setItem('milad_auth_version', AUTH_VERSION);
+}
+
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
