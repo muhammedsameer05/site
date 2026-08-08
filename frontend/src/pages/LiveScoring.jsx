@@ -118,23 +118,6 @@ export default function LiveScoring() {
         </div>
       </div>
 
-      {/* Live Stream Activity Ticker Log */}
-      <div className="glass-panel p-6 rounded-3xl border border-slate-800">
-        <h3 className="text-sm font-bold text-amber-400 uppercase tracking-wider mb-4 flex items-center space-x-2">
-          <Zap className="w-4 h-4 text-amber-400" />
-          <span>Real-time Scoring Broadcast Log</span>
-        </h3>
-
-        <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
-          {liveLog.map(item => (
-            <div key={item.id} className="p-3 rounded-xl bg-slate-800/60 border border-slate-700/50 flex items-center justify-between text-xs">
-              <span className="text-slate-200 font-medium">{item.text}</span>
-              <span className="text-[10px] text-emerald-400 font-mono shrink-0 ml-2">{item.time}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
     </div>
   );
 }
