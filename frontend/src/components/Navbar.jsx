@@ -7,9 +7,11 @@ import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 
 export default function Navbar({ activeTab, setActiveTab, onOpenSearch }) {
-  const { user, role, logout } = useAuth();
+  const { user, logout } = useAuth();
   const { t, lang, setLang } = useLanguage();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const role = user?.role || 'public';
 
   const navItems = [
     { id: 'home', label: t('home'), icon: BookOpen, roles: ['all'] },
@@ -106,7 +108,7 @@ export default function Navbar({ activeTab, setActiveTab, onOpenSearch }) {
               <div className="flex items-center space-x-2">
                 <div className="px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg bg-emerald-950 border border-emerald-500/40 text-[11px] sm:text-xs font-medium text-amber-300 hidden sm:flex items-center space-x-1.5">
                   <Shield className="w-3.5 h-3.5 text-amber-400" />
-                  <span className="capitalize font-bold">{role.replace('_', ' ')} Portal</span>
+                  <span className="capitalize font-bold">{(role || 'public').replace('_', ' ')} Portal</span>
                 </div>
                 <button
                   onClick={() => {
