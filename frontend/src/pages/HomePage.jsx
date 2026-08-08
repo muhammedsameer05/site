@@ -78,57 +78,6 @@ export default function HomePage({ onNavigate }) {
         </div>
       </section>
 
-      {/* Festival Photo Gallery Highlights Section */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h2 className="text-2xl font-extrabold emerald-gradient-text flex items-center space-x-2">
-              <Sparkles className="w-6 h-6 text-amber-400" />
-              <span>Milad Festival Photo Gallery</span>
-            </h2>
-            <p className="text-xs text-slate-400">Stage performances, Qiraat competitions & festival highlights</p>
-          </div>
-          <button
-            onClick={() => onNavigate('gallery')}
-            className="flex items-center space-x-1 text-xs font-bold text-amber-400 hover:text-amber-300"
-          >
-            <span>View Full Gallery</span>
-            <ArrowRight className="w-4 h-4" />
-          </button>
-        </div>
-
-        {gallery.length === 0 ? (
-          <div className="glass-panel p-8 text-center rounded-2xl border border-slate-800 text-slate-400 text-xs">
-            No gallery photos uploaded yet. Admins can upload event photos in the Gallery tab.
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            {gallery.map(item => (
-              <div 
-                key={item.id}
-                onClick={() => onNavigate('gallery')}
-                className="group glass-panel rounded-2xl border border-slate-800 overflow-hidden cursor-pointer hover:border-amber-400/50 transition duration-300 relative flex flex-col justify-between"
-              >
-                <div className="h-48 overflow-hidden bg-slate-950">
-                  <img 
-                    src={item.url} 
-                    alt={item.title} 
-                    className="w-full h-full object-cover group-hover:scale-110 transition duration-500"
-                  />
-                </div>
-                <div className="p-4 bg-slate-900/90">
-                  <span className="text-[10px] font-bold text-amber-400 uppercase tracking-widest block mb-1">
-                    {item.album_name}
-                  </span>
-                  <h4 className="text-sm font-bold text-white group-hover:text-amber-300 transition">{item.title}</h4>
-                  {item.caption && <p className="text-xs text-slate-400 mt-1 line-clamp-1">{item.caption}</p>}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </section>
-
       {/* Upcoming & Completed Programs Grid */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between mb-6">
@@ -207,6 +156,57 @@ export default function HomePage({ onNavigate }) {
                     </div>
                   )}
 
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* Festival Photo Gallery Highlights Section (Moved to Last) */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h2 className="text-2xl font-extrabold emerald-gradient-text flex items-center space-x-2">
+              <Sparkles className="w-6 h-6 text-amber-400" />
+              <span>Milad Festival Photo Gallery</span>
+            </h2>
+            <p className="text-xs text-slate-400">Stage performances, Qiraat competitions & festival highlights</p>
+          </div>
+          <button
+            onClick={() => onNavigate('gallery')}
+            className="flex items-center space-x-1 text-xs font-bold text-amber-400 hover:text-amber-300"
+          >
+            <span>View Full Gallery</span>
+            <ArrowRight className="w-4 h-4" />
+          </button>
+        </div>
+
+        {gallery.length === 0 ? (
+          <div className="glass-panel p-8 text-center rounded-2xl border border-slate-800 text-slate-400 text-xs">
+            No gallery photos uploaded yet. Admins can upload event photos in the Gallery tab.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            {gallery.map(item => (
+              <div 
+                key={item.id}
+                onClick={() => onNavigate('gallery')}
+                className="group glass-panel rounded-2xl border border-slate-800 overflow-hidden cursor-pointer hover:border-amber-400/50 transition duration-300 relative flex flex-col justify-between"
+              >
+                <div className="h-48 overflow-hidden bg-slate-950">
+                  <img 
+                    src={item.url} 
+                    alt={item.title} 
+                    className="w-full h-full object-cover group-hover:scale-110 transition duration-500"
+                  />
+                </div>
+                <div className="p-4 bg-slate-900/90">
+                  <span className="text-[10px] font-bold text-amber-400 uppercase tracking-widest block mb-1">
+                    {item.album_name}
+                  </span>
+                  <h4 className="text-sm font-bold text-white group-hover:text-amber-300 transition">{item.title}</h4>
+                  {item.caption && <p className="text-xs text-slate-400 mt-1 line-clamp-1">{item.caption}</p>}
                 </div>
               </div>
             ))}
