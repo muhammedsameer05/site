@@ -714,4 +714,41 @@ router.get('/reports/dashboard-stats', async (req, res) => {
   }
 });
 
+// -------------------------------------------------------------
+// GALLERY ENDPOINTS
+// -------------------------------------------------------------
+router.get('/gallery', async (req, res) => {
+  try {
+    const items = await all('SELECT * FROM gallery ORDER BY id DESC');
+    res.json(items || []);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.post('/gallery', async (req, res) => {
+  try {
+    const { title, album_name, url, caption } = req.body;
+    if (!url) return res.status(400).json({ error: 'Image URL/data is required' });
+
+    const result = await run(`
+      INSERT INTO gallery (title, album_name, url, caption)
+      VALUES (?, ?, ?, ?)
+    `, [title || 'Milad Festival Photo', album_name || 'Milad 2026', url, caption || '']);
+
+    res.json({ success: true, id: result.id });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.delete('/gallery/:id', async (req, res) => {
+  try {
+    await run('DELETE FROM gallery WHERE id = ?', [req.params.id]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;

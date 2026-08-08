@@ -24,14 +24,21 @@ export default function Gallery() {
       .then(data => {
         const backendItems = Array.isArray(data) ? data : [];
         const localItems = JSON.parse(localStorage.getItem('milad_local_gallery') || '[]');
+        const deletedIds = JSON.parse(localStorage.getItem('milad_deleted_gallery_ids') || '[]');
+
+        const filteredBackend = backendItems.filter(item => !deletedIds.includes(String(item.id)));
+        const filteredLocal = localItems.filter(item => !deletedIds.includes(String(item.id)));
+
         // Combine local and backend items without duplicates
-        const combined = [...localItems, ...backendItems];
+        const combined = [...filteredLocal, ...filteredBackend];
         const unique = Array.from(new Map(combined.map(item => [item.id || item.url, item])).values());
         setItems(unique);
       })
       .catch(() => {
         const localItems = JSON.parse(localStorage.getItem('milad_local_gallery') || '[]');
-        setItems(localItems);
+        const deletedIds = JSON.parse(localStorage.getItem('milad_deleted_gallery_ids') || '[]');
+        const filteredLocal = localItems.filter(item => !deletedIds.includes(String(item.id)));
+        setItems(filteredLocal);
       });
   };
 
@@ -99,13 +106,23 @@ export default function Gallery() {
       .then(data => {
         setUploading(false);
         setShowUploadModal(false);
+
+        const newItem = {
+          id: data.id || `uploaded_${Date.now()}`,
+          title: formData.title,
+          album_name: formData.album_name,
+          url: formData.url,
+          caption: formData.caption
+        };
+        const existing = JSON.parse(localStorage.getItem('milad_local_gallery') || '[]');
+        localStorage.setItem('milad_local_gallery', JSON.stringify([newItem, ...existing]));
+
         setFormData({ title: '', album_name: 'Milad 2026', url: '', caption: '' });
         setPreviewUrl('');
         loadGallery();
       })
       .catch(() => {
         setUploading(false);
-        // Fallback local storage add for seamless client persistence
         const newItem = {
           id: `local_${Date.now()}`,
           title: formData.title,
@@ -114,8 +131,7 @@ export default function Gallery() {
           caption: formData.caption
         };
         const existing = JSON.parse(localStorage.getItem('milad_local_gallery') || '[]');
-        const updated = [newItem, ...existing];
-        localStorage.setItem('milad_local_gallery', JSON.stringify(updated));
+        localStorage.setItem('milad_local_gallery', JSON.stringify([newItem, ...existing]));
 
         setShowUploadModal(false);
         setFormData({ title: '', album_name: 'Milad 2026', url: '', caption: '' });
@@ -127,14 +143,27 @@ export default function Gallery() {
   const handleDelete = (id, e) => {
     e.stopPropagation();
     if (window.confirm('Are you sure you want to delete this photo from the gallery?')) {
-      // Remove from local storage if local item
+      const targetId = String(id);
+
+      // Track deleted ID in local storage so it never resurfaces
+      const deletedIds = JSON.parse(localStorage.getItem('milad_deleted_gallery_ids') || '[]');
+      if (!deletedIds.includes(targetId)) {
+        deletedIds.push(targetId);
+        localStorage.setItem('milad_deleted_gallery_ids', JSON.stringify(deletedIds));
+      }
+
+      // Filter local items immediately
       const localItems = JSON.parse(localStorage.getItem('milad_local_gallery') || '[]');
-      const filteredLocal = localItems.filter(item => item.id !== id);
+      const filteredLocal = localItems.filter(item => String(item.id) !== targetId);
       localStorage.setItem('milad_local_gallery', JSON.stringify(filteredLocal));
 
+      // Remove from UI state immediately
+      setItems(prev => prev.filter(item => String(item.id) !== targetId));
+
+      // Execute backend delete
       fetch(`/api/gallery/${id}`, { method: 'DELETE' })
         .then(() => loadGallery())
-        .catch(() => loadGallery());
+        .catch(() => {});
     }
   };
 
