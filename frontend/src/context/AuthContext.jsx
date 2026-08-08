@@ -5,15 +5,10 @@ const AuthContext = createContext();
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {
     const saved = localStorage.getItem('milad_user');
-    return saved ? JSON.parse(saved) : {
-      id: 1,
-      name: 'Usthad Sayyid Muhammed',
-      role: 'super_admin',
-      email: 'superadmin@madrasa.org'
-    };
+    return saved ? JSON.parse(saved) : null;
   });
 
-  const [token, setToken] = useState(() => localStorage.getItem('milad_token') || 'demo-jwt-token');
+  const [token, setToken] = useState(() => localStorage.getItem('milad_token') || null);
 
   useEffect(() => {
     if (user) {
@@ -26,7 +21,7 @@ export function AuthProvider({ children }) {
   const login = (userData, userToken) => {
     setUser(userData);
     setToken(userToken);
-    localStorage.setItem('milad_token', userToken);
+    localStorage.setItem('milad_token', userToken || 'jwt-auth-token');
   };
 
   const logout = () => {
@@ -38,6 +33,11 @@ export function AuthProvider({ children }) {
 
   // Switch Role for demonstration
   const switchRole = (newRole) => {
+    if (!newRole || newRole === 'public') {
+      logout();
+      return;
+    }
+
     const roleNames = {
       super_admin: 'Usthad Sayyid Muhammed (Super Admin)',
       admin: 'Usthad Abdul Rahman (Admin)',
@@ -47,13 +47,16 @@ export function AuthProvider({ children }) {
       public: 'Guest Visitor (Public)'
     };
     
-    setUser({
+    const newUser = {
       id: newRole === 'judge' ? 3 : 1,
       name: roleNames[newRole] || 'User',
       role: newRole,
       email: `${newRole}@madrasa.org`,
       judgeId: newRole === 'judge' ? 1 : null
-    });
+    };
+
+    setUser(newUser);
+    setToken('jwt-auth-token');
   };
 
   return (
