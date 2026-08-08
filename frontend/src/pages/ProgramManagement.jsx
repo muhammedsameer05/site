@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Plus, Users, Clock, MapPin, Edit, Trash2 } from 'lucide-react';
+import { Calendar, Plus, Users, Clock, MapPin, Edit, Trash2, Award } from 'lucide-react';
 
 export default function ProgramManagement() {
   const [programs, setPrograms] = useState([]);
@@ -175,6 +175,35 @@ export default function ProgramManagement() {
                   <span>{p.participant_count || 0} / {p.max_participants || 20} Participants</span>
                 </div>
               </div>
+
+              {/* Winners Podium Display */}
+              {p.winners && p.winners.length > 0 && (
+                <div className="mt-3 p-3 rounded-xl bg-slate-900/90 border border-amber-400/40 space-y-2">
+                  <div className="flex items-center space-x-1.5 text-[10px] font-bold uppercase tracking-widest text-amber-400 border-b border-slate-800 pb-1.5">
+                    <Award className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Official Winners Podium</span>
+                  </div>
+                  {p.winners.map((w, idx) => (
+                    <div key={idx} className="flex items-center justify-between text-xs">
+                      <div className="flex items-center space-x-2">
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase ${
+                          w.prize === '1st' ? 'bg-amber-500 text-slate-950 shadow' :
+                          w.prize === '2nd' ? 'bg-slate-300 text-slate-950 shadow' :
+                          'bg-amber-700 text-white shadow'
+                        }`}>
+                          {w.prize === '1st' ? '🥇 1st' : w.prize === '2nd' ? '🥈 2nd' : '🥉 3rd'}
+                        </span>
+                        <span className="text-white font-bold">{w.student_name}</span>
+                        <span className="text-[10px] font-bold px-1.5 py-0.2 rounded border" style={{ color: w.house_color || '#10b981', borderColor: `${w.house_color || '#10b981'}80` }}>
+                          {w.house_name}
+                        </span>
+                      </div>
+                      <span className="font-mono text-emerald-400 text-xs font-black">{w.total_score} pts</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
             </div>
 
             {/* Status Controls */}

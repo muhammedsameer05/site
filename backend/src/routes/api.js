@@ -297,8 +297,20 @@ router.get('/programs', async (req, res) => {
       `, [p.id]);
 
       const participantCount = await get('SELECT COUNT(*) as count FROM program_participants WHERE program_id = ?', [p.id]);
+      
+      const winners = await all(`
+        SELECT r.prize, r.total_score, r.points_awarded, s.name as student_name, s.admission_no, h.name as house_name, h.color_hex as house_color
+        FROM results r
+        JOIN students s ON r.student_id = s.id
+        LEFT JOIN houses h ON s.house_id = h.id
+        WHERE r.program_id = ?
+        ORDER BY r.total_score DESC
+        LIMIT 3
+      `, [p.id]);
+
       p.assigned_judges = judges;
       p.participant_count = participantCount.count;
+      p.winners = winners;
     }
 
     res.json(programs);
