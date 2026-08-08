@@ -50,17 +50,15 @@ export default function Navbar({ activeTab, setActiveTab, onOpenSearch }) {
           
           {/* Brand Logo */}
           <div className="flex items-center space-x-3 cursor-pointer" onClick={() => setActiveTab('home')}>
-            <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-emerald-600 via-emerald-500 to-amber-400 p-0.5 shadow-lg shadow-emerald-900/50 flex items-center justify-center">
-              <div className="w-full h-full bg-slate-900 rounded-full flex items-center justify-center border border-amber-400/40">
-                <span className="text-xl font-bold gold-gradient-text font-serif">م</span>
-              </div>
+            <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-amber-400/80 shadow-lg shadow-emerald-900/50 bg-white p-0.5 flex items-center justify-center">
+              <img src="/milad-logo.jpg" alt="Vibe of Madeena Logo" className="w-full h-full object-cover rounded-full" />
             </div>
             <div>
-              <span className="text-lg font-bold emerald-gradient-text tracking-wide block leading-tight">
-                MADRASA MILAD
+              <span className="text-base sm:text-lg font-black emerald-gradient-text tracking-wide block leading-tight">
+                വൈബ് ഓഫ് മദീന 2K26
               </span>
-              <span className="text-xs text-amber-400/90 tracking-widest font-mono uppercase">
-                MANAGEMENT SYSTEM
+              <span className="text-[10px] text-amber-400/90 tracking-widest font-mono uppercase">
+                JAMALULLEYLI MADRASA, PAYYANNUR
               </span>
             </div>
           </div>
