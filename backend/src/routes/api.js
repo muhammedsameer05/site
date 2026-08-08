@@ -340,15 +340,28 @@ router.get('/programs', async (req, res) => {
 
       const participantCount = await get('SELECT COUNT(*) as count FROM program_participants WHERE program_id = ?', [p.id]);
       
-      const winners = await all(`
+      let winners = await all(`
         SELECT r.prize, r.total_score, r.points_awarded, s.name as student_name, s.admission_no, h.name as house_name, h.color_hex as house_color
         FROM results r
-        JOIN students s ON r.student_id = s.id
+        JOIN students s ON (r.student_id = s.id OR r.student_id = s.student_id)
         LEFT JOIN houses h ON s.house_id = h.id
         WHERE r.program_id = ?
         ORDER BY r.total_score DESC
         LIMIT 3
       `, [p.id]);
+
+      if (!winners || winners.length === 0) {
+        await calculateProgramResults(p.id);
+        winners = await all(`
+          SELECT r.prize, r.total_score, r.points_awarded, s.name as student_name, s.admission_no, h.name as house_name, h.color_hex as house_color
+          FROM results r
+          JOIN students s ON (r.student_id = s.id OR r.student_id = s.student_id)
+          LEFT JOIN houses h ON s.house_id = h.id
+          WHERE r.program_id = ?
+          ORDER BY r.total_score DESC
+          LIMIT 3
+        `, [p.id]);
+      }
 
       p.assigned_judges = judges;
       p.participant_count = participantCount.count;
@@ -589,15 +602,28 @@ router.post('/results/calculate/:programId', async (req, res) => {
 
 router.get('/results/program/:programId', async (req, res) => {
   try {
-    const results = await all(`
+    let results = await all(`
       SELECT r.*, s.name as student_name, s.student_id as student_code, s.arabic_name, s.class_name, h.name as house_name, h.color_hex as house_color
       FROM results r
-      JOIN students s ON r.student_id = s.id
+      JOIN students s ON (r.student_id = s.id OR r.student_id = s.student_id)
       LEFT JOIN houses h ON s.house_id = h.id
       WHERE r.program_id = ?
       ORDER BY r.total_score DESC
     `, [req.params.programId]);
-    res.json(results);
+
+    if (!results || results.length === 0) {
+      await calculateProgramResults(req.params.programId);
+      results = await all(`
+        SELECT r.*, s.name as student_name, s.student_id as student_code, s.arabic_name, s.class_name, h.name as house_name, h.color_hex as house_color
+        FROM results r
+        JOIN students s ON (r.student_id = s.id OR r.student_id = s.student_id)
+        LEFT JOIN houses h ON s.house_id = h.id
+        WHERE r.program_id = ?
+        ORDER BY r.total_score DESC
+      `, [req.params.programId]);
+    }
+
+    res.json(results || []);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
