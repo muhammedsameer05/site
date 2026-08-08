@@ -24,7 +24,6 @@ export default function Navbar({ activeTab, setActiveTab, onOpenSearch }) {
     { id: 'results', label: t('results'), icon: Trophy, roles: ['all'] },
     { id: 'reports', label: t('reports'), icon: Layers, roles: ['super_admin', 'admin'] },
     { id: 'gallery', label: t('gallery'), icon: Sparkles, roles: ['all'] },
-    { id: 'notice', label: t('notice_board'), icon: BookOpen, roles: ['all'] },
     { id: 'settings', label: t('settings'), icon: Shield, roles: ['super_admin', 'admin'] }
   ];
 
@@ -36,7 +35,7 @@ export default function Navbar({ activeTab, setActiveTab, onOpenSearch }) {
       return ['students', 'results', 'live-scoring'].includes(item.id);
     }
     if (role === 'public') {
-      return ['home', 'timetable', 'live-scoring', 'results', 'gallery', 'notice'].includes(item.id);
+      return ['home', 'timetable', 'live-scoring', 'results', 'gallery'].includes(item.id);
     }
     return item.roles.includes('all') || item.roles.includes(role);
   });
