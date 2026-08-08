@@ -60,8 +60,10 @@ async function calculateProgramResults(programId, io) {
       io.emit('results_published', { programId });
       io.emit('score_updated', { programId });
     }
+    return studentScores ? studentScores.length : 0;
   } catch (err) {
     console.error('[DB ERROR] Failed to calculate program results:', err);
+    return 0;
   }
 }
 
@@ -589,8 +591,8 @@ router.post('/results/calculate/:programId', async (req, res) => {
   try {
     const { programId } = req.params;
     const io = req.app.get('io');
-    await calculateProgramResults(programId, io);
-    res.json({ success: true });
+    const count = await calculateProgramResults(programId, io);
+    res.json({ success: true, count: count || 0 });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -605,7 +607,7 @@ router.get('/results/program/:programId', async (req, res) => {
       LEFT JOIN houses h ON s.house_id = h.id
       WHERE r.program_id = ?
       ORDER BY r.total_score DESC
-    `, [req.params.id]);
+    `, [req.params.programId]);
     res.json(results);
   } catch (err) {
     res.status(500).json({ error: err.message });
