@@ -11,7 +11,6 @@ export default function ProgramManagement() {
     code: '',
     name: '',
     category_id: 1,
-    age_group: 'Sub Junior',
     type: 'individual',
     venue_id: 1,
     program_date: '2026-08-15',
@@ -55,7 +54,7 @@ export default function ProgramManagement() {
       .then(res => res.json())
       .then(() => {
         setShowModal(false);
-        setFormData({ id: null, code: '', name: '', category_id: 1, age_group: 'Sub Junior', type: 'individual', venue_id: 1, program_date: '2026-08-15', start_time: '09:00', end_time: '10:30', max_participants: 15, status: 'pending' });
+        setFormData({ id: null, code: '', name: '', category_id: 1, type: 'individual', venue_id: 1, program_date: '2026-08-15', start_time: '09:00', end_time: '10:30', max_participants: 15, status: 'pending' });
         loadData();
       });
   };
@@ -90,7 +89,7 @@ export default function ProgramManagement() {
 
         <button
           onClick={() => {
-            setFormData({ id: null, code: `PRG-${100 + programs.length + 1}`, name: '', category_id: 1, age_group: 'Sub Junior', type: 'individual', venue_id: 1, program_date: '2026-08-15', start_time: '09:00', end_time: '10:30', max_participants: 15, status: 'pending' });
+            setFormData({ id: null, code: `PRG-${100 + programs.length + 1}`, name: '', category_id: 1, type: 'individual', venue_id: 1, program_date: '2026-08-15', start_time: '09:00', end_time: '10:30', max_participants: 15, status: 'pending' });
             setShowModal(true);
           }}
           className="flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs shadow-lg transition"
@@ -129,7 +128,6 @@ export default function ProgramManagement() {
                         code: p.code,
                         name: p.name,
                         category_id: p.category_id || 1,
-                        age_group: p.age_group || 'Sub Junior',
                         type: p.type || 'individual',
                         venue_id: p.venue_id || 1,
                         program_date: p.program_date || '2026-08-15',
@@ -158,7 +156,7 @@ export default function ProgramManagement() {
 
               <h3 className="text-lg font-bold text-white mb-1">{p.name}</h3>
               <p className="text-xs text-emerald-400 font-semibold mb-3">
-                {p.category_name || 'Category'} | {p.age_group} ({p.type})
+                {p.category_name || 'Category'} | <span className="capitalize font-bold text-amber-300">{p.type || 'individual'}</span>
               </p>
 
               <div className="space-y-1 text-xs text-slate-400 font-mono border-t border-slate-800/80 pt-3">
@@ -279,17 +277,14 @@ export default function ProgramManagement() {
               </div>
 
               <div>
-                <label className="block text-slate-400 mb-1">Age Group</label>
+                <label className="block text-slate-400 mb-1">Event Type</label>
                 <select
-                  value={formData.age_group}
-                  onChange={e => setFormData({ ...formData, age_group: e.target.value })}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-white"
+                  value={formData.type}
+                  onChange={e => setFormData({ ...formData, type: e.target.value })}
+                  className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-white font-semibold capitalize"
                 >
-                  <option value="Kiddies">Kiddies</option>
-                  <option value="Sub Junior">Sub Junior</option>
-                  <option value="Junior">Junior</option>
-                  <option value="Senior">Senior</option>
-                  <option value="Super Senior">Super Senior</option>
+                  <option value="individual">Individual</option>
+                  <option value="group">Group</option>
                 </select>
               </div>
 
