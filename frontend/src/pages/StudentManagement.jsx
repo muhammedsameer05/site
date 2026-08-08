@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  User, Plus, Search, QrCode, Edit, Trash2, Shield, Eye, Award, CheckCircle, Save
+  User, Plus, Search, QrCode, Edit, Trash2, CheckCircle, Save
 } from 'lucide-react';
 import QRCodeModal from '../components/QRCodeModal';
 import { useAuth } from '../context/AuthContext';
@@ -22,17 +22,8 @@ export default function StudentManagement() {
     id: null,
     admission_no: `ADM-${Date.now().toString().slice(-4)}`,
     name: '',
-    arabic_name: '',
-    gender: 'male',
-    dob: '2014-05-10',
-    age: 12,
     class_name: 'Class 6',
-    division: 'A',
-    house_id: 1,
-    parent_name: '',
-    phone: '',
-    email: '',
-    address: ''
+    house_id: 1
   });
 
   const loadData = () => {
@@ -59,7 +50,15 @@ export default function StudentManagement() {
     fetch(url, {
       method,
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(formData)
+      body: JSON.stringify({
+        ...formData,
+        arabic_name: '',
+        division: 'A',
+        parent_name: '',
+        phone: '',
+        gender: 'male',
+        age: 10
+      })
     })
       .then(res => res.json())
       .then(() => {
@@ -80,7 +79,7 @@ export default function StudentManagement() {
   const filtered = students.filter(s => 
     s.name.toLowerCase().includes(search.toLowerCase()) || 
     s.student_id.toLowerCase().includes(search.toLowerCase()) ||
-    (s.arabic_name && s.arabic_name.includes(search))
+    (s.admission_no && s.admission_no.toLowerCase().includes(search.toLowerCase()))
   );
 
   // Dedicated Student Portal View (Student role)
@@ -89,30 +88,25 @@ export default function StudentManagement() {
       student_id: 'STU-1001',
       admission_no: 'ADM-2024-01',
       name: 'Muhammed Danish',
-      arabic_name: 'محمد دانش',
       class_name: 'Class 8',
-      division: 'A',
       house_name: 'Green House',
-      house_color: '#10B981',
-      age: 14,
-      phone: '+91 9123456789',
-      parent_name: 'Ibrahim K.T.'
+      house_color: '#10B981'
     };
 
     return (
-      <div className="max-w-3xl mx-auto space-y-6">
-        <div className="glass-panel p-6 rounded-3xl border border-amber-400/40 bg-slate-900 text-white shadow-2xl">
+      <div className="max-w-xl mx-auto space-y-6">
+        <div className="glass-panel p-6 sm:p-8 rounded-3xl border border-amber-400/40 bg-slate-900 text-white shadow-2xl">
           <div className="flex items-center justify-between border-b border-slate-800 pb-4 mb-6">
             <div>
-              <h1 className="text-2xl font-black emerald-gradient-text">Student Details & Profile Portal</h1>
-              <p className="text-xs text-slate-400 font-mono">Manage your personal details and view official Milad QR badge</p>
+              <h1 className="text-2xl font-black emerald-gradient-text">Student Profile Portal</h1>
+              <p className="text-xs text-slate-400 font-mono">Manage student details & view official Milad QR badge</p>
             </div>
             <button
               onClick={() => setQrStudent(currentStudent)}
               className="flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs shadow"
             >
               <QrCode className="w-4 h-4" />
-              <span>View QR ID Badge</span>
+              <span>View QR Badge</span>
             </button>
           </div>
 
@@ -123,9 +117,20 @@ export default function StudentManagement() {
             </div>
           )}
 
-          <form onSubmit={handleSave} className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+          <form onSubmit={handleSave} className="space-y-4 text-xs">
             <div>
-              <label className="block text-slate-300 font-bold mb-1">Full Name (English)</label>
+              <label className="block text-slate-300 font-bold mb-1">Admission No</label>
+              <input
+                type="text"
+                required
+                value={formData.admission_no || currentStudent.admission_no}
+                onChange={e => setFormData({ ...formData, admission_no: e.target.value })}
+                className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white font-bold font-mono"
+              />
+            </div>
+
+            <div>
+              <label className="block text-slate-300 font-bold mb-1">Full Name</label>
               <input
                 type="text"
                 required
@@ -136,31 +141,12 @@ export default function StudentManagement() {
             </div>
 
             <div>
-              <label className="block text-slate-300 font-bold mb-1">Arabic Name (الاسم بالعربية)</label>
-              <input
-                type="text"
-                value={formData.arabic_name || currentStudent.arabic_name}
-                onChange={e => setFormData({ ...formData, arabic_name: e.target.value })}
-                className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white font-serif text-sm"
-              />
-            </div>
-
-            <div>
               <label className="block text-slate-300 font-bold mb-1">Class</label>
               <input
                 type="text"
+                required
                 value={formData.class_name || currentStudent.class_name}
                 onChange={e => setFormData({ ...formData, class_name: e.target.value })}
-                className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white"
-              />
-            </div>
-
-            <div>
-              <label className="block text-slate-300 font-bold mb-1">Division</label>
-              <input
-                type="text"
-                value={formData.division || currentStudent.division}
-                onChange={e => setFormData({ ...formData, division: e.target.value })}
                 className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white"
               />
             </div>
@@ -178,43 +164,13 @@ export default function StudentManagement() {
               </select>
             </div>
 
-            <div>
-              <label className="block text-slate-300 font-bold mb-1">Parent Name</label>
-              <input
-                type="text"
-                value={formData.parent_name || currentStudent.parent_name}
-                onChange={e => setFormData({ ...formData, parent_name: e.target.value })}
-                className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white"
-              />
-            </div>
-
-            <div>
-              <label className="block text-slate-300 font-bold mb-1">Parent Phone Number</label>
-              <input
-                type="text"
-                value={formData.phone || currentStudent.phone}
-                onChange={e => setFormData({ ...formData, phone: e.target.value })}
-                className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white"
-              />
-            </div>
-
-            <div>
-              <label className="block text-slate-300 font-bold mb-1">Address</label>
-              <input
-                type="text"
-                value={formData.address || 'Calicut Road'}
-                onChange={e => setFormData({ ...formData, address: e.target.value })}
-                className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white"
-              />
-            </div>
-
-            <div className="sm:col-span-2 flex justify-end pt-4 border-t border-slate-800">
+            <div className="flex justify-end pt-4 border-t border-slate-800">
               <button
                 type="submit"
                 className="flex items-center space-x-2 px-6 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:brightness-110 text-slate-950 font-black text-xs shadow-lg transition"
               >
                 <Save className="w-4 h-4" />
-                <span>Save My Details</span>
+                <span>Save Student Details</span>
               </button>
             </div>
           </form>
@@ -236,15 +192,15 @@ export default function StudentManagement() {
         <div>
           <h1 className="text-2xl font-extrabold emerald-gradient-text flex items-center space-x-2">
             <User className="w-6 h-6 text-amber-400" />
-            <span>Student Management Directory</span>
+            <span>Student Directory</span>
           </h1>
-          <p className="text-xs text-slate-400 font-mono">Manage student records, Arabic names, QR codes, and profiles</p>
+          <p className="text-xs text-slate-400 font-mono">Manage student records, house assignments, and QR badges</p>
         </div>
 
         {isAdmin && (
           <button
             onClick={() => {
-              setFormData({ id: null, admission_no: `ADM-${Date.now().toString().slice(-4)}`, name: '', arabic_name: '', gender: 'male', dob: '2014-05-10', age: 12, class_name: 'Class 6', division: 'A', house_id: 1, parent_name: '', phone: '', email: '', address: '' });
+              setFormData({ id: null, admission_no: `ADM-${Date.now().toString().slice(-4)}`, name: '', class_name: 'Class 6', house_id: 1 });
               setShowForm(true);
             }}
             className="flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs shadow-lg transition"
@@ -263,7 +219,7 @@ export default function StudentManagement() {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by name, Arabic name, ID..."
+            placeholder="Search by student name or admission ID..."
             className="w-full bg-slate-900 border border-slate-700 rounded-xl pl-10 pr-4 py-2 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-amber-400"
           />
         </div>
@@ -276,23 +232,19 @@ export default function StudentManagement() {
           <table className="w-full text-left text-xs text-slate-300">
             <thead className="bg-slate-900/90 text-amber-400 uppercase font-mono border-b border-slate-800">
               <tr>
-                <th className="p-4">Student ID</th>
+                <th className="p-4">Admission No</th>
                 <th className="p-4">Student Name</th>
-                <th className="p-4">Class & Div</th>
+                <th className="p-4">Class</th>
                 <th className="p-4">House</th>
-                <th className="p-4">Parent Phone</th>
                 <th className="p-4 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/60">
               {filtered.map((s) => (
                 <tr key={s.id} className="hover:bg-slate-800/40 transition">
-                  <td className="p-4 font-mono text-emerald-400 font-bold">{s.student_id}</td>
-                  <td className="p-4">
-                    <div className="font-bold text-white text-sm">{s.name}</div>
-                    {s.arabic_name && <div className="text-xs font-serif text-amber-300">{s.arabic_name}</div>}
-                  </td>
-                  <td className="p-4 font-semibold">{s.class_name} ({s.division})</td>
+                  <td className="p-4 font-mono text-emerald-400 font-bold">{s.admission_no || s.student_id}</td>
+                  <td className="p-4 font-bold text-white text-sm">{s.name}</td>
+                  <td className="p-4 font-semibold">{s.class_name}</td>
                   <td className="p-4">
                     <span 
                       className="px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase border"
@@ -305,7 +257,6 @@ export default function StudentManagement() {
                       {s.house_name || 'Green House'}
                     </span>
                   </td>
-                  <td className="p-4 font-mono">{s.phone || 'N/A'}</td>
                   <td className="p-4 text-right space-x-2">
                     <button
                       onClick={() => setQrStudent(s)}
@@ -318,7 +269,13 @@ export default function StudentManagement() {
                       <>
                         <button
                           onClick={() => {
-                            setFormData(s);
+                            setFormData({
+                              id: s.id,
+                              admission_no: s.admission_no || s.student_id,
+                              name: s.name,
+                              class_name: s.class_name,
+                              house_id: s.house_id || 1
+                            });
                             setShowForm(true);
                           }}
                           className="p-1.5 rounded-lg bg-slate-800 text-amber-400 hover:bg-slate-700"
@@ -341,74 +298,56 @@ export default function StudentManagement() {
         </div>
       </div>
 
-      {/* Add / Edit Modal */}
+      {/* Simplified Add / Edit Modal */}
       {showForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4 overflow-y-auto">
-          <div className="glass-panel w-full max-w-2xl rounded-2xl border border-amber-400/40 p-6 shadow-2xl bg-slate-900 text-white my-8">
-            <h3 className="text-lg font-bold emerald-gradient-text mb-4">
+          <div className="glass-panel w-full max-w-lg rounded-3xl border border-amber-400/40 p-6 sm:p-8 shadow-2xl bg-slate-900 text-white my-8">
+            <h3 className="text-xl font-black emerald-gradient-text mb-4">
               {formData.id ? 'Edit Student Profile' : 'Add New Student'}
             </h3>
 
-            <form onSubmit={handleSave} className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+            <form onSubmit={handleSave} className="space-y-4 text-xs">
               <div>
-                <label className="block text-slate-400 mb-1">Admission No</label>
+                <label className="block text-slate-300 font-bold mb-1">Admission No</label>
                 <input
                   type="text"
                   required
                   value={formData.admission_no}
                   onChange={e => setFormData({ ...formData, admission_no: e.target.value })}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-white"
+                  className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white font-mono"
                 />
               </div>
 
               <div>
-                <label className="block text-slate-400 mb-1">Full Name (English)</label>
+                <label className="block text-slate-300 font-bold mb-1">Full Name</label>
                 <input
                   type="text"
                   required
                   value={formData.name}
                   onChange={e => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-white"
+                  placeholder="Student Full Name"
+                  className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white font-bold"
                 />
               </div>
 
               <div>
-                <label className="block text-slate-400 mb-1">Arabic Name (الاسم بالعربية)</label>
+                <label className="block text-slate-300 font-bold mb-1">Class</label>
                 <input
                   type="text"
-                  value={formData.arabic_name}
-                  onChange={e => setFormData({ ...formData, arabic_name: e.target.value })}
-                  placeholder="محمد دانش"
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-white font-serif"
-                />
-              </div>
-
-              <div>
-                <label className="block text-slate-400 mb-1">Class</label>
-                <input
-                  type="text"
+                  required
                   value={formData.class_name}
                   onChange={e => setFormData({ ...formData, class_name: e.target.value })}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-white"
+                  placeholder="Class 6"
+                  className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white"
                 />
               </div>
 
               <div>
-                <label className="block text-slate-400 mb-1">Division</label>
-                <input
-                  type="text"
-                  value={formData.division}
-                  onChange={e => setFormData({ ...formData, division: e.target.value })}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-white"
-                />
-              </div>
-
-              <div>
-                <label className="block text-slate-400 mb-1">House</label>
+                <label className="block text-slate-300 font-bold mb-1">House</label>
                 <select
                   value={formData.house_id}
                   onChange={e => setFormData({ ...formData, house_id: e.target.value })}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-white"
+                  className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white font-bold"
                 >
                   {houses.map(h => (
                     <option key={h.id} value={h.id}>{h.name}</option>
@@ -416,37 +355,17 @@ export default function StudentManagement() {
                 </select>
               </div>
 
-              <div>
-                <label className="block text-slate-400 mb-1">Parent Name</label>
-                <input
-                  type="text"
-                  value={formData.parent_name}
-                  onChange={e => setFormData({ ...formData, parent_name: e.target.value })}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-white"
-                />
-              </div>
-
-              <div>
-                <label className="block text-slate-400 mb-1">Parent Phone</label>
-                <input
-                  type="text"
-                  value={formData.phone}
-                  onChange={e => setFormData({ ...formData, phone: e.target.value })}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-white"
-                />
-              </div>
-
-              <div className="sm:col-span-2 flex justify-end space-x-3 mt-4">
+              <div className="flex justify-end space-x-3 pt-4 border-t border-slate-800">
                 <button
                   type="button"
                   onClick={() => setShowForm(false)}
-                  className="px-4 py-2 rounded-xl glass-panel text-slate-400 hover:text-white"
+                  className="px-4 py-2.5 rounded-xl glass-panel text-slate-400 hover:text-white"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold"
+                  className="px-6 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold"
                 >
                   Save Student Profile
                 </button>
