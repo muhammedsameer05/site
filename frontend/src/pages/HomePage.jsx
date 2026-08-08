@@ -178,7 +178,6 @@ export default function HomePage({ onNavigate }) {
                               {w.house_name}
                             </span>
                           </div>
-                          <span className="font-mono text-emerald-400 text-xs font-black">{w.total_score} pts</span>
                         </div>
                       ))}
                     </div>
