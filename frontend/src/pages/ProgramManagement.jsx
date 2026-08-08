@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Plus, Users, Clock, MapPin, Edit, Trash2, Award } from 'lucide-react';
+import { Calendar, Plus, Users, Clock, Edit, Trash2, Award } from 'lucide-react';
 
 export default function ProgramManagement() {
   const [programs, setPrograms] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [venues, setVenues] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({
     id: null,
@@ -29,11 +28,6 @@ export default function ProgramManagement() {
     fetch('/api/categories')
       .then(res => res.json())
       .then(data => setCategories(Array.isArray(data) ? data : []))
-      .catch(() => {});
-
-    fetch('/api/venues')
-      .then(res => res.json())
-      .then(data => setVenues(Array.isArray(data) ? data : []))
       .catch(() => {});
   };
 
@@ -84,7 +78,7 @@ export default function ProgramManagement() {
             <Calendar className="w-6 h-6 text-amber-400" />
             <span>Program & Competition Management</span>
           </h1>
-          <p className="text-xs text-slate-400 font-mono">Create, edit programs, allocate venues, assign judges, and manage live execution status</p>
+          <p className="text-xs text-slate-400 font-mono">Create, edit programs, assign judges, and manage live execution status</p>
         </div>
 
         <button
@@ -106,26 +100,23 @@ export default function ProgramManagement() {
             
             <div>
               <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] font-bold font-mono px-2 py-0.5 rounded bg-slate-800 text-amber-300 border border-slate-700">
-                  {p.code}
+                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase ${
+                  p.status === 'running' 
+                    ? 'bg-amber-500/20 text-amber-400 border border-amber-400/40 animate-pulse'
+                    : p.status === 'completed'
+                    ? 'bg-emerald-950 text-emerald-300 border border-emerald-500/40'
+                    : 'bg-slate-800 text-slate-400'
+                }`}>
+                  {p.status}
                 </span>
-                <div className="flex items-center space-x-2">
-                  <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase ${
-                    p.status === 'running' 
-                      ? 'bg-amber-500/20 text-amber-400 border border-amber-400/40 animate-pulse'
-                      : p.status === 'completed'
-                      ? 'bg-emerald-950 text-emerald-300 border border-emerald-500/40'
-                      : 'bg-slate-800 text-slate-400'
-                  }`}>
-                    {p.status}
-                  </span>
 
+                <div className="flex items-center space-x-2">
                   {/* Edit & Delete Action Icons */}
                   <button
                     onClick={() => {
                       setFormData({
                         id: p.id,
-                        code: p.code,
+                        code: p.code || '',
                         name: p.name,
                         category_id: p.category_id || 1,
                         type: p.type || 'individual',
@@ -138,7 +129,7 @@ export default function ProgramManagement() {
                       });
                       setShowModal(true);
                     }}
-                    className="p-1 rounded bg-slate-800 text-amber-400 hover:bg-slate-700 transition"
+                    className="p-1.5 rounded bg-slate-800 text-amber-400 hover:bg-slate-700 transition"
                     title="Edit Program"
                   >
                     <Edit className="w-3.5 h-3.5" />
@@ -146,7 +137,7 @@ export default function ProgramManagement() {
 
                   <button
                     onClick={() => handleDelete(p.id)}
-                    className="p-1 rounded bg-red-950/60 text-red-400 hover:bg-red-900 transition"
+                    className="p-1.5 rounded bg-red-950/60 text-red-400 hover:bg-red-900 transition"
                     title="Delete Program"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
@@ -160,10 +151,6 @@ export default function ProgramManagement() {
               </p>
 
               <div className="space-y-1 text-xs text-slate-400 font-mono border-t border-slate-800/80 pt-3">
-                <div className="flex items-center space-x-2">
-                  <MapPin className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                  <span>{p.venue_name || 'Auditorium Main Stage'}</span>
-                </div>
                 <div className="flex items-center space-x-2">
                   <Clock className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
                   <span>{p.start_time || '09:00'} - {p.end_time || '10:30'}</span>
@@ -240,18 +227,7 @@ export default function ProgramManagement() {
             </h3>
             
             <form onSubmit={handleSave} className="grid grid-cols-2 gap-4 text-xs">
-              <div>
-                <label className="block text-slate-400 mb-1">Program Code</label>
-                <input
-                  type="text"
-                  required
-                  value={formData.code}
-                  onChange={e => setFormData({ ...formData, code: e.target.value })}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-white"
-                />
-              </div>
-
-              <div>
+              <div className="col-span-2">
                 <label className="block text-slate-400 mb-1">Program Name</label>
                 <input
                   type="text"
@@ -289,19 +265,6 @@ export default function ProgramManagement() {
               </div>
 
               <div>
-                <label className="block text-slate-400 mb-1">Venue Stage</label>
-                <select
-                  value={formData.venue_id}
-                  onChange={e => setFormData({ ...formData, venue_id: e.target.value })}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-white"
-                >
-                  {venues.map(v => (
-                    <option key={v.id} value={v.id}>{v.name}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
                 <label className="block text-slate-400 mb-1">Max Participants</label>
                 <input
                   type="number"
@@ -309,6 +272,19 @@ export default function ProgramManagement() {
                   onChange={e => setFormData({ ...formData, max_participants: e.target.value })}
                   className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-white"
                 />
+              </div>
+
+              <div>
+                <label className="block text-slate-400 mb-1">Execution Status</label>
+                <select
+                  value={formData.status}
+                  onChange={e => setFormData({ ...formData, status: e.target.value })}
+                  className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-white font-bold"
+                >
+                  <option value="pending">Pending</option>
+                  <option value="running">Running (Live)</option>
+                  <option value="completed">Completed</option>
+                </select>
               </div>
 
               <div>
@@ -329,19 +305,6 @@ export default function ProgramManagement() {
                   onChange={e => setFormData({ ...formData, end_time: e.target.value })}
                   className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-white"
                 />
-              </div>
-
-              <div>
-                <label className="block text-slate-400 mb-1">Execution Status</label>
-                <select
-                  value={formData.status}
-                  onChange={e => setFormData({ ...formData, status: e.target.value })}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-white font-bold"
-                >
-                  <option value="pending">Pending</option>
-                  <option value="running">Running (Live)</option>
-                  <option value="completed">Completed</option>
-                </select>
               </div>
 
               <div className="col-span-2 flex justify-end space-x-3 pt-2 border-t border-slate-800">
