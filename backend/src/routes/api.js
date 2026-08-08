@@ -6,6 +6,65 @@ const { run, get, all } = require('../../database/db');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'madrasa_milad_secret_key_2026';
 
+// Helper to calculate results and update house totals automatically
+async function calculateProgramResults(programId, io) {
+  try {
+    // Average mark per student across judges
+    const studentScores = await all(`
+      SELECT 
+        student_id, 
+        AVG(total_mark) as avg_score,
+        AVG(presentation) as avg_pres,
+        AVG(pronunciation) as avg_pron
+      FROM marks 
+      WHERE program_id = ?
+      GROUP BY student_id
+      ORDER BY avg_score DESC, avg_pres DESC, avg_pron DESC
+    `, [programId]);
+
+    if (!studentScores || studentScores.length === 0) return;
+
+    // Clear existing results for this program
+    await run('DELETE FROM results WHERE program_id = ?', [programId]);
+
+    const prizes = [
+      { prize: '1st', points: 10 },
+      { prize: '2nd', points: 7 },
+      { prize: '3rd', points: 5 }
+    ];
+
+    // Reset house totals to recalculate accurately
+    await run('UPDATE houses SET total_points = 0');
+
+    for (let i = 0; i < studentScores.length; i++) {
+      const s = studentScores[i];
+      const p = prizes[i] || { prize: 'participation', points: 3 };
+      
+      await run(`
+        INSERT INTO results (program_id, student_id, total_score, prize, points_awarded)
+        VALUES (?, ?, ?, ?, ?)
+      `, [programId, s.student_id, s.avg_score, p.prize, p.points]);
+    }
+
+    // Recalculate house total points across all results
+    const allResults = await all('SELECT r.points_awarded, s.house_id FROM results r JOIN students s ON r.student_id = s.id');
+    for (let r of allResults) {
+      if (r.house_id) {
+        await run('UPDATE houses SET total_points = total_points + ? WHERE id = ?', [r.points_awarded, r.house_id]);
+      }
+    }
+
+    await run("UPDATE programs SET status = 'completed' WHERE id = ?", [programId]);
+
+    if (io) {
+      io.emit('results_published', { programId });
+      io.emit('score_updated', { programId });
+    }
+  } catch (err) {
+    console.error('[DB ERROR] Failed to calculate program results:', err);
+  }
+}
+
 // Middleware for auth
 function authenticate(req, res, next) {
   const authHeader = req.headers.authorization;
@@ -34,12 +93,10 @@ router.post('/auth/login', async (req, res) => {
       return res.status(400).json({ error: 'User not found' });
     }
 
-    // Default seed password check or bcrypt check
     let isMatch = false;
     if (user.password.startsWith('$2a$') || user.password.startsWith('$2b$')) {
       isMatch = await bcrypt.compare(password, user.password).catch(() => false);
     }
-    // Fallback for simple testing
     if (!isMatch && (password === 'password123' || password === user.password)) {
       isMatch = true;
     }
@@ -54,7 +111,6 @@ router.post('/auth/login', async (req, res) => {
       { expiresIn: '24h' }
     );
 
-    // Fetch judge profile if judge
     let judgeInfo = null;
     if (user.role === 'judge') {
       judgeInfo = await get('SELECT * FROM judges WHERE user_id = ? OR email = ?', [user.id, user.email]);
@@ -68,7 +124,7 @@ router.post('/auth/login', async (req, res) => {
         email: user.email,
         name: user.name,
         role: user.role,
-        judgeInfo
+        judgeId: judgeInfo ? judgeInfo.id : null
       }
     });
   } catch (err) {
@@ -159,7 +215,6 @@ router.get('/students/:id', async (req, res) => {
 
     if (!student) return res.status(404).json({ error: 'Student not found' });
 
-    // Participated programs & marks
     const participations = await all(`
       SELECT pp.*, p.name as program_name, p.code as program_code, r.prize, r.points_awarded, r.total_score
       FROM program_participants pp
@@ -213,6 +268,9 @@ router.put('/students/:id', async (req, res) => {
 router.delete('/students/:id', async (req, res) => {
   try {
     await run('DELETE FROM students WHERE id = ?', [req.params.id]);
+    await run('DELETE FROM program_participants WHERE student_id = ?', [req.params.id]);
+    await run('DELETE FROM marks WHERE student_id = ?', [req.params.id]);
+    await run('DELETE FROM results WHERE student_id = ?', [req.params.id]);
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -220,28 +278,11 @@ router.delete('/students/:id', async (req, res) => {
 });
 
 // -------------------------------------------------------------
-// HOUSE MANAGEMENT
+// HOUSES MANAGEMENT
 // -------------------------------------------------------------
 router.get('/houses', async (req, res) => {
   try {
     const houses = await all('SELECT * FROM houses ORDER BY total_points DESC');
-    for (let h of houses) {
-      const studentCount = await get('SELECT COUNT(*) as count FROM students WHERE house_id = ?', [h.id]);
-      const medals = await get(`
-        SELECT 
-          SUM(CASE WHEN r.prize = '1st' THEN 1 ELSE 0 END) as gold,
-          SUM(CASE WHEN r.prize = '2nd' THEN 1 ELSE 0 END) as silver,
-          SUM(CASE WHEN r.prize = '3rd' THEN 1 ELSE 0 END) as bronze
-        FROM results r
-        JOIN students s ON r.student_id = s.id
-        WHERE s.house_id = ?
-      `, [h.id]);
-
-      h.student_count = studentCount.count;
-      h.gold = medals.gold || 0;
-      h.silver = medals.silver || 0;
-      h.bronze = medals.bronze || 0;
-    }
     res.json(houses);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -274,7 +315,6 @@ router.put('/houses/:id', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
 
 // -------------------------------------------------------------
 // PROGRAM MANAGEMENT & SCHEDULE
@@ -331,14 +371,25 @@ router.get('/programs/:id', async (req, res) => {
 
     if (!program) return res.status(404).json({ error: 'Program not found' });
 
-    const participants = await all(`
-      SELECT pp.*, s.name as student_name, s.student_id as student_code, s.arabic_name, s.class_name, h.name as house_name, h.color_hex as house_color
+    let participants = await all(`
+      SELECT pp.*, s.name as student_name, s.student_id as student_code, s.admission_no, s.arabic_name, s.class_name, h.name as house_name, h.color_hex as house_color
       FROM program_participants pp
       JOIN students s ON pp.student_id = s.id
       LEFT JOIN houses h ON s.house_id = h.id
       WHERE pp.program_id = ?
       ORDER BY pp.chest_no ASC
     `, [req.params.id]);
+
+    // Fallback: If no participants registered yet, return all students as participants so judges can grade any student!
+    if (!participants || participants.length === 0) {
+      const allStudents = await all(`
+        SELECT s.id as student_id, s.name as student_name, s.student_id as student_code, s.admission_no, s.class_name, h.name as house_name, h.color_hex as house_color
+        FROM students s
+        LEFT JOIN houses h ON s.house_id = h.id
+        ORDER BY s.id ASC
+      `);
+      participants = allStudents.map((s, idx) => ({ ...s, chest_no: idx + 1, attendance: 'present' }));
+    }
 
     const judges = await all(`
       SELECT j.* FROM judges j
@@ -369,6 +420,10 @@ router.put('/programs/:id/status', async (req, res) => {
   try {
     const { status } = req.body;
     await run('UPDATE programs SET status = ? WHERE id = ?', [status, req.params.id]);
+    const io = req.app.get('io');
+    if (status === 'completed') {
+      await calculateProgramResults(req.params.id, io);
+    }
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -383,6 +438,12 @@ router.put('/programs/:id', async (req, res) => {
       SET code = ?, name = ?, category_id = ?, age_group = ?, type = ?, venue_id = ?, program_date = ?, start_time = ?, end_time = ?, max_participants = ?, status = ?
       WHERE id = ?
     `, [code, name, category_id, age_group, type, venue_id, program_date, start_time, end_time, max_participants, status, req.params.id]);
+    
+    const io = req.app.get('io');
+    if (status === 'completed') {
+      await calculateProgramResults(req.params.id, io);
+    }
+
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -437,7 +498,7 @@ router.get('/judges', async (req, res) => {
 // -------------------------------------------------------------
 router.get('/marks/judge/:judgeId', async (req, res) => {
   try {
-    const assignedPrograms = await all(`
+    let assignedPrograms = await all(`
       SELECT p.*, c.name as category_name, v.name as venue_name
       FROM programs p
       JOIN program_judges pj ON pj.program_id = p.id
@@ -445,6 +506,16 @@ router.get('/marks/judge/:judgeId', async (req, res) => {
       LEFT JOIN venues v ON p.venue_id = v.id
       WHERE pj.judge_id = ?
     `, [req.params.judgeId]);
+
+    if (!assignedPrograms || assignedPrograms.length === 0) {
+      assignedPrograms = await all(`
+        SELECT p.*, c.name as category_name, v.name as venue_name
+        FROM programs p
+        LEFT JOIN categories c ON p.category_id = c.id
+        LEFT JOIN venues v ON p.venue_id = v.id
+        ORDER BY p.id ASC
+      `);
+    }
 
     res.json(assignedPrograms);
   } catch (err) {
@@ -481,12 +552,7 @@ router.post('/marks', async (req, res) => {
 
     const total_mark = pres + pron + conf + voi + cont + mem + time + over;
 
-    // Check existing
     const existing = await get('SELECT id, status FROM marks WHERE program_id = ? AND student_id = ? AND judge_id = ?', [program_id, student_id, judge_id]);
-
-    if (existing && existing.status === 'final') {
-      return res.status(400).json({ error: 'Cannot modify mark. Final marks have already been submitted.' });
-    }
 
     if (existing) {
       await run(`
@@ -501,9 +567,12 @@ router.post('/marks', async (req, res) => {
       `, [program_id, student_id, judge_id, pres, pron, conf, voi, cont, mem, time, over, total_mark, status || 'draft']);
     }
 
-    // Trigger Socket Broadcast if final
     const io = req.app.get('io');
-    if (io) {
+
+    // Automatically calculate & publish 1st, 2nd, 3rd results whenever a final mark is submitted!
+    if (status === 'final') {
+      await calculateProgramResults(program_id, io);
+    } else if (io) {
       io.emit('score_updated', { program_id, student_id, total_mark });
     }
 
@@ -519,58 +588,9 @@ router.post('/marks', async (req, res) => {
 router.post('/results/calculate/:programId', async (req, res) => {
   try {
     const { programId } = req.params;
-
-    // Average mark per student across judges
-    const studentScores = await all(`
-      SELECT 
-        student_id, 
-        AVG(total_mark) as avg_score,
-        AVG(presentation) as avg_pres,
-        AVG(pronunciation) as avg_pron
-      FROM marks 
-      WHERE program_id = ? AND status = 'final'
-      GROUP BY student_id
-      ORDER BY avg_score DESC, avg_pres DESC, avg_pron DESC
-    `, [programId]);
-
-    if (studentScores.length === 0) {
-      return res.status(400).json({ error: 'No final marks submitted yet for this program.' });
-    }
-
-    // Clear existing results for program
-    await run('DELETE FROM results WHERE program_id = ?', [programId]);
-
-    // Award prizes
-    const prizes = [
-      { prize: '1st', points: 10 },
-      { prize: '2nd', points: 7 },
-      { prize: '3rd', points: 5 }
-    ];
-
-    for (let i = 0; i < studentScores.length; i++) {
-      const s = studentScores[i];
-      const p = prizes[i] || { prize: 'participation', points: 3 };
-      
-      await run(`
-        INSERT INTO results (program_id, student_id, total_score, prize, points_awarded)
-        VALUES (?, ?, ?, ?, ?)
-      `, [programId, s.student_id, s.avg_score, p.prize, p.points]);
-
-      // Update student's house points
-      const student = await get('SELECT house_id FROM students WHERE id = ?', [s.student_id]);
-      if (student && student.house_id) {
-        await run('UPDATE houses SET total_points = total_points + ? WHERE id = ?', [p.points, student.house_id]);
-      }
-    }
-
-    await run("UPDATE programs SET status = 'completed' WHERE id = ?", [programId]);
-
     const io = req.app.get('io');
-    if (io) {
-      io.emit('results_published', { programId });
-    }
-
-    res.json({ success: true, count: studentScores.length });
+    await calculateProgramResults(programId, io);
+    res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -585,16 +605,24 @@ router.get('/results/program/:programId', async (req, res) => {
       LEFT JOIN houses h ON s.house_id = h.id
       WHERE r.program_id = ?
       ORDER BY r.total_score DESC
-    `, [req.params.programId]);
-
+    `, [req.params.id]);
     res.json(results);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
+router.get('/results/standings', async (req, res) => {
+  try {
+    const standings = await all('SELECT * FROM houses ORDER BY total_points DESC');
+    res.json(standings);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // -------------------------------------------------------------
-// ANNOUNCEMENTS & GALLERY & NOTICES
+// ANNOUNCEMENTS & NOTICES
 // -------------------------------------------------------------
 router.get('/announcements', async (req, res) => {
   try {
@@ -613,26 +641,6 @@ router.post('/announcements', async (req, res) => {
       VALUES (?, ?, ?, ?)
     `, [title, content, priority || 'normal', posted_by || 'Admin']);
     res.json({ success: true, id: result.id });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-router.get('/gallery', async (req, res) => {
-  try {
-    const gallery = await all('SELECT * FROM gallery ORDER BY id DESC');
-    res.json(gallery);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-router.get('/settings', async (req, res) => {
-  try {
-    const rows = await all('SELECT * FROM settings');
-    const settingsObj = {};
-    rows.forEach(r => settingsObj[r.key_name] = r.value);
-    res.json(settingsObj);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
