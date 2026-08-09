@@ -22,8 +22,23 @@ export default function ProgramManagement() {
   const loadData = () => {
     fetch('/api/programs')
       .then(res => res.json())
-      .then(data => setPrograms(Array.isArray(data) ? data : []))
-      .catch(() => {});
+      .then(data => {
+        const backendItems = Array.isArray(data) ? data : [];
+        const customItems = JSON.parse(localStorage.getItem('milad_custom_programs') || '[]');
+        const deletedIds = JSON.parse(localStorage.getItem('milad_deleted_program_ids') || '[]');
+
+        const filteredBackend = backendItems.filter(p => !deletedIds.includes(String(p.id)));
+        const filteredCustom = customItems.filter(p => !deletedIds.includes(String(p.id)));
+
+        const merged = [...filteredCustom, ...filteredBackend];
+        const unique = Array.from(new Map(merged.map(p => [String(p.id || p.code), p])).values());
+        setPrograms(unique);
+        localStorage.setItem('milad_cached_programs', JSON.stringify(unique));
+      })
+      .catch(() => {
+        const cached = JSON.parse(localStorage.getItem('milad_cached_programs') || '[]');
+        setPrograms(cached);
+      });
 
     fetch('/api/categories')
       .then(res => res.json())
@@ -37,35 +52,77 @@ export default function ProgramManagement() {
 
   const handleSave = (e) => {
     e.preventDefault();
-    const method = formData.id ? 'PUT' : 'POST';
-    const url = formData.id ? `/api/programs/${formData.id}` : '/api/programs';
+    const isEdit = !!formData.id;
+    const progObj = {
+      ...formData,
+      id: formData.id || Date.now(),
+      code: formData.code || `PRG-${Date.now().toString().slice(-4)}`
+    };
+
+    // Save to local storage immediately
+    const customItems = JSON.parse(localStorage.getItem('milad_custom_programs') || '[]');
+    let updatedCustom;
+    if (isEdit) {
+      updatedCustom = customItems.map(p => String(p.id) === String(progObj.id) ? progObj : p);
+    } else {
+      updatedCustom = [progObj, ...customItems];
+    }
+    localStorage.setItem('milad_custom_programs', JSON.stringify(updatedCustom));
+
+    setPrograms(prev => {
+      const filtered = prev.filter(p => String(p.id) !== String(progObj.id));
+      return [progObj, ...filtered];
+    });
+
+    const method = isEdit ? 'PUT' : 'POST';
+    const url = isEdit ? `/api/programs/${formData.id}` : '/api/programs';
 
     fetch(url, {
       method,
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(formData)
+      body: JSON.stringify(progObj)
     })
       .then(res => res.json())
       .then(() => {
         setShowModal(false);
         setFormData({ id: null, code: '', name: '', category_id: 1, type: 'individual', venue_id: 1, program_date: '2026-08-15', start_time: '09:00', end_time: '10:30', max_participants: 15, status: 'pending' });
         loadData();
+      })
+      .catch(() => {
+        setShowModal(false);
+        setFormData({ id: null, code: '', name: '', category_id: 1, type: 'individual', venue_id: 1, program_date: '2026-08-15', start_time: '09:00', end_time: '10:30', max_participants: 15, status: 'pending' });
       });
   };
 
   const handleDelete = (id) => {
     if (window.confirm('Are you sure you want to delete this program?')) {
+      const deletedIds = JSON.parse(localStorage.getItem('milad_deleted_program_ids') || '[]');
+      if (!deletedIds.includes(String(id))) {
+        deletedIds.push(String(id));
+        localStorage.setItem('milad_deleted_program_ids', JSON.stringify(deletedIds));
+      }
+
+      const customItems = JSON.parse(localStorage.getItem('milad_custom_programs') || '[]');
+      const filteredCustom = customItems.filter(p => String(p.id) !== String(id));
+      localStorage.setItem('milad_custom_programs', JSON.stringify(filteredCustom));
+
+      setPrograms(prev => prev.filter(p => String(p.id) !== String(id)));
+
       fetch(`/api/programs/${id}`, { method: 'DELETE' })
-        .then(() => loadData());
+        .then(() => loadData())
+        .catch(() => {});
     }
   };
 
   const updateStatus = (id, newStatus) => {
+    setPrograms(prev => prev.map(p => String(p.id) === String(id) ? { ...p, status: newStatus } : p));
     fetch(`/api/programs/${id}/status`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status: newStatus })
-    }).then(() => loadData());
+    })
+      .then(() => loadData())
+      .catch(() => {});
   };
 
   return (

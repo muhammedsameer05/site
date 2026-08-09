@@ -32,8 +32,23 @@ export default function StudentManagement() {
   const loadData = () => {
     fetch('/api/students')
       .then(res => res.json())
-      .then(data => setStudents(Array.isArray(data) ? data : []))
-      .catch(() => {});
+      .then(data => {
+        const backendItems = Array.isArray(data) ? data : [];
+        const customItems = JSON.parse(localStorage.getItem('milad_custom_students') || '[]');
+        const deletedIds = JSON.parse(localStorage.getItem('milad_deleted_student_ids') || '[]');
+
+        const filteredBackend = backendItems.filter(s => !deletedIds.includes(String(s.id)));
+        const filteredCustom = customItems.filter(s => !deletedIds.includes(String(s.id)));
+
+        const merged = [...filteredCustom, ...filteredBackend];
+        const unique = Array.from(new Map(merged.map(s => [String(s.id || s.admission_no), s])).values());
+        setStudents(unique);
+        localStorage.setItem('milad_cached_students', JSON.stringify(unique));
+      })
+      .catch(() => {
+        const cached = JSON.parse(localStorage.getItem('milad_cached_students') || '[]');
+        setStudents(cached);
+      });
 
     fetch('/api/houses')
       .then(res => res.json())
@@ -47,21 +62,42 @@ export default function StudentManagement() {
 
   const handleSave = (e) => {
     e.preventDefault();
-    const method = formData.id ? 'PUT' : 'POST';
-    const url = formData.id ? `/api/students/${formData.id}` : '/api/students';
+    const isEdit = !!formData.id;
+    const studentObj = {
+      ...formData,
+      id: formData.id || Date.now(),
+      student_id: formData.student_id || `STU-${Date.now().toString().slice(-4)}`,
+      arabic_name: '',
+      division: 'A',
+      parent_name: '',
+      phone: '',
+      gender: 'male',
+      age: 10
+    };
+
+    // Save to local storage immediately
+    const customItems = JSON.parse(localStorage.getItem('milad_custom_students') || '[]');
+    let updatedCustom;
+    if (isEdit) {
+      updatedCustom = customItems.map(s => String(s.id) === String(studentObj.id) ? studentObj : s);
+    } else {
+      updatedCustom = [studentObj, ...customItems];
+    }
+    localStorage.setItem('milad_custom_students', JSON.stringify(updatedCustom));
+
+    // Also update UI state immediately
+    setStudents(prev => {
+      const filtered = prev.filter(s => String(s.id) !== String(studentObj.id));
+      return [studentObj, ...filtered];
+    });
+
+    const method = isEdit ? 'PUT' : 'POST';
+    const url = isEdit ? `/api/students/${formData.id}` : '/api/students';
 
     fetch(url, {
       method,
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        ...formData,
-        arabic_name: '',
-        division: 'A',
-        parent_name: '',
-        phone: '',
-        gender: 'male',
-        age: 10
-      })
+      body: JSON.stringify(studentObj)
     })
       .then(res => res.json())
       .then(() => {
@@ -69,13 +105,31 @@ export default function StudentManagement() {
         setSavedSuccess(true);
         setTimeout(() => setSavedSuccess(false), 3000);
         loadData();
+      })
+      .catch(() => {
+        setShowForm(false);
+        setSavedSuccess(true);
+        setTimeout(() => setSavedSuccess(false), 3000);
       });
   };
 
   const handleDelete = (id) => {
     if (window.confirm('Are you sure you want to delete this student profile?')) {
+      const deletedIds = JSON.parse(localStorage.getItem('milad_deleted_student_ids') || '[]');
+      if (!deletedIds.includes(String(id))) {
+        deletedIds.push(String(id));
+        localStorage.setItem('milad_deleted_student_ids', JSON.stringify(deletedIds));
+      }
+
+      const customItems = JSON.parse(localStorage.getItem('milad_custom_students') || '[]');
+      const filteredCustom = customItems.filter(s => String(s.id) !== String(id));
+      localStorage.setItem('milad_custom_students', JSON.stringify(filteredCustom));
+
+      setStudents(prev => prev.filter(s => String(s.id) !== String(id)));
+
       fetch(`/api/students/${id}`, { method: 'DELETE' })
-        .then(() => loadData());
+        .then(() => loadData())
+        .catch(() => {});
     }
   };
 

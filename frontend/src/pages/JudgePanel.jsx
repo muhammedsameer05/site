@@ -190,8 +190,21 @@ export default function JudgePanel() {
     if (selectedStudent.chest_no) updatedMap[selectedStudent.chest_no] = { ...bodyData, total_mark: calculateTotal() };
     if (selectedStudent.student_code) updatedMap[selectedStudent.student_code] = { ...bodyData, total_mark: calculateTotal() };
 
+    const fullMarkObj = { 
+      ...bodyData, 
+      total_mark: calculateTotal(),
+      student_name: selectedStudent.student_name,
+      student_code: selectedStudent.student_code,
+      house_name: selectedStudent.house_name,
+      house_color: selectedStudent.house_color
+    };
     setSubmittedMarksMap(updatedMap);
-    localStorage.setItem(`milad_marks_${selectedProgram.id}_${studentIdToSubmit}`, JSON.stringify({ ...bodyData, total_mark: calculateTotal() }));
+    localStorage.setItem(`milad_marks_${selectedProgram.id}_${studentIdToSubmit}`, JSON.stringify(fullMarkObj));
+
+    const allSavedMarks = JSON.parse(localStorage.getItem('milad_all_saved_marks') || '[]');
+    const filteredMarks = allSavedMarks.filter(m => !(String(m.program_id) === String(selectedProgram.id) && String(m.student_id) === String(studentIdToSubmit)));
+    filteredMarks.push(fullMarkObj);
+    localStorage.setItem('milad_all_saved_marks', JSON.stringify(filteredMarks));
 
     fetch('/api/marks', {
       method: 'POST',
