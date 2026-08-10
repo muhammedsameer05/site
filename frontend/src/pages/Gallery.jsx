@@ -416,6 +416,17 @@ export default function Gallery() {
               </div>
 
               <div>
+                <label className="block text-slate-300 font-semibold mb-1">Caption / Description (Optional)</label>
+                <textarea
+                  rows="2"
+                  value={formData.caption}
+                  onChange={e => setFormData({ ...formData, caption: e.target.value })}
+                  placeholder="Enter photo description or caption..."
+                  className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white"
+                />
+              </div>
+
+              <div>
                 <label className="block text-slate-300 font-semibold mb-1">Upload Photo File</label>
                 <input
                   type="file"
