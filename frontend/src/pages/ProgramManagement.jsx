@@ -86,14 +86,19 @@ export default function ProgramManagement() {
       },
       body: JSON.stringify(formData)
     })
-      .then(res => res.json())
+      .then(async (res) => {
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          throw new Error(data.error || 'Failed to save program');
+        }
+        return data;
+      })
       .then(() => {
         setShowModal(false);
         loadData();
       })
-      .catch(() => {
-        setShowModal(false);
-        loadData();
+      .catch((err) => {
+        alert(err.message || 'Error saving program');
       });
   };
 

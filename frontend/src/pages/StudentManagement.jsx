@@ -143,7 +143,13 @@ export default function StudentManagement() {
       },
       body: JSON.stringify(studentObj)
     })
-      .then(res => res.json())
+      .then(async (res) => {
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          throw new Error(data.error || 'Failed to save student profile');
+        }
+        return data;
+      })
       .then(() => {
         setSubmitting(false);
         setShowForm(false);
@@ -151,12 +157,9 @@ export default function StudentManagement() {
         setTimeout(() => setSavedSuccess(false), 3000);
         loadData();
       })
-      .catch(() => {
+      .catch((err) => {
         setSubmitting(false);
-        setShowForm(false);
-        setSavedSuccess(true);
-        setTimeout(() => setSavedSuccess(false), 3000);
-        loadData();
+        alert(err.message || 'Error saving student profile');
       });
   };
 
