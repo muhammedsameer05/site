@@ -30,27 +30,27 @@ export default function StudentManagement() {
   });
 
   const loadData = () => {
-    fetch('/api/students')
+    localStorage.removeItem('milad_custom_students');
+    localStorage.removeItem('milad_deleted_student_ids');
+
+    fetch('/api/students', { cache: 'no-store' })
       .then(res => res.json())
       .then(data => {
         const backendItems = Array.isArray(data) ? data : [];
-        const customItems = JSON.parse(localStorage.getItem('milad_custom_students') || '[]');
-        const deletedIds = JSON.parse(localStorage.getItem('milad_deleted_student_ids') || '[]');
-
-        const filteredBackend = backendItems.filter(s => !deletedIds.includes(String(s.id)));
-        const filteredCustom = customItems.filter(s => !deletedIds.includes(String(s.id)));
-
-        const merged = [...filteredCustom, ...filteredBackend];
-        const unique = Array.from(new Map(merged.map(s => [String(s.id || s.admission_no), s])).values());
-        setStudents(unique);
-        localStorage.setItem('milad_cached_students', JSON.stringify(unique));
+        const uniqueMap = new Map();
+        backendItems.forEach(s => {
+          const key = (s.admission_no || s.student_id || s.name || String(s.id)).toString().trim().toLowerCase();
+          if (!uniqueMap.has(key)) {
+            uniqueMap.set(key, s);
+          }
+        });
+        setStudents(Array.from(uniqueMap.values()));
       })
       .catch(() => {
-        const cached = JSON.parse(localStorage.getItem('milad_cached_students') || '[]');
-        setStudents(cached);
+        setStudents([]);
       });
 
-    fetch('/api/houses')
+    fetch('/api/houses', { cache: 'no-store' })
       .then(res => res.json())
       .then(data => setHouses(Array.isArray(data) ? data : []))
       .catch(() => {});
@@ -65,7 +65,6 @@ export default function StudentManagement() {
     const isEdit = !!formData.id;
     const studentObj = {
       ...formData,
-      id: formData.id || Date.now(),
       student_id: formData.student_id || `STU-${Date.now().toString().slice(-4)}`,
       arabic_name: '',
       division: 'A',
@@ -74,22 +73,6 @@ export default function StudentManagement() {
       gender: 'male',
       age: 10
     };
-
-    // Save to local storage immediately
-    const customItems = JSON.parse(localStorage.getItem('milad_custom_students') || '[]');
-    let updatedCustom;
-    if (isEdit) {
-      updatedCustom = customItems.map(s => String(s.id) === String(studentObj.id) ? studentObj : s);
-    } else {
-      updatedCustom = [studentObj, ...customItems];
-    }
-    localStorage.setItem('milad_custom_students', JSON.stringify(updatedCustom));
-
-    // Also update UI state immediately
-    setStudents(prev => {
-      const filtered = prev.filter(s => String(s.id) !== String(studentObj.id));
-      return [studentObj, ...filtered];
-    });
 
     const method = isEdit ? 'PUT' : 'POST';
     const url = isEdit ? `/api/students/${formData.id}` : '/api/students';
@@ -110,26 +93,17 @@ export default function StudentManagement() {
         setShowForm(false);
         setSavedSuccess(true);
         setTimeout(() => setSavedSuccess(false), 3000);
+        loadData();
       });
   };
 
   const handleDelete = (id) => {
     if (window.confirm('Are you sure you want to delete this student profile?')) {
-      const deletedIds = JSON.parse(localStorage.getItem('milad_deleted_student_ids') || '[]');
-      if (!deletedIds.includes(String(id))) {
-        deletedIds.push(String(id));
-        localStorage.setItem('milad_deleted_student_ids', JSON.stringify(deletedIds));
-      }
-
-      const customItems = JSON.parse(localStorage.getItem('milad_custom_students') || '[]');
-      const filteredCustom = customItems.filter(s => String(s.id) !== String(id));
-      localStorage.setItem('milad_custom_students', JSON.stringify(filteredCustom));
-
       setStudents(prev => prev.filter(s => String(s.id) !== String(id)));
 
       fetch(`/api/students/${id}`, { method: 'DELETE' })
         .then(() => loadData())
-        .catch(() => {});
+        .catch(() => loadData());
     }
   };
 

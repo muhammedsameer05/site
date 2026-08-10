@@ -168,23 +168,21 @@ export default function ProgramManagement() {
       third_student_id: existing3rd?.student_id || name3rd
     });
 
-    fetch('/api/students')
+    fetch('/api/students', { cache: 'no-store' })
       .then(res => res.json())
       .then(data => {
         const backendItems = Array.isArray(data) ? data : [];
-        const customItems = JSON.parse(localStorage.getItem('milad_custom_students') || '[]');
-        const deletedIds = JSON.parse(localStorage.getItem('milad_deleted_student_ids') || '[]');
-
-        const filteredBackend = backendItems.filter(s => !deletedIds.includes(String(s.id)));
-        const filteredCustom = customItems.filter(s => !deletedIds.includes(String(s.id)));
-
-        const merged = [...filteredCustom, ...filteredBackend];
-        const unique = Array.from(new Map(merged.map(s => [String(s.id || s.admission_no), s])).values());
-        setAllStudentsList(unique);
+        const uniqueMap = new Map();
+        backendItems.forEach(s => {
+          const key = (s.admission_no || s.student_id || s.name || String(s.id)).toString().trim().toLowerCase();
+          if (!uniqueMap.has(key)) {
+            uniqueMap.set(key, s);
+          }
+        });
+        setAllStudentsList(Array.from(uniqueMap.values()));
       })
       .catch(() => {
-        const cached = JSON.parse(localStorage.getItem('milad_cached_students') || '[]');
-        setAllStudentsList(cached);
+        setAllStudentsList([]);
       });
 
     setShowWinnersModal(true);
