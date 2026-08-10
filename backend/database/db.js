@@ -212,14 +212,12 @@ async function initDb() {
     uploaded_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
 
-  const galleryCount = await get('SELECT COUNT(*) as count FROM gallery');
-  if (!galleryCount || galleryCount.count === 0) {
-    await run(`INSERT INTO gallery (album_name, title, media_type, url, caption) VALUES
-      ('Milad 2026', 'വൈബ് ഓഫ് മദീന 2K26 - Official Festival Banner', 'photo', '/milad-logo.jpg', 'Jamalulleyli Madrasa Payyanur'),
-      ('Stage Highlights', 'Qiraat Recitation Competition Stage', 'photo', 'https://images.unsplash.com/photo-1542816417-0983c9c9ad53?auto=format&fit=crop&w=800&q=80', 'Inaugural prayer session led by Principal Usthad'),
-      ('Cultural Events', 'Duff & Mawlid Group Performance', 'photo', 'https://images.unsplash.com/photo-1584551246679-0daf3d275d0f?auto=format&fit=crop&w=800&q=80', 'Senior students presenting traditional Duff song')
-    `);
-  }
+  // Unconditionally purge old demo unsplash photos from database
+  await run(`
+    DELETE FROM gallery 
+    WHERE url LIKE '%unsplash.com%' 
+       OR title IN ('Opening Ceremony & Qiraat Recitation', 'Duff Group Performance', 'Qiraat Recitation Competition Stage', 'Duff & Mawlid Group Performance')
+  `);
 
   await run(`CREATE TABLE IF NOT EXISTS settings (
     key_name TEXT PRIMARY KEY,

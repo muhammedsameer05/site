@@ -91,11 +91,6 @@ INSERT INTO `announcements` (`title`, `content`, `priority`, `posted_by`) VALUES
 ('Welcome to Milad-un-Nabi Festival 2026', 'We are delighted to announce the grand inauguration of Madrasa Milad Festival 2026. All programs start at 9:00 AM sharp at Stage 1.', 'high', 'Madrasa Committee'),
 ('Live Leaderboard Active', 'Parents and guests can watch live real-time scores and house standings on the digital screens or on our official website portal.', 'normal', 'IT Cell');
 
--- Gallery
-INSERT INTO `gallery` (`album_name`, `title`, `media_type`, `url`, `caption`) VALUES
-('Milad 2026 Highlights', 'Opening Ceremony & Qiraat Recitation', 'photo', 'https://images.unsplash.com/photo-1542816417-0983c9c9ad53?auto=format&fit=crop&w=800&q=80', 'Inaugural prayer session led by Principal Usthad'),
-('Stage 1 Events', 'Duff Group Performance', 'photo', 'https://images.unsplash.com/photo-1584551246679-0daf3d275d0f?auto=format&fit=crop&w=800&q=80', 'Senior students presenting traditional Duff song');
-
 -- Settings
 INSERT INTO `settings` (`key_name`, `value`) VALUES
 ('school_name', 'Madrasat-ul-Huda Islamic Academy'),
