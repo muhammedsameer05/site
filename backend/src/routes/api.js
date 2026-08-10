@@ -854,7 +854,11 @@ router.put('/gallery/:id', async (req, res) => {
 
 router.delete('/gallery/:id', async (req, res) => {
   try {
-    await run('DELETE FROM gallery WHERE id = ?', [req.params.id]);
+    const { id } = req.params;
+    await run(`
+      DELETE FROM gallery 
+      WHERE id = ? OR CAST(id AS TEXT) = CAST(? AS TEXT) OR title = ? OR url = ?
+    `, [id, id, id, id]);
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });

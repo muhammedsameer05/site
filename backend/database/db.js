@@ -212,6 +212,12 @@ async function initDb() {
     uploaded_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
 
+  // Purge legacy demo photos so all devices show clean live uploads
+  await run(`
+    DELETE FROM gallery 
+    WHERE title IN ('Opening Ceremony & Qiraat Recitation', 'Duff Group Performance')
+  `);
+
   await run(`CREATE TABLE IF NOT EXISTS settings (
     key_name TEXT PRIMARY KEY,
     value TEXT NOT NULL
