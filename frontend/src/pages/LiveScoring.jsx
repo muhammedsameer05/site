@@ -458,23 +458,86 @@ export default function LiveScoring() {
 
           {/* Current House Ranks */}
           <div className="glass-panel p-5 rounded-3xl border border-slate-200 bg-white shadow-sm space-y-3">
-            <h3 className="text-sm font-black text-slate-900 flex items-center space-x-1.5">
-              <Sparkles className="w-4 h-4 text-emerald-600" />
-              <span>Current Live House Standings</span>
+            <h3 className="text-sm font-black text-slate-900 flex items-center justify-between">
+              <span className="flex items-center space-x-1.5">
+                <Sparkles className="w-4 h-4 text-emerald-600" />
+                <span>Current Live House Standings</span>
+              </span>
+              <span className="text-[10px] text-emerald-700 font-mono font-extrabold uppercase">Live Desk</span>
             </h3>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {houses.map(h => (
                 <div 
                   key={h.id}
-                  className="p-3.5 rounded-2xl border flex flex-col justify-between bg-slate-50"
+                  className="p-4 rounded-2xl border flex flex-col justify-between bg-slate-50 space-y-3"
                   style={{ borderColor: h.color_hex }}
                 >
-                  <span className="text-xs font-black" style={{ color: h.color_hex }}>{h.name}</span>
-                  <div className="mt-2 flex items-baseline justify-between">
-                    <span className="text-2xl font-black text-slate-900">{h.total_points || 0}</span>
-                    <span className="text-[10px] text-slate-500 font-bold uppercase font-mono">Points</span>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-black" style={{ color: h.color_hex }}>{h.name}</span>
+                    <span className="text-2xl font-black text-slate-900 font-mono">{h.total_points || 0} Pts</span>
                   </div>
+
+                  {/* 1-Click Live Adjustment Buttons */}
+                  <div className="grid grid-cols-4 gap-1.5 pt-1">
+                    <button
+                      onClick={async () => {
+                        await fetch(`/api/houses/${h.id}`, {
+                          method: 'PUT',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ total_points: (h.total_points || 0) + 10 })
+                        });
+                        loadData();
+                      }}
+                      className="py-1 px-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-black text-[11px] transition text-center shadow-xs"
+                      title="Add 10 Points"
+                    >
+                      +10
+                    </button>
+                    <button
+                      onClick={async () => {
+                        await fetch(`/api/houses/${h.id}`, {
+                          method: 'PUT',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ total_points: (h.total_points || 0) + 5 })
+                        });
+                        loadData();
+                      }}
+                      className="py-1 px-2 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white font-black text-[11px] transition text-center shadow-xs"
+                      title="Add 5 Points"
+                    >
+                      +5
+                    </button>
+                    <button
+                      onClick={async () => {
+                        await fetch(`/api/houses/${h.id}`, {
+                          method: 'PUT',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ total_points: (h.total_points || 0) + 1 })
+                        });
+                        loadData();
+                      }}
+                      className="py-1 px-2 rounded-lg bg-teal-600 hover:bg-teal-700 text-white font-black text-[11px] transition text-center shadow-xs"
+                      title="Add 1 Point"
+                    >
+                      +1
+                    </button>
+                    <button
+                      onClick={async () => {
+                        await fetch(`/api/houses/${h.id}`, {
+                          method: 'PUT',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ total_points: Math.max(0, (h.total_points || 0) - 5) })
+                        });
+                        loadData();
+                      }}
+                      className="py-1 px-2 rounded-lg bg-rose-500 hover:bg-rose-600 text-white font-black text-[11px] transition text-center shadow-xs"
+                      title="Deduct 5 Points"
+                    >
+                      -5
+                    </button>
+                  </div>
+
                 </div>
               ))}
             </div>
