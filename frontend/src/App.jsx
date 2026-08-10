@@ -58,25 +58,6 @@ function MainContent() {
       }
     }
 
-    // Student Portal Guard
-    if (role === 'student') {
-      const studentForbiddenTabs = ['dashboard', 'houses', 'programs', 'reports', 'settings'];
-      if (studentForbiddenTabs.includes(activeTab)) {
-        return (
-          <div className="glass-panel p-8 text-center rounded-3xl border border-blue-500/40 max-w-lg mx-auto my-12 bg-slate-900 shadow-2xl">
-            <h3 className="text-xl font-bold text-blue-400 mb-2">Access Restricted (Student Portal)</h3>
-            <p className="text-xs text-slate-300 mb-6">Students are restricted to Student Details entry & certificates view.</p>
-            <button
-              onClick={() => setActiveTab('students')}
-              className="px-6 py-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs"
-            >
-              Go to My Student Details
-            </button>
-          </div>
-        );
-      }
-    }
-
     switch (activeTab) {
       case 'home':
         return <HomePage onNavigate={setActiveTab} />;
