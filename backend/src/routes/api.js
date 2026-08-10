@@ -447,13 +447,34 @@ router.post('/houses', async (req, res) => {
 router.put('/houses/:id', async (req, res) => {
   try {
     const { name, code, color_hex, motto, captain_name, total_points } = req.body;
+    const existing = await get('SELECT * FROM houses WHERE id = ? OR CAST(id AS TEXT) = CAST(? AS TEXT)', [req.params.id, req.params.id]);
+    if (!existing) {
+      return res.status(404).json({ error: 'House not found' });
+    }
+
+    const updatedName = (name !== undefined && name !== null) ? name : existing.name;
+    const updatedCode = (code !== undefined && code !== null) ? code : existing.code;
+    const updatedColor = (color_hex !== undefined && color_hex !== null) ? color_hex : existing.color_hex;
+    const updatedMotto = (motto !== undefined && motto !== null) ? motto : existing.motto;
+    const updatedCaptain = (captain_name !== undefined && captain_name !== null) ? captain_name : existing.captain_name;
+    const updatedPoints = (total_points !== undefined && total_points !== null) ? Number(total_points) : existing.total_points;
+
     await run(`
       UPDATE houses 
-      SET name = ?, code = ?, color_hex = ?, motto = ?, captain_name = ?, total_points = COALESCE(?, total_points)
-      WHERE id = ?
-    `, [name, code, color_hex, motto, captain_name, total_points, req.params.id]);
-    res.json({ success: true });
+      SET name = ?, code = ?, color_hex = ?, motto = ?, captain_name = ?, total_points = ?
+      WHERE id = ? OR CAST(id AS TEXT) = CAST(? AS TEXT)
+    `, [updatedName, updatedCode, updatedColor, updatedMotto, updatedCaptain, updatedPoints, req.params.id, req.params.id]);
+
+    const io = req.app.get('io');
+    if (io) {
+      io.emit('score_updated', { houseId: req.params.id, total_points: updatedPoints });
+      io.emit('results_published', { houseId: req.params.id });
+    }
+
+    triggerPersistenceSync();
+    res.json({ success: true, total_points: updatedPoints });
   } catch (err) {
+    console.error('[HOUSE UPDATE ERROR]', err);
     res.status(500).json({ error: err.message });
   }
 });
