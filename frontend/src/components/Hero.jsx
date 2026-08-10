@@ -67,7 +67,7 @@ export default function Hero({ onNavigate }) {
           <div className="text-xs font-bold text-amber-400 uppercase tracking-widest mb-3">
             Grand Festival Countdown
           </div>
-          <CountdownTimer targetDate="2026-08-15T09:00:00" />
+          <CountdownTimer targetDate={localStorage.getItem('milad_cooldown_target_date') || '2026-08-15T09:00:00'} />
         </div>
 
         {/* Action Buttons */}
