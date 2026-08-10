@@ -39,9 +39,10 @@ async function calculateProgramResults(programId, io) {
       { prize: '3rd', points: 5 }
     ];
 
-    for (let i = 0; i < studentScores.length; i++) {
+    for (let i = 0; i < Math.min(3, studentScores.length); i++) {
       const sScore = studentScores[i];
-      const p = prizes[i] || { prize: 'participation', points: 3 };
+      const p = prizes[i];
+      if (!p) continue;
       
       // Resolve exact student record from database
       const studentObj = await get(`
@@ -406,11 +407,12 @@ async function recalculateAllHousePoints() {
         r.student_id = s.admission_no OR
         s.name LIKE r.student_id
       )
+      WHERE r.prize IN ('1st', '2nd', '3rd')
     `);
 
     for (const r of resultsWithHouse) {
       if (r.house_id) {
-        const pts = Number(r.points_awarded) || (r.prize === '1st' ? 10 : r.prize === '2nd' ? 7 : r.prize === '3rd' ? 5 : 0);
+        const pts = r.prize === '1st' ? 10 : r.prize === '2nd' ? 7 : r.prize === '3rd' ? 5 : 0;
         await run('UPDATE houses SET total_points = total_points + ? WHERE id = ? OR CAST(id AS TEXT) = CAST(? AS TEXT)', [pts, r.house_id, r.house_id]);
       }
     }

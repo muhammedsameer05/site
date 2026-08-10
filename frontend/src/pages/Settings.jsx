@@ -9,7 +9,7 @@ export default function Settings() {
     point_1st: '10',
     point_2nd: '7',
     point_3rd: '5',
-    point_participation: '3',
+    point_participation: '0',
     theme_primary: '#065F46',
     cooldown_target: localStorage.getItem('milad_cooldown_target_date') || '2026-08-15T09:00'
   });
