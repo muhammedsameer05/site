@@ -433,10 +433,10 @@ export default function StudentManagement() {
                 </div>
               </div>
 
-              {/* Row 2: Category & House */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Row 2: Category, Class & House */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-slate-300 font-bold mb-1.5">Category (Category)</label>
+                  <label className="block text-slate-300 font-bold mb-1.5">Category</label>
                   <select
                     value={formData.category_name}
                     onChange={e => setFormData({ ...formData, category_name: e.target.value })}
@@ -449,7 +449,19 @@ export default function StudentManagement() {
                 </div>
 
                 <div>
-                  <label className="block text-slate-300 font-bold mb-1.5">House (House Allocation)</label>
+                  <label className="block text-slate-300 font-bold mb-1.5">Class</label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.class_name}
+                    onChange={e => setFormData({ ...formData, class_name: e.target.value })}
+                    placeholder="Class 6"
+                    className="w-full bg-slate-950 border border-slate-700/80 rounded-xl p-3 text-white font-bold focus:border-emerald-500 focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-slate-300 font-bold mb-1.5">House</label>
                   <select
                     value={formData.house_id}
                     onChange={e => setFormData({ ...formData, house_id: e.target.value })}
@@ -460,43 +472,6 @@ export default function StudentManagement() {
                     ))}
                   </select>
                 </div>
-              </div>
-
-              {/* Row 3: Parent Name & Phone */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-slate-300 font-bold mb-1.5">Parent's Name (Parent Name)</label>
-                  <input
-                    type="text"
-                    value={formData.parent_name}
-                    onChange={e => setFormData({ ...formData, parent_name: e.target.value })}
-                    placeholder="e.g. അബ്ദുള്ള കെ"
-                    className="w-full bg-slate-950 border border-slate-700/80 rounded-xl p-3 text-white font-bold focus:border-emerald-500 focus:outline-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-slate-300 font-bold mb-1.5">Phone Number (Phone)</label>
-                  <input
-                    type="text"
-                    value={formData.phone}
-                    onChange={e => setFormData({ ...formData, phone: e.target.value })}
-                    placeholder="e.g. 9846001122"
-                    className="w-full bg-slate-950 border border-slate-700/80 rounded-xl p-3 text-white font-bold focus:border-emerald-500 focus:outline-none"
-                  />
-                </div>
-              </div>
-
-              {/* Row 4: Photo URL Link */}
-              <div>
-                <label className="block text-slate-300 font-bold mb-1.5">Photo URL Link (Photo URL)</label>
-                <input
-                  type="text"
-                  value={formData.photo}
-                  onChange={e => setFormData({ ...formData, photo: e.target.value })}
-                  placeholder="https://images.unsplash.com/photo-1544717305-2782549b5136..."
-                  className="w-full bg-slate-950 border border-slate-700/80 rounded-xl p-3 text-white font-mono focus:border-emerald-500 focus:outline-none"
-                />
               </div>
 
               {/* Contest Items Participating (Registered Items) */}
