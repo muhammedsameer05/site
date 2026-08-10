@@ -18,7 +18,6 @@ export default function Navbar({ activeTab, setActiveTab, onOpenSearch }) {
     { id: 'students', label: t('students'), icon: User, roles: ['all'] },
     { id: 'programs', label: t('programs'), icon: Calendar, roles: ['all'] },
     { id: 'timetable', label: t('timetable'), icon: Calendar, roles: ['all'] },
-    { id: 'live-scoring', label: 'Live Scoring Panel', icon: Trophy, roles: ['all'] },
     { id: 'results', label: t('results'), icon: Trophy, roles: ['all'] },
     { id: 'gallery', label: t('gallery'), icon: Sparkles, roles: ['all'] },
     { id: 'dashboard', label: 'Overview', icon: Layers, roles: ['super_admin', 'admin', 'stage_coordinator'] },
@@ -29,7 +28,7 @@ export default function Navbar({ activeTab, setActiveTab, onOpenSearch }) {
 
   const visibleNav = navItems.filter(item => {
     if (role === 'public') {
-      return ['home', 'students', 'programs', 'timetable', 'live-scoring', 'results', 'gallery'].includes(item.id);
+      return ['home', 'students', 'programs', 'timetable', 'results', 'gallery'].includes(item.id);
     }
     return item.roles.includes('all') || item.roles.includes(role);
   });
