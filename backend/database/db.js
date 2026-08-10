@@ -278,6 +278,14 @@ async function initDb() {
   const persistence = require('./persistence');
   await persistence.restoreFromDatabaseSnapshot({ run, get, all });
 
+  // Automatically purge legacy sample demo students so deleted demo data disappears immediately
+  try {
+    await run("DELETE FROM students WHERE admission_no LIKE 'ADM-2024-%' OR name IN ('Muhammed Danish', 'Ahmad Zayan', 'Fathima Zahra', 'Aisha Raihana', 'Omar Abdullah')");
+    await run("DELETE FROM program_participants WHERE student_id IN (1,2,3,4,5)");
+    await run("DELETE FROM results WHERE student_id IN (1,2,3,4,5)");
+    await persistence.syncDatabaseSnapshot({ run, get, all });
+  } catch (e) {}
+
   console.log('[DB] Database initialized safely without data loss! Archiving & Audit Logs ready.');
 }
 
