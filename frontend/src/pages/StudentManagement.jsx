@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  User, Plus, Search, QrCode, Edit, Trash2, CheckCircle, Save, X
+  User, Plus, Search, Award, Edit, Trash2, CheckCircle, Save, X
 } from 'lucide-react';
 import QRCodeModal from '../components/QRCodeModal';
 import { useAuth } from '../context/AuthContext';
@@ -181,14 +181,14 @@ export default function StudentManagement() {
           <div className="flex items-center justify-between border-b border-slate-200 pb-4 mb-6">
             <div>
               <h1 className="text-2xl font-black emerald-gradient-text">Student Profile Portal</h1>
-              <p className="text-xs text-slate-500 font-mono font-bold">Manage student details & view official Milad QR badge</p>
+              <p className="text-xs text-slate-500 font-mono font-bold">Manage student details & view official Milad ID badge</p>
             </div>
             <button
               onClick={() => setQrStudent(currentStudent)}
               className="flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow"
             >
-              <QrCode className="w-4 h-4" />
-              <span>View QR Badge</span>
+              <Award className="w-4 h-4" />
+              <span>View ID Badge</span>
             </button>
           </div>
 
@@ -357,13 +357,6 @@ export default function StudentManagement() {
                     </span>
                   </td>
                   <td className="p-4 text-right space-x-2">
-                    <button
-                      onClick={() => setQrStudent(s)}
-                      className="p-1.5 rounded-lg bg-emerald-100 text-emerald-800 border border-emerald-300 hover:bg-emerald-200 transition"
-                      title="Generate QR ID Card"
-                    >
-                      <QrCode className="w-4 h-4" />
-                    </button>
                     {isAdmin && (
                       <>
                         <button
