@@ -267,109 +267,106 @@ export default function ProgramManagement() {
       </div>
 
       {/* Program Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         {programs.map((p) => (
-          <div key={p.id} className="glass-panel p-5 rounded-2xl border border-slate-800 flex flex-col justify-between space-y-4 hover:border-amber-400/40 transition relative">
+          <div key={p.id} className="glass-panel p-5 rounded-2xl border border-slate-800/90 flex flex-col justify-between space-y-4 hover:border-amber-400/40 transition shadow-lg h-full">
             
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase ${
-                  p.status === 'running' 
-                    ? 'bg-amber-500/20 text-amber-400 border border-amber-400/40 animate-pulse'
-                    : p.status === 'completed'
-                    ? 'bg-emerald-950 text-emerald-300 border border-emerald-500/40'
-                    : 'bg-slate-800 text-slate-400'
-                }`}>
-                  {p.status}
-                </span>
+            <div className="flex flex-col justify-between h-full">
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-md bg-slate-900/90 text-emerald-400 border border-emerald-500/30">
+                    {p.category_name || 'Category'} • {p.type || 'individual'}
+                  </span>
 
-                <div className="flex items-center space-x-2">
-                  <button
-                    onClick={() => {
-                      setFormData({
-                        id: p.id,
-                        code: p.code || '',
-                        name: p.name,
-                        category_id: p.category_id || 1,
-                        type: p.type || 'individual',
-                        venue_id: p.venue_id || 1,
-                        program_date: p.program_date || '2026-08-15',
-                        start_time: p.start_time || '09:00',
-                        end_time: p.end_time || '10:30',
-                        max_participants: p.max_participants || 15,
-                        status: p.status || 'pending'
-                      });
-                      setShowModal(true);
-                    }}
-                    className="p-1.5 rounded bg-slate-800 text-amber-400 hover:bg-slate-700 transition"
-                    title="Edit Program"
-                  >
-                    <Edit className="w-3.5 h-3.5" />
-                  </button>
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={() => {
+                        setFormData({
+                          id: p.id,
+                          code: p.code || '',
+                          name: p.name,
+                          category_id: p.category_id || 1,
+                          type: p.type || 'individual',
+                          venue_id: p.venue_id || 1,
+                          program_date: p.program_date || '2026-08-15',
+                          start_time: p.start_time || '09:00',
+                          end_time: p.end_time || '10:30',
+                          max_participants: p.max_participants || 15,
+                          status: p.status || 'pending'
+                        });
+                        setShowModal(true);
+                      }}
+                      className="p-1.5 rounded-lg bg-slate-800 text-amber-400 hover:bg-slate-700 transition"
+                      title="Edit Program"
+                    >
+                      <Edit className="w-3.5 h-3.5" />
+                    </button>
 
-                  <button
-                    onClick={() => handleDelete(p.id)}
-                    className="p-1.5 rounded bg-red-950/60 text-red-400 hover:bg-red-900 transition"
-                    title="Delete Program"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              </div>
-
-              <h3 className="text-lg font-bold text-white mb-1">{p.name}</h3>
-              <p className="text-xs text-emerald-400 font-semibold mb-3">
-                {p.category_name || 'Category'} | <span className="capitalize font-bold text-amber-300">{p.type || 'individual'}</span>
-              </p>
-
-              <div className="space-y-1 text-xs text-slate-400 font-mono border-t border-slate-800/80 pt-3 mb-3">
-                <div className="flex items-center space-x-2">
-                  <Clock className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                  <span>{p.start_time || '09:00'} - {p.end_time || '10:30'}</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Users className="w-3.5 h-3.5 text-blue-400 shrink-0" />
-                  <span>{p.participant_count || 0} / {p.max_participants || 20} Participants</span>
-                </div>
-              </div>
-
-              {/* Add 1st, 2nd, 3rd Winners Button */}
-              <button
-                onClick={() => handleOpenWinnersModal(p)}
-                className="w-full mb-3 py-2 px-3 rounded-xl bg-gradient-to-r from-amber-500/20 to-amber-600/30 hover:from-amber-500/30 hover:to-amber-600/40 text-amber-300 border border-amber-400/50 text-xs font-bold flex items-center justify-center space-x-2 transition shadow-sm"
-              >
-                <Trophy className="w-4 h-4 text-amber-400" />
-                <span>🏆 Add / Edit 1st, 2nd, 3rd Winners</span>
-              </button>
-
-              {/* Winners Podium Display */}
-              {p.winners && p.winners.length > 0 && (
-                <div className="p-3 rounded-xl bg-slate-900/90 border border-amber-400/40 space-y-2">
-                  <div className="flex items-center space-x-1.5 text-[10px] font-bold uppercase tracking-widest text-amber-400 border-b border-slate-800 pb-1.5">
-                    <Award className="w-3.5 h-3.5 text-amber-400" />
-                    <span>Official Winners Podium</span>
+                    <button
+                      onClick={() => handleDelete(p.id)}
+                      className="p-1.5 rounded-lg bg-red-950/60 text-red-400 hover:bg-red-900 transition"
+                      title="Delete Program"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
                   </div>
-                  {p.winners.map((w, idx) => (
-                    <div key={idx} className="flex items-center justify-between text-xs">
-                      <div className="flex items-center space-x-2">
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase ${
-                          w.prize === '1st' ? 'bg-amber-500 text-slate-950 shadow' :
-                          w.prize === '2nd' ? 'bg-slate-300 text-slate-950 shadow' :
-                          'bg-amber-700 text-white shadow'
-                        }`}>
-                          {w.prize === '1st' ? '🥇 1st' : w.prize === '2nd' ? '🥈 2nd' : '🥉 3rd'}
-                        </span>
-                        <span className="text-white font-bold">{w.student_name}</span>
-                        <span className="text-[10px] font-bold px-1.5 py-0.2 rounded border" style={{ color: w.house_color || '#10b981', borderColor: `${w.house_color || '#10b981'}80` }}>
-                          {w.house_name}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
                 </div>
-              )}
 
-            </div>
+                <h3 className="text-lg font-extrabold text-white mb-1.5">{p.name}</h3>
+
+                <div className="space-y-1 text-xs text-slate-400 font-mono border-t border-slate-800/80 pt-3 mb-3">
+                  <div className="flex items-center space-x-2">
+                    <Clock className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                    <span>{p.start_time || '09:00'} - {p.end_time || '10:30'}</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Users className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+                    <span>{p.participant_count || 0} / {p.max_participants || 20} Participants</span>
+                  </div>
+                </div>
+
+                {/* Add 1st, 2nd, 3rd Winners Button */}
+                <button
+                  onClick={() => handleOpenWinnersModal(p)}
+                  className="w-full mb-3 py-2 px-3 rounded-xl bg-gradient-to-r from-amber-500/20 to-amber-600/30 hover:from-amber-500/30 hover:to-amber-600/40 text-amber-300 border border-amber-400/50 text-xs font-bold flex items-center justify-center space-x-2 transition shadow-sm"
+                >
+                  <Trophy className="w-4 h-4 text-amber-400" />
+                  <span>🏆 Add / Edit 1st, 2nd, 3rd Winners</span>
+                </button>
+
+                {/* Winners Podium Display or Clean Placeholder */}
+                {p.winners && p.winners.length > 0 ? (
+                  <div className="p-3.5 rounded-xl bg-gradient-to-b from-slate-900/90 to-slate-950/90 border border-amber-400/30 shadow-md space-y-2">
+                    <div className="flex items-center space-x-1.5 text-[10px] font-black uppercase tracking-widest text-amber-400 border-b border-amber-400/20 pb-1.5">
+                      <Award className="w-3.5 h-3.5 text-amber-400" />
+                      <span>Official Winners Podium</span>
+                    </div>
+                    <div className="space-y-1.5">
+                      {p.winners.map((w, idx) => (
+                        <div key={idx} className="flex items-center justify-between text-xs">
+                          <div className="flex items-center space-x-2">
+                            <span className={`px-2 py-0.5 rounded font-black text-[10px] uppercase shadow-sm ${
+                              w.prize === '1st' ? 'bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950' :
+                              w.prize === '2nd' ? 'bg-gradient-to-r from-slate-200 to-slate-300 text-slate-950' :
+                              'bg-gradient-to-r from-amber-700 to-amber-800 text-amber-100'
+                            }`}>
+                              {w.prize === '1st' ? '🥇 1st' : w.prize === '2nd' ? '🥈 2nd' : '🥉 3rd'}
+                            </span>
+                            <span className="text-white font-extrabold">{w.student_name}</span>
+                          </div>
+                          <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full border shadow-sm" style={{ color: w.house_color || '#10b981', borderColor: `${w.house_color || '#10b981'}60`, backgroundColor: `${w.house_color || '#10b981'}15` }}>
+                            {w.house_name}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="p-3.5 rounded-xl bg-slate-900/30 border border-dashed border-slate-800/80 flex items-center justify-center text-[11px] text-slate-500 font-mono min-h-[105px]">
+                    {p.status === 'running' ? '⏳ Competition currently in progress...' : '📅 Results pending winner announcement'}
+                  </div>
+                )}
+              </div>
 
             {/* Status Controls */}
             <div className="flex items-center justify-between border-t border-slate-800 pt-3">
@@ -394,8 +391,8 @@ export default function ProgramManagement() {
                 )}
               </div>
             </div>
-
           </div>
+        </div>
         ))}
       </div>
 
