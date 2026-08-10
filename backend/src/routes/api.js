@@ -216,8 +216,8 @@ router.get('/students/:id', async (req, res) => {
       SELECT s.*, h.name as house_name, h.color_hex as house_color 
       FROM students s 
       LEFT JOIN houses h ON s.house_id = h.id 
-      WHERE s.id = ?
-    `, [req.params.id]);
+      WHERE s.id = ? OR CAST(s.id AS TEXT) = CAST(? AS TEXT)
+    `, [req.params.id, req.params.id]);
 
     if (!student) return res.status(404).json({ error: 'Student not found' });
 
@@ -226,10 +226,12 @@ router.get('/students/:id', async (req, res) => {
       FROM program_participants pp
       JOIN programs p ON pp.program_id = p.id
       LEFT JOIN results r ON r.program_id = p.id AND r.student_id = pp.student_id
-      WHERE pp.student_id = ?
-    `, [req.params.id]);
+      WHERE pp.student_id = ? OR CAST(pp.student_id AS TEXT) = CAST(? AS TEXT)
+    `, [req.params.id, req.params.id]);
 
-    res.json({ student, participations });
+    const registered_program_ids = (participations || []).map(p => p.program_id);
+
+    res.json({ student, participations: participations || [], registered_program_ids });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -238,19 +240,31 @@ router.get('/students/:id', async (req, res) => {
 router.post('/students', async (req, res) => {
   try {
     const {
-      admission_no, name, category_name, arabic_name, gender, dob, age, class_name,
-      division, house_id, parent_name, phone, email, address
+      admission_no, name, category_name, arabic_name, photo, gender, dob, age, class_name,
+      division, house_id, parent_name, phone, email, address, registered_program_ids
     } = req.body;
 
     const count = await get('SELECT COUNT(*) as c FROM students');
-    const student_id = `STU-${1000 + count.c + 1}`;
+    const student_id = `STU-${1000 + (count?.c || 0) + 1}`;
 
     const result = await run(`
-      INSERT INTO students (student_id, admission_no, name, category_name, arabic_name, gender, dob, age, class_name, division, house_id, parent_name, phone, email, address)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `, [student_id, admission_no, name, category_name || 'Kiddies', arabic_name || '', gender || 'male', dob, age || 10, class_name, division || 'A', house_id, parent_name || '', phone || '', email || '', address || '']);
+      INSERT INTO students (student_id, admission_no, name, category_name, arabic_name, photo, gender, dob, age, class_name, division, house_id, parent_name, phone, email, address)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `, [student_id, admission_no, name, category_name || 'Kiddies', arabic_name || '', photo || '', gender || 'male', dob, age || 10, class_name || 'Class 6', division || 'A', house_id || 1, parent_name || '', phone || '', email || '', address || '']);
 
-    res.json({ success: true, id: result.id, student_id });
+    const newStudentId = result.id;
+
+    if (Array.isArray(registered_program_ids)) {
+      await run('DELETE FROM program_participants WHERE student_id = ? OR CAST(student_id AS TEXT) = CAST(? AS TEXT)', [newStudentId, newStudentId]);
+      for (const progId of registered_program_ids) {
+        await run(`
+          INSERT INTO program_participants (program_id, student_id, chest_no, attendance)
+          VALUES (?, ?, ?, 'present')
+        `, [progId, newStudentId, admission_no || newStudentId]);
+      }
+    }
+
+    res.json({ success: true, id: newStudentId, student_id });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -258,13 +272,25 @@ router.post('/students', async (req, res) => {
 
 router.put('/students/:id', async (req, res) => {
   try {
-    const { name, category_name, arabic_name, gender, dob, age, class_name, division, house_id, parent_name, phone, email, address, admission_no } = req.body;
+    const { name, category_name, arabic_name, photo, gender, dob, age, class_name, division, house_id, parent_name, phone, email, address, admission_no, registered_program_ids } = req.body;
+    const targetId = req.params.id;
+
     await run(`
       UPDATE students 
-      SET name = ?, category_name = ?, arabic_name = ?, gender = ?, dob = ?, age = ?, class_name = ?, division = ?, house_id = ?, parent_name = ?, phone = ?, email = ?, address = ?, admission_no = COALESCE(?, admission_no)
-      WHERE id = ?
-    `, [name, category_name || 'Kiddies', arabic_name || '', gender || 'male', dob, age || 10, class_name, division || 'A', house_id, parent_name || '', phone || '', email || '', address || '', admission_no, req.params.id]);
-    
+      SET name = ?, category_name = ?, arabic_name = ?, photo = ?, gender = ?, dob = ?, age = ?, class_name = ?, division = ?, house_id = ?, parent_name = ?, phone = ?, email = ?, address = ?, admission_no = COALESCE(?, admission_no)
+      WHERE id = ? OR CAST(id AS TEXT) = CAST(? AS TEXT)
+    `, [name, category_name || 'Kiddies', arabic_name || '', photo || '', gender || 'male', dob, age || 10, class_name || 'Class 6', division || 'A', house_id || 1, parent_name || '', phone || '', email || '', address || '', admission_no, targetId, targetId]);
+
+    if (Array.isArray(registered_program_ids)) {
+      await run('DELETE FROM program_participants WHERE student_id = ? OR CAST(student_id AS TEXT) = CAST(? AS TEXT)', [targetId, targetId]);
+      for (const progId of registered_program_ids) {
+        await run(`
+          INSERT INTO program_participants (program_id, student_id, chest_no, attendance)
+          VALUES (?, ?, ?, 'present')
+        `, [progId, targetId, admission_no || targetId]);
+      }
+    }
+
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });

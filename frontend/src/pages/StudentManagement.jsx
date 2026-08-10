@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  User, Plus, Search, QrCode, Edit, Trash2, CheckCircle, Save
+  User, Plus, Search, QrCode, Edit, Trash2, CheckCircle, Save, X
 } from 'lucide-react';
 import QRCodeModal from '../components/QRCodeModal';
 import { useAuth } from '../context/AuthContext';
@@ -13,6 +13,8 @@ export default function StudentManagement() {
 
   const [students, setStudents] = useState([]);
   const [houses, setHouses] = useState([]);
+  const [allPrograms, setAllPrograms] = useState([]);
+  const [registeredProgramIds, setRegisteredProgramIds] = useState([]);
   const [search, setSearch] = useState('');
   const [qrStudent, setQrStudent] = useState(null);
   const [showForm, setShowForm] = useState(false);
@@ -24,9 +26,12 @@ export default function StudentManagement() {
     id: null,
     admission_no: '',
     name: '',
-    category_name: 'Kiddies',
+    category_name: 'Sub Junior',
     class_name: 'Class 6',
-    house_id: 1
+    house_id: 1,
+    parent_name: '',
+    phone: '',
+    photo: ''
   });
 
   const loadData = () => {
@@ -54,11 +59,57 @@ export default function StudentManagement() {
       .then(res => res.json())
       .then(data => setHouses(Array.isArray(data) ? data : []))
       .catch(() => {});
+
+    fetch('/api/programs', { cache: 'no-store' })
+      .then(res => res.json())
+      .then(data => setAllPrograms(Array.isArray(data) ? data : []))
+      .catch(() => {});
   };
 
   useEffect(() => {
     loadData();
   }, []);
+
+  const handleAdd = () => {
+    setFormData({
+      id: null,
+      admission_no: '',
+      name: '',
+      category_name: 'Sub Junior',
+      class_name: 'Class 6',
+      house_id: 1,
+      parent_name: '',
+      phone: '',
+      photo: ''
+    });
+    setRegisteredProgramIds([]);
+    setShowForm(true);
+  };
+
+  const handleEdit = (s) => {
+    setFormData({
+      id: s.id,
+      admission_no: s.admission_no || s.student_id || '',
+      name: s.name || '',
+      category_name: s.category_name || 'Sub Junior',
+      class_name: s.class_name || 'Class 6',
+      house_id: s.house_id || 1,
+      parent_name: s.parent_name || '',
+      phone: s.phone || '',
+      photo: s.photo || ''
+    });
+
+    fetch(`/api/students/${s.id}`, { cache: 'no-store' })
+      .then(res => res.json())
+      .then(data => {
+        setRegisteredProgramIds(data.registered_program_ids || []);
+      })
+      .catch(() => {
+        setRegisteredProgramIds([]);
+      });
+
+    setShowForm(true);
+  };
 
   const handleSave = (e) => {
     e.preventDefault();
@@ -68,10 +119,7 @@ export default function StudentManagement() {
       student_id: formData.student_id || `STU-${Date.now().toString().slice(-4)}`,
       arabic_name: '',
       division: 'A',
-      parent_name: '',
-      phone: '',
-      gender: 'male',
-      age: 10
+      registered_program_ids: registeredProgramIds
     };
 
     const method = isEdit ? 'PUT' : 'POST';
@@ -158,6 +206,7 @@ export default function StudentManagement() {
                 required
                 value={formData.admission_no || currentStudent.admission_no}
                 onChange={e => setFormData({ ...formData, admission_no: e.target.value })}
+                placeholder="Enter Code No (e.g. 101 or CODE-101)"
                 className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white font-bold font-mono"
               />
             </div>
@@ -245,10 +294,7 @@ export default function StudentManagement() {
 
         {isAdmin && (
           <button
-            onClick={() => {
-              setFormData({ id: null, admission_no: '', name: '', category_name: 'Kiddies', class_name: 'Class 6', house_id: 1 });
-              setShowForm(true);
-            }}
+            onClick={handleAdd}
             className="flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs shadow-lg transition"
           >
             <Plus className="w-4 h-4" />
@@ -320,17 +366,7 @@ export default function StudentManagement() {
                     {isAdmin && (
                       <>
                         <button
-                          onClick={() => {
-                            setFormData({
-                              id: s.id,
-                              admission_no: s.admission_no || s.student_id,
-                              name: s.name,
-                              category_name: s.category_name || 'Kiddies',
-                              class_name: s.class_name,
-                              house_id: s.house_id || 1
-                            });
-                            setShowForm(true);
-                          }}
+                          onClick={() => handleEdit(s)}
                           className="p-1.5 rounded-lg bg-slate-800 text-amber-400 hover:bg-slate-700"
                         >
                           <Edit className="w-4 h-4" />
@@ -351,90 +387,179 @@ export default function StudentManagement() {
         </div>
       </div>
 
-      {/* Simplified Add / Edit Modal with Category */}
+      {/* Edit / Add Student Modal matching user screenshot */}
       {showForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4 overflow-y-auto">
-          <div className="glass-panel w-full max-w-lg rounded-3xl border border-amber-400/40 p-6 sm:p-8 shadow-2xl bg-slate-900 text-white my-8">
-            <h3 className="text-xl font-black emerald-gradient-text mb-4">
-              {formData.id ? 'Edit Student Profile' : 'Add New Student'}
-            </h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-md p-4 overflow-y-auto">
+          <div className="glass-panel w-full max-w-2xl rounded-3xl border border-slate-700/80 p-6 sm:p-8 shadow-2xl bg-slate-900 text-white my-8 max-h-[90vh] overflow-y-auto">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b border-slate-800 pb-4 mb-6">
+              <h3 className="text-lg font-black text-white flex items-center space-x-2">
+                <span>{formData.id ? `Edit Student Information (#${formData.admission_no || formData.id})` : 'Add New Student Profile'}</span>
+              </h3>
+              <button 
+                type="button" 
+                onClick={() => setShowForm(false)}
+                className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
 
-            <form onSubmit={handleSave} className="space-y-4 text-xs">
+            <form onSubmit={handleSave} className="space-y-5 text-xs">
+              {/* Row 1: Chest No & Student Name */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-slate-300 font-bold mb-1.5">Chest Number (Chest No)</label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.admission_no}
+                    onChange={e => setFormData({ ...formData, admission_no: e.target.value })}
+                    placeholder="101"
+                    className="w-full bg-slate-950 border border-slate-700/80 rounded-xl p-3 text-emerald-400 font-bold font-mono focus:border-emerald-500 focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-slate-300 font-bold mb-1.5">Student's Name (Student Name)</label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.name}
+                    onChange={e => setFormData({ ...formData, name: e.target.value })}
+                    placeholder="e.g. മുഹമ്മദ് അൻഷിദ് or Muhammed Anshid"
+                    className="w-full bg-slate-950 border border-slate-700/80 rounded-xl p-3 text-white font-bold focus:border-emerald-500 focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              {/* Row 2: Category & House */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-slate-300 font-bold mb-1.5">Category (Category)</label>
+                  <select
+                    value={formData.category_name}
+                    onChange={e => setFormData({ ...formData, category_name: e.target.value })}
+                    className="w-full bg-slate-950 border border-slate-700/80 rounded-xl p-3 text-white font-bold focus:border-emerald-500 focus:outline-none"
+                  >
+                    {categories.map((cat, idx) => (
+                      <option key={idx} value={cat}>{cat}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-slate-300 font-bold mb-1.5">House (House Allocation)</label>
+                  <select
+                    value={formData.house_id}
+                    onChange={e => setFormData({ ...formData, house_id: e.target.value })}
+                    className="w-full bg-slate-950 border border-slate-700/80 rounded-xl p-3 text-white font-bold focus:border-emerald-500 focus:outline-none"
+                  >
+                    {houses.map(h => (
+                      <option key={h.id} value={h.id}>{h.name}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Row 3: Parent Name & Phone */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-slate-300 font-bold mb-1.5">Parent's Name (Parent Name)</label>
+                  <input
+                    type="text"
+                    value={formData.parent_name}
+                    onChange={e => setFormData({ ...formData, parent_name: e.target.value })}
+                    placeholder="e.g. അബ്ദുള്ള കെ"
+                    className="w-full bg-slate-950 border border-slate-700/80 rounded-xl p-3 text-white font-bold focus:border-emerald-500 focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-slate-300 font-bold mb-1.5">Phone Number (Phone)</label>
+                  <input
+                    type="text"
+                    value={formData.phone}
+                    onChange={e => setFormData({ ...formData, phone: e.target.value })}
+                    placeholder="e.g. 9846001122"
+                    className="w-full bg-slate-950 border border-slate-700/80 rounded-xl p-3 text-white font-bold focus:border-emerald-500 focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              {/* Row 4: Photo URL Link */}
               <div>
-                <label className="block text-slate-300 font-bold mb-1">Code No</label>
+                <label className="block text-slate-300 font-bold mb-1.5">Photo URL Link (Photo URL)</label>
                 <input
                   type="text"
-                  required
-                  value={formData.admission_no}
-                  onChange={e => setFormData({ ...formData, admission_no: e.target.value })}
-                  placeholder="Enter Code No (e.g. 101 or CODE-101)"
-                  className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white font-mono"
+                  value={formData.photo}
+                  onChange={e => setFormData({ ...formData, photo: e.target.value })}
+                  placeholder="https://images.unsplash.com/photo-1544717305-2782549b5136..."
+                  className="w-full bg-slate-950 border border-slate-700/80 rounded-xl p-3 text-white font-mono focus:border-emerald-500 focus:outline-none"
                 />
               </div>
 
+              {/* Contest Items Participating (Registered Items) */}
               <div>
-                <label className="block text-slate-300 font-bold mb-1">Full Name</label>
-                <input
-                  type="text"
-                  required
-                  value={formData.name}
-                  onChange={e => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="Student Full Name"
-                  className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white font-bold"
-                />
+                <label className="block text-slate-200 font-extrabold mb-2 text-xs uppercase tracking-wider">
+                  Contest Items Participating (Registered Items)
+                </label>
+                <div className="bg-slate-950/70 border border-slate-800 rounded-2xl p-3 max-h-56 overflow-y-auto">
+                  {allPrograms.length === 0 ? (
+                    <p className="text-slate-500 text-center py-4 font-mono text-[11px]">No active contest items available</p>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                      {allPrograms.map(prog => {
+                        const isChecked = registeredProgramIds.includes(prog.id);
+                        return (
+                          <label 
+                            key={prog.id} 
+                            className={`flex items-start space-x-3 p-3 rounded-xl border cursor-pointer transition ${
+                              isChecked 
+                                ? 'bg-emerald-950/40 border-emerald-500/60 text-white' 
+                                : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:border-slate-700'
+                            }`}
+                          >
+                            <input 
+                              type="checkbox"
+                              checked={isChecked}
+                              onChange={() => {
+                                if (isChecked) {
+                                  setRegisteredProgramIds(prev => prev.filter(id => id !== prog.id));
+                                } else {
+                                  setRegisteredProgramIds(prev => [...prev, prog.id]);
+                                }
+                              }}
+                              className="mt-0.5 w-4 h-4 rounded border-slate-700 text-emerald-500 focus:ring-emerald-500 focus:ring-offset-slate-900 accent-emerald-500"
+                            />
+                            <div className="flex-1 min-w-0">
+                              <p className="font-bold text-xs leading-snug truncate text-white">{prog.name}</p>
+                              <p className="text-[10px] text-slate-400 font-mono mt-0.5">
+                                {prog.code || `PRG-${prog.id}`} • {prog.category_name || prog.age_group || 'General'}
+                              </p>
+                            </div>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
               </div>
 
-              <div>
-                <label className="block text-slate-300 font-bold mb-1">Category</label>
-                <select
-                  value={formData.category_name}
-                  onChange={e => setFormData({ ...formData, category_name: e.target.value })}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white font-bold"
-                >
-                  {categories.map((cat, idx) => (
-                    <option key={idx} value={cat}>{cat}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-slate-300 font-bold mb-1">Class</label>
-                <input
-                  type="text"
-                  required
-                  value={formData.class_name}
-                  onChange={e => setFormData({ ...formData, class_name: e.target.value })}
-                  placeholder="Class 6"
-                  className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white"
-                />
-              </div>
-
-              <div>
-                <label className="block text-slate-300 font-bold mb-1">House</label>
-                <select
-                  value={formData.house_id}
-                  onChange={e => setFormData({ ...formData, house_id: e.target.value })}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white font-bold"
-                >
-                  {houses.map(h => (
-                    <option key={h.id} value={h.id}>{h.name}</option>
-                  ))}
-                </select>
-              </div>
-
+              {/* Modal Footer */}
               <div className="flex justify-end space-x-3 pt-4 border-t border-slate-800">
                 <button
                   type="button"
                   onClick={() => setShowForm(false)}
-                  className="px-4 py-2.5 rounded-xl glass-panel text-slate-400 hover:text-white"
+                  className="px-5 py-2.5 rounded-xl glass-panel text-slate-400 hover:text-white font-bold transition"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold"
+                  className="px-7 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold shadow-lg transition"
                 >
-                  Save Student Profile
+                  Save
                 </button>
               </div>
             </form>
