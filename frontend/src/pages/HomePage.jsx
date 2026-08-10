@@ -60,6 +60,73 @@ export default function HomePage({ onNavigate }) {
       {/* Hero Section */}
       <Hero onNavigate={onNavigate} />
 
+      {/* Quick Access Portal Menu for Parents */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-6">
+          <h2 className="text-xl sm:text-2xl font-black text-slate-900">
+            Quick <span className="emerald-gradient-text">Information Access</span>
+          </h2>
+          <p className="text-xs text-slate-500 font-bold mt-1">Select an option below to easily view event details and standings</p>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
+          <button
+            onClick={() => onNavigate('students')}
+            className="glass-panel p-4 rounded-2xl border border-emerald-200 bg-white hover:border-emerald-500 hover:shadow-md transition text-center flex flex-col items-center justify-center space-y-2 group"
+          >
+            <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center group-hover:scale-110 transition">
+              <Award className="w-6 h-6" />
+            </div>
+            <span className="text-sm font-black text-slate-900">Students</span>
+            <span className="text-[10px] text-slate-500 font-bold">Find Student & ID</span>
+          </button>
+
+          <button
+            onClick={() => onNavigate('programs')}
+            className="glass-panel p-4 rounded-2xl border border-emerald-200 bg-white hover:border-emerald-500 hover:shadow-md transition text-center flex flex-col items-center justify-center space-y-2 group"
+          >
+            <div className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-800 flex items-center justify-center group-hover:scale-110 transition">
+              <Calendar className="w-6 h-6" />
+            </div>
+            <span className="text-sm font-black text-slate-900">Programs</span>
+            <span className="text-[10px] text-slate-500 font-bold">Contest Items</span>
+          </button>
+
+          <button
+            onClick={() => onNavigate('timetable')}
+            className="glass-panel p-4 rounded-2xl border border-emerald-200 bg-white hover:border-emerald-500 hover:shadow-md transition text-center flex flex-col items-center justify-center space-y-2 group"
+          >
+            <div className="w-12 h-12 rounded-2xl bg-blue-100 text-blue-800 flex items-center justify-center group-hover:scale-110 transition">
+              <Clock className="w-6 h-6" />
+            </div>
+            <span className="text-sm font-black text-slate-900">Schedule</span>
+            <span className="text-[10px] text-slate-500 font-bold">Stage Timetable</span>
+          </button>
+
+          <button
+            onClick={() => onNavigate('results')}
+            className="glass-panel p-4 rounded-2xl border border-emerald-200 bg-white hover:border-emerald-500 hover:shadow-md transition text-center flex flex-col items-center justify-center space-y-2 group"
+          >
+            <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center group-hover:scale-110 transition">
+              <Trophy className="w-6 h-6" />
+            </div>
+            <span className="text-sm font-black text-slate-900">Results</span>
+            <span className="text-[10px] text-slate-500 font-bold">Winner Standings</span>
+          </button>
+
+          <button
+            onClick={() => onNavigate('gallery')}
+            className="glass-panel p-4 rounded-2xl border border-emerald-200 bg-white hover:border-emerald-500 hover:shadow-md transition text-center flex flex-col items-center justify-center space-y-2 group col-span-2 sm:col-span-1"
+          >
+            <div className="w-12 h-12 rounded-2xl bg-purple-100 text-purple-800 flex items-center justify-center group-hover:scale-110 transition">
+              <Sparkles className="w-6 h-6" />
+            </div>
+            <span className="text-sm font-black text-slate-900">Gallery</span>
+            <span className="text-[10px] text-slate-500 font-bold">Event Photos</span>
+          </button>
+        </div>
+      </section>
+
       {/* Live Leaderboard Snippet */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between mb-6">
@@ -71,7 +138,7 @@ export default function HomePage({ onNavigate }) {
             <p className="text-xs text-slate-500 font-bold">Instant score tallies updated live</p>
           </div>
           <button
-            onClick={() => onNavigate('live-scoring')}
+            onClick={() => onNavigate('results')}
             className="flex items-center space-x-1 text-xs font-bold text-emerald-700 hover:text-emerald-900"
           >
             <span>View Full Leaderboard</span>

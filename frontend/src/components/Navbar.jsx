@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { 
   BookOpen, Layers, User, Shield, Calendar, Award, Trophy, Sparkles, 
-  Search, Globe, LogOut, Lock, Menu, X 
+  Search, Globe, LogOut, Lock, Menu, X, Archive, ShieldCheck 
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -15,19 +15,20 @@ export default function Navbar({ activeTab, setActiveTab, onOpenSearch }) {
 
   const navItems = [
     { id: 'home', label: t('home'), icon: BookOpen, roles: ['all'] },
-    { id: 'dashboard', label: t('dashboard'), icon: Layers, roles: ['super_admin', 'admin', 'stage_coordinator'] },
-    { id: 'students', label: t('students'), icon: User, roles: ['super_admin', 'admin', 'stage_coordinator'] },
-    { id: 'houses', label: t('houses'), icon: Shield, roles: ['super_admin', 'admin', 'stage_coordinator'] },
-    { id: 'programs', label: t('programs'), icon: Calendar, roles: ['super_admin', 'admin', 'stage_coordinator'] },
+    { id: 'students', label: t('students'), icon: User, roles: ['all'] },
+    { id: 'programs', label: t('programs'), icon: Calendar, roles: ['all'] },
     { id: 'timetable', label: t('timetable'), icon: Calendar, roles: ['all'] },
     { id: 'results', label: t('results'), icon: Trophy, roles: ['all'] },
     { id: 'gallery', label: t('gallery'), icon: Sparkles, roles: ['all'] },
+    { id: 'dashboard', label: 'Overview', icon: Layers, roles: ['super_admin', 'admin', 'stage_coordinator'] },
+    { id: 'archive', label: 'Archive', icon: Archive, roles: ['super_admin', 'admin', 'stage_coordinator'] },
+    { id: 'audit-logs', label: 'Audit Logs', icon: ShieldCheck, roles: ['super_admin', 'admin'] },
     { id: 'settings', label: t('settings'), icon: Shield, roles: ['super_admin', 'admin'] }
   ];
 
   const visibleNav = navItems.filter(item => {
     if (role === 'public') {
-      return ['home', 'timetable', 'live-scoring', 'results', 'gallery'].includes(item.id);
+      return ['home', 'students', 'programs', 'timetable', 'results', 'gallery'].includes(item.id);
     }
     return item.roles.includes('all') || item.roles.includes(role);
   });

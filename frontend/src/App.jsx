@@ -20,6 +20,8 @@ import Gallery from './pages/Gallery';
 import NoticeBoard from './pages/NoticeBoard';
 import Settings from './pages/Settings';
 import LoginPage from './pages/LoginPage';
+import ArchiveManagement from './pages/ArchiveManagement';
+import AuditLog from './pages/AuditLog';
 
 function MainContent() {
   const { user } = useAuth();
@@ -39,19 +41,19 @@ function MainContent() {
       return <LoginPage onLoginSuccess={(targetTab) => setActiveTab(targetTab)} />;
     }
 
-    // Public / Unauthenticated User Restriction Guard
+    // Public / Unauthenticated User Restriction Guard for Admin Only modules
     if (role === 'public') {
-      const protectedTabs = ['dashboard', 'students', 'houses', 'programs', 'reports', 'settings'];
-      if (protectedTabs.includes(activeTab)) {
+      const protectedAdminTabs = ['dashboard', 'houses', 'reports', 'settings', 'archive', 'audit-logs'];
+      if (protectedAdminTabs.includes(activeTab)) {
         return (
-          <div className="glass-panel p-8 text-center rounded-3xl border border-amber-500/40 max-w-lg mx-auto my-12 bg-slate-900 shadow-2xl">
-            <h3 className="text-xl font-bold text-amber-400 mb-2">Portal Authentication Required</h3>
-            <p className="text-xs text-slate-300 mb-6">You must log in to access the {activeTab.toUpperCase()} module. Please select your portal below.</p>
+          <div className="glass-panel p-8 text-center rounded-3xl border border-amber-500/40 max-w-lg mx-auto my-12 bg-white shadow-2xl">
+            <h3 className="text-xl font-bold text-slate-900 mb-2">Admin Portal Authentication Required</h3>
+            <p className="text-xs text-slate-500 mb-6">Administrator credentials required to access system settings & management modules.</p>
             <button
               onClick={() => setActiveTab('login')}
-              className="px-6 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:brightness-110 text-slate-950 font-black text-xs shadow-lg transition"
+              className="px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-md transition"
             >
-              Go to Portal Login Page
+              Sign In to Admin Portal
             </button>
           </div>
         );
@@ -83,6 +85,10 @@ function MainContent() {
         return <Gallery />;
       case 'notice':
         return <NoticeBoard />;
+      case 'archive':
+        return <ArchiveManagement />;
+      case 'audit-logs':
+        return <AuditLog />;
       case 'settings':
         return <Settings />;
       default:

@@ -6,7 +6,7 @@ import QRCodeModal from '../components/QRCodeModal';
 import { useAuth } from '../context/AuthContext';
 
 export default function StudentManagement() {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const role = user?.role || 'public';
   const isAdmin = ['super_admin', 'admin', 'stage_coordinator'].includes(role);
   const isStudent = role === 'student';
@@ -20,6 +20,7 @@ export default function StudentManagement() {
   const [qrStudent, setQrStudent] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [savedSuccess, setSavedSuccess] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const categories = ['Kiddies', 'Sub Junior', 'Junior', 'Senior', 'Super Senior'];
 
@@ -36,9 +37,6 @@ export default function StudentManagement() {
   });
 
   const loadData = () => {
-    localStorage.removeItem('milad_custom_students');
-    localStorage.removeItem('milad_deleted_student_ids');
-
     fetch('/api/students', { cache: 'no-store' })
       .then(res => res.json())
       .then(data => {
@@ -78,7 +76,7 @@ export default function StudentManagement() {
       name: '',
       category_name: 'Sub Junior',
       class_name: 'Class 6',
-      house_id: 1,
+      house_id: houses[0]?.id || 1,
       parent_name: '',
       phone: '',
       photo: ''
@@ -87,39 +85,50 @@ export default function StudentManagement() {
     setShowForm(true);
   };
 
-  const handleEdit = (s) => {
+  const handleEdit = (student) => {
     setFormData({
-      id: s.id,
-      admission_no: s.admission_no || s.student_id || '',
-      name: s.name || '',
-      category_name: s.category_name || 'Sub Junior',
-      class_name: s.class_name || 'Class 6',
-      house_id: s.house_id || 1,
-      parent_name: s.parent_name || '',
-      phone: s.phone || '',
-      photo: s.photo || ''
+      id: student.id,
+      admission_no: student.admission_no || '',
+      name: student.name,
+      category_name: student.category_name || 'Sub Junior',
+      class_name: student.class_name,
+      house_id: student.house_id || 1,
+      parent_name: student.parent_name || '',
+      phone: student.phone || '',
+      photo: student.photo || ''
     });
 
-    fetch(`/api/students/${s.id}`, { cache: 'no-store' })
+    fetch(`/api/students/${student.id}`)
       .then(res => res.json())
       .then(data => {
-        setRegisteredProgramIds(data.registered_program_ids || []);
+        if (data.registered_program_ids) {
+          setRegisteredProgramIds(data.registered_program_ids);
+        } else {
+          setRegisteredProgramIds([]);
+        }
       })
-      .catch(() => {
-        setRegisteredProgramIds([]);
-      });
+      .catch(() => setRegisteredProgramIds([]));
 
     setShowForm(true);
   };
 
+  const toggleProgramSelection = (programId) => {
+    setRegisteredProgramIds(prev => 
+      prev.includes(programId) 
+        ? prev.filter(id => id !== programId)
+        : [...prev, programId]
+    );
+  };
+
   const handleSave = (e) => {
     e.preventDefault();
-    const isEdit = !!formData.id;
+    if (submitting) return;
+
+    setSubmitting(true);
+    const isEdit = Boolean(formData.id);
+
     const studentObj = {
       ...formData,
-      student_id: formData.student_id || `STU-${Date.now().toString().slice(-4)}`,
-      arabic_name: '',
-      division: 'A',
       registered_program_ids: registeredProgramIds
     };
 
@@ -128,17 +137,22 @@ export default function StudentManagement() {
 
     fetch(url, {
       method,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {})
+      },
       body: JSON.stringify(studentObj)
     })
       .then(res => res.json())
       .then(() => {
+        setSubmitting(false);
         setShowForm(false);
         setSavedSuccess(true);
         setTimeout(() => setSavedSuccess(false), 3000);
         loadData();
       })
       .catch(() => {
+        setSubmitting(false);
         setShowForm(false);
         setSavedSuccess(true);
         setTimeout(() => setSavedSuccess(false), 3000);
@@ -147,10 +161,13 @@ export default function StudentManagement() {
   };
 
   const handleDelete = (id) => {
-    if (window.confirm('Are you sure you want to delete this student profile?')) {
+    if (window.confirm('Are you sure you want to archive this student profile? The record can be restored anytime from Archive Management.')) {
       setStudents(prev => prev.filter(s => String(s.id) !== String(id)));
 
-      fetch(`/api/students/${id}`, { method: 'DELETE' })
+      fetch(`/api/students/${id}/archive`, { 
+        method: 'PUT',
+        headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) }
+      })
         .then(() => loadData())
         .catch(() => loadData());
     }
@@ -158,7 +175,7 @@ export default function StudentManagement() {
 
   const filtered = students.filter(s => 
     s.name.toLowerCase().includes(search.toLowerCase()) || 
-    s.student_id.toLowerCase().includes(search.toLowerCase()) ||
+    (s.student_id && s.student_id.toLowerCase().includes(search.toLowerCase())) ||
     (s.category_name && s.category_name.toLowerCase().includes(search.toLowerCase())) ||
     (s.admission_no && s.admission_no.toLowerCase().includes(search.toLowerCase()))
   );

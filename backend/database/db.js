@@ -212,16 +212,6 @@ async function initDb() {
     uploaded_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
 
-  // Unconditionally purge sample/example demo data so database starts 100% clean
-  await run(`DELETE FROM results WHERE student_id IN (SELECT id FROM students WHERE admission_no LIKE 'ADM-%') OR program_id IN (1, 2, 3, 4, 5, 6, 7, 8)`);
-  await run(`DELETE FROM marks WHERE student_id IN (SELECT id FROM students WHERE admission_no LIKE 'ADM-%') OR program_id IN (1, 2, 3, 4, 5, 6, 7, 8)`);
-  await run(`DELETE FROM program_participants WHERE student_id IN (SELECT id FROM students WHERE admission_no LIKE 'ADM-%') OR chest_no IN (101, 102, 103, 104, 105, 201, 202, 203)`);
-  await run(`DELETE FROM students WHERE admission_no LIKE 'ADM-%' OR name IN ('Muhammed Danish', 'Ahmad Zayan', 'Fathima Zahra', 'Aisha Raihana', 'Omar Abdullah')`);
-  await run(`DELETE FROM program_judges WHERE program_id IN (1, 2, 3, 4, 5, 6, 7, 8)`);
-  await run(`DELETE FROM programs WHERE code IN ('PRG-101', 'PRG-102', 'PRG-103', 'PRG-104', 'PRG-105', 'PRG-106', 'PRG-107', 'PRG-108')`);
-  await run(`DELETE FROM announcements WHERE title IN ('Welcome to Milad-un-Nabi Festival 2026', 'Live Leaderboard Active')`);
-  await run(`DELETE FROM gallery WHERE url LIKE '%unsplash.com%' OR title IN ('Opening Ceremony & Qiraat Recitation', 'Duff Group Performance', 'Qiraat Recitation Competition Stage', 'Duff & Mawlid Group Performance')`);
-
   await run(`CREATE TABLE IF NOT EXISTS settings (
     key_name TEXT PRIMARY KEY,
     value TEXT NOT NULL
@@ -235,35 +225,43 @@ async function initDb() {
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
 
-  // Ensure house count is strictly 2
+  // Migration: Add soft deletion / archiving columns to tables if missing
+  const tablesToMigrate = ['students', 'programs', 'results', 'announcements', 'marks'];
+  for (const table of tablesToMigrate) {
+    try { await run(`ALTER TABLE ${table} ADD COLUMN is_archived INTEGER DEFAULT 0`); } catch (e) {}
+    try { await run(`ALTER TABLE ${table} ADD COLUMN archived_at DATETIME`); } catch (e) {}
+    try { await run(`ALTER TABLE ${table} ADD COLUMN archived_by TEXT`); } catch (e) {}
+  }
+
+  // Ensure houses exist if table is empty (never overwrite existing)
   const houseRows = await all('SELECT * FROM houses');
   if (houseRows.length === 0) {
     await run(`INSERT INTO houses (id, code, name, color_hex, motto, captain_name, total_points) VALUES 
       (1, 'H-GRN', 'Green House', '#10B981', 'Courage and Devotion in Faith', 'Captain 1', 0),
       (2, 'H-BLU', 'Blue House', '#3B82F6', 'Knowledge is Light and Guidance', 'Captain 2', 0)`);
-  } else {
-    await run('UPDATE houses SET total_points = 0');
   }
 
-  // Categories: Kiddies, Sub Junior, Junior, Senior, Super Senior
-  await run('DELETE FROM categories');
-  await run(`INSERT INTO categories (id, name, min_age, max_age, description) VALUES
-    (1, 'Kiddies', 5, 7, 'Kiddies Category'),
-    (2, 'Sub Junior', 8, 10, 'Sub Junior Category'),
-    (3, 'Junior', 11, 13, 'Junior Category'),
-    (4, 'Senior', 14, 16, 'Senior Category'),
-    (5, 'Super Senior', 17, 20, 'Super Senior Category')`);
+  // Ensure 5 standard categories exist if empty
+  const categoryRows = await all('SELECT * FROM categories');
+  if (categoryRows.length === 0) {
+    await run(`INSERT INTO categories (id, name, min_age, max_age, description) VALUES
+      (1, 'Kiddies', 5, 7, 'Kiddies Category'),
+      (2, 'Sub Junior', 8, 10, 'Sub Junior Category'),
+      (3, 'Junior', 11, 13, 'Junior Category'),
+      (4, 'Senior', 14, 16, 'Senior Category'),
+      (5, 'Super Senior', 17, 20, 'Super Senior Category')`);
+  }
 
-  // Ensure venues exist
+  // Ensure venues exist if table is empty
   const venueCount = await get('SELECT COUNT(*) as count FROM venues');
-  if (venueCount && venueCount.count === 0) {
+  if (!venueCount || venueCount.count === 0) {
     await run(`INSERT INTO venues (id, name, stage_number, capacity, location) VALUES
       (1, 'Stage 1 (Imam Bukhari Stage)', 1, 500, 'Main Auditorium'),
       (2, 'Stage 2 (Imam Shafi Stage)', 2, 200, 'Academic Hall'),
       (3, 'Stage 3 (Imam Ghazali Hall)', 3, 150, 'Library Extension')`);
   }
 
-  // Ensure admin user exists
+  // Ensure default admin users exist if table is empty
   const userCount = await get('SELECT COUNT(*) as count FROM users');
   if (!userCount || userCount.count === 0) {
     const passHash = '$2a$10$e8w8S5P0dK0xG9Jv8sJ6Ue2xXyY.7m3v5Z8m3v5Z8m3v5Z8m3v5Z8';
@@ -273,7 +271,7 @@ async function initDb() {
       (3, 'judge1', 'judge1@madrasa.org', '${passHash}', 'Qari Zakariya Al-Hafiz', 'judge')`);
   }
 
-  console.log('[DB] Database initialized with 5 Categories (Kiddies, Sub Junior, Junior, Senior, Super Senior)!');
+  console.log('[DB] Database initialized safely without data loss! Archiving & Audit Logs ready.');
 }
 
 module.exports = {

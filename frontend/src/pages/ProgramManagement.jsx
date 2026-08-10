@@ -1,7 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, Plus, Users, Clock, Edit, Trash2, Award, Trophy, CheckCircle, X, Sparkles, Search } from 'lucide-react';
 
+import { useAuth } from '../context/AuthContext';
+
 export default function ProgramManagement() {
+  const { user, token } = useAuth();
+  const role = user?.role || 'public';
+  const isAdmin = ['super_admin', 'admin', 'stage_coordinator'].includes(role);
+
   const [programs, setPrograms] = useState([]);
   const [categories, setCategories] = useState([]);
   const [showModal, setShowModal] = useState(false);
@@ -38,9 +44,6 @@ export default function ProgramManagement() {
   const [winnersSaving, setWinnersSaving] = useState(false);
 
   const loadData = () => {
-    localStorage.removeItem('milad_custom_programs');
-    localStorage.removeItem('milad_deleted_program_ids');
-
     fetch('/api/programs', { cache: 'no-store' })
       .then(res => res.json())
       .then(data => {
@@ -68,40 +71,40 @@ export default function ProgramManagement() {
     loadData();
   }, []);
 
-  const handleSave = (e) => {
+  const handleSaveProgram = (e) => {
     e.preventDefault();
-    const isEdit = !!formData.id;
-    const progObj = {
-      ...formData,
-      code: formData.code || `PRG-${Date.now().toString().slice(-4)}`
-    };
 
+    const isEdit = Boolean(formData.id);
     const method = isEdit ? 'PUT' : 'POST';
     const url = isEdit ? `/api/programs/${formData.id}` : '/api/programs';
 
     fetch(url, {
       method,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(progObj)
+      headers: { 
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {})
+      },
+      body: JSON.stringify(formData)
     })
       .then(res => res.json())
       .then(() => {
         setShowModal(false);
-        setFormData({ id: null, code: '', name: '', category_id: 1, type: 'individual', venue_id: 1, program_date: '2026-08-15', start_time: '09:00', end_time: '10:30', max_participants: 15, status: 'pending' });
         loadData();
       })
       .catch(() => {
         setShowModal(false);
-        setFormData({ id: null, code: '', name: '', category_id: 1, type: 'individual', venue_id: 1, program_date: '2026-08-15', start_time: '09:00', end_time: '10:30', max_participants: 15, status: 'pending' });
         loadData();
       });
   };
 
   const handleDelete = (id) => {
-    if (window.confirm('Are you sure you want to delete this program?')) {
+    if (window.confirm('Are you sure you want to archive this program? The record can be restored anytime from Archive Management.')) {
       setPrograms(prev => prev.filter(p => String(p.id) !== String(id)));
 
-      fetch(`/api/programs/${id}`, { method: 'DELETE' })
+      fetch(`/api/programs/${id}/archive`, { 
+        method: 'PUT',
+        headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) }
+      })
         .then(() => loadData())
         .catch(() => loadData());
     }
@@ -111,7 +114,10 @@ export default function ProgramManagement() {
     setPrograms(prev => prev.map(p => String(p.id) === String(id) ? { ...p, status: newStatus } : p));
     fetch(`/api/programs/${id}/status`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {})
+      },
       body: JSON.stringify({ status: newStatus })
     })
       .then(() => loadData())

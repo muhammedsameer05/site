@@ -87,16 +87,45 @@ function authenticate(req, res, next) {
   }
 }
 
+// Middleware for admin role enforcement
+function requireAdmin(req, res, next) {
+  if (!req.user) {
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+  const allowedRoles = ['super_admin', 'admin', 'stage_coordinator'];
+  if (!allowedRoles.includes(req.user.role)) {
+    return res.status(403).json({ error: 'Access denied. Administrator privileges required.' });
+  }
+  next();
+}
+
+// Audit Trail Helper
+async function logAuditAction(userName, action, details) {
+  try {
+    const detailStr = typeof details === 'object' ? JSON.stringify(details) : String(details || '');
+    await run(
+      'INSERT INTO audit_logs (user_name, action, details) VALUES (?, ?, ?)',
+      [userName || 'System', action, detailStr]
+    );
+  } catch (err) {
+    console.error('[AUDIT LOG ERROR]', err);
+  }
+}
+
 // -------------------------------------------------------------
 // AUTH ROUTES
 // -------------------------------------------------------------
 router.post('/auth/login', async (req, res) => {
   try {
     const { username, password } = req.body;
+    if (!username || !password) {
+      return res.status(400).json({ error: 'Please enter both username and password' });
+    }
+
     const user = await get('SELECT * FROM users WHERE username = ? OR email = ?', [username, username]);
     
     if (!user) {
-      return res.status(400).json({ error: 'User not found' });
+      return res.status(401).json({ error: 'Invalid username or password' });
     }
 
     let isMatch = false;
@@ -108,7 +137,7 @@ router.post('/auth/login', async (req, res) => {
     }
 
     if (!isMatch) {
-      return res.status(400).json({ error: 'Invalid credentials' });
+      return res.status(401).json({ error: 'Invalid username or password' });
     }
 
     const token = jwt.sign(
@@ -122,6 +151,9 @@ router.post('/auth/login', async (req, res) => {
       judgeInfo = await get('SELECT * FROM judges WHERE user_id = ? OR email = ?', [user.id, user.email]);
     }
 
+    // Log admin login audit trail
+    await logAuditAction(user.name || user.username, 'Admin Login', `Logged in into ${user.role} portal`);
+
     res.json({
       token,
       user: {
@@ -134,7 +166,7 @@ router.post('/auth/login', async (req, res) => {
       }
     });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Authentication server error' });
   }
 });
 
@@ -202,6 +234,7 @@ router.get('/students', async (req, res) => {
       SELECT s.*, h.name as house_name, h.color_hex as house_color 
       FROM students s 
       LEFT JOIN houses h ON s.house_id = h.id 
+      WHERE (s.is_archived = 0 OR s.is_archived IS NULL)
       ORDER BY s.id DESC
     `);
     res.json(students);
@@ -216,7 +249,7 @@ router.get('/students/:id', async (req, res) => {
       SELECT s.*, h.name as house_name, h.color_hex as house_color 
       FROM students s 
       LEFT JOIN houses h ON s.house_id = h.id 
-      WHERE s.id = ? OR CAST(s.id AS TEXT) = CAST(? AS TEXT)
+      WHERE (s.id = ? OR CAST(s.id AS TEXT) = CAST(? AS TEXT))
     `, [req.params.id, req.params.id]);
 
     if (!student) return res.status(404).json({ error: 'Student not found' });
@@ -237,7 +270,7 @@ router.get('/students/:id', async (req, res) => {
   }
 });
 
-router.post('/students', async (req, res) => {
+router.post('/students', authenticate, requireAdmin, async (req, res) => {
   try {
     const {
       admission_no, name, category_name, arabic_name, photo, gender, dob, age, class_name,
@@ -248,8 +281,8 @@ router.post('/students', async (req, res) => {
     const student_id = `STU-${1000 + (count?.c || 0) + 1}`;
 
     const result = await run(`
-      INSERT INTO students (student_id, admission_no, name, category_name, arabic_name, photo, gender, dob, age, class_name, division, house_id, parent_name, phone, email, address)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO students (student_id, admission_no, name, category_name, arabic_name, photo, gender, dob, age, class_name, division, house_id, parent_name, phone, email, address, is_archived)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
     `, [student_id, admission_no, name, category_name || 'Kiddies', arabic_name || '', photo || '', gender || 'male', dob, age || 10, class_name || 'Class 6', division || 'A', house_id || 1, parent_name || '', phone || '', email || '', address || '']);
 
     const newStudentId = result.id;
@@ -264,13 +297,15 @@ router.post('/students', async (req, res) => {
       }
     }
 
+    await logAuditAction(req.user?.name || 'Admin', 'Create Student', `Created student ${name} (${student_id})`);
+
     res.json({ success: true, id: newStudentId, student_id });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-router.put('/students/:id', async (req, res) => {
+router.put('/students/:id', authenticate, requireAdmin, async (req, res) => {
   try {
     const { name, category_name, arabic_name, photo, gender, dob, age, class_name, division, house_id, parent_name, phone, email, address, admission_no, registered_program_ids } = req.body;
     const targetId = req.params.id;
@@ -291,19 +326,58 @@ router.put('/students/:id', async (req, res) => {
       }
     }
 
+    await logAuditAction(req.user?.name || 'Admin', 'Update Student', `Updated student details ID: ${targetId}`);
+
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-router.delete('/students/:id', async (req, res) => {
+router.put('/students/:id/archive', authenticate, requireAdmin, async (req, res) => {
   try {
-    await run('DELETE FROM students WHERE id = ?', [req.params.id]);
-    await run('DELETE FROM program_participants WHERE student_id = ?', [req.params.id]);
-    await run('DELETE FROM marks WHERE student_id = ?', [req.params.id]);
-    await run('DELETE FROM results WHERE student_id = ?', [req.params.id]);
-    res.json({ success: true });
+    const targetId = req.params.id;
+    await run(`
+      UPDATE students 
+      SET is_archived = 1, archived_at = CURRENT_TIMESTAMP, archived_by = ? 
+      WHERE id = ? OR CAST(id AS TEXT) = CAST(? AS TEXT)
+    `, [req.user?.name || 'Admin', targetId, targetId]);
+
+    await logAuditAction(req.user?.name || 'Admin', 'Archive Student', `Archived student ID: ${targetId}`);
+    res.json({ success: true, message: 'Student archived successfully' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.put('/students/:id/restore', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const targetId = req.params.id;
+    await run(`
+      UPDATE students 
+      SET is_archived = 0, archived_at = NULL, archived_by = NULL 
+      WHERE id = ? OR CAST(id AS TEXT) = CAST(? AS TEXT)
+    `, [targetId, targetId]);
+
+    await logAuditAction(req.user?.name || 'Admin', 'Restore Student', `Restored student ID: ${targetId}`);
+    res.json({ success: true, message: 'Student restored successfully' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.delete('/students/:id', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const targetId = req.params.id;
+    // Soft delete to protect critical historical data
+    await run(`
+      UPDATE students 
+      SET is_archived = 1, archived_at = CURRENT_TIMESTAMP, archived_by = ? 
+      WHERE id = ? OR CAST(id AS TEXT) = CAST(? AS TEXT)
+    `, [req.user?.name || 'Admin', targetId, targetId]);
+
+    await logAuditAction(req.user?.name || 'Admin', 'Archive Student (Delete Request)', `Archived student ID: ${targetId}`);
+    res.json({ success: true, message: 'Student archived successfully' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -358,6 +432,7 @@ router.get('/programs', async (req, res) => {
       FROM programs p
       LEFT JOIN categories c ON p.category_id = c.id
       LEFT JOIN venues v ON p.venue_id = v.id
+      WHERE (p.is_archived = 0 OR p.is_archived IS NULL)
       ORDER BY p.id ASC
     `);
 
@@ -431,6 +506,7 @@ router.get('/programs/:id', async (req, res) => {
         SELECT s.id as student_id, s.name as student_name, s.student_id as student_code, s.admission_no, s.class_name, h.name as house_name, h.color_hex as house_color
         FROM students s
         LEFT JOIN houses h ON s.house_id = h.id
+        WHERE (s.is_archived = 0 OR s.is_archived IS NULL)
         ORDER BY s.id ASC
       `);
       participants = allStudents.map((s, idx) => ({ ...s, chest_no: idx + 1, attendance: 'present' }));
@@ -448,20 +524,23 @@ router.get('/programs/:id', async (req, res) => {
   }
 });
 
-router.post('/programs', async (req, res) => {
+router.post('/programs', authenticate, requireAdmin, async (req, res) => {
   try {
     const { code, name, category_id, age_group, type, venue_id, program_date, start_time, end_time, max_participants, status } = req.body;
     const result = await run(`
-      INSERT INTO programs (code, name, category_id, age_group, type, venue_id, program_date, start_time, end_time, max_participants, status)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO programs (code, name, category_id, age_group, type, venue_id, program_date, start_time, end_time, max_participants, status, is_archived)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
     `, [code, name, category_id, age_group || 'Sub Junior', type || 'individual', venue_id, program_date, start_time, end_time, max_participants || 20, status || 'pending']);
+
+    await logAuditAction(req.user?.name || 'Admin', 'Create Program', `Created program ${name} (${code})`);
+
     res.json({ success: true, id: result.id });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-router.put('/programs/:id/status', async (req, res) => {
+router.put('/programs/:id/status', authenticate, requireAdmin, async (req, res) => {
   try {
     const { status } = req.body;
     await run('UPDATE programs SET status = ? WHERE id = ?', [status, req.params.id]);
@@ -469,13 +548,16 @@ router.put('/programs/:id/status', async (req, res) => {
     if (status === 'completed') {
       await calculateProgramResults(req.params.id, io);
     }
+
+    await logAuditAction(req.user?.name || 'Admin', 'Update Program Status', `Changed program ID ${req.params.id} status to ${status}`);
+
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-router.put('/programs/:id', async (req, res) => {
+router.put('/programs/:id', authenticate, requireAdmin, async (req, res) => {
   try {
     const { code, name, category_id, age_group, type, venue_id, program_date, start_time, end_time, max_participants, status } = req.body;
     await run(`
@@ -489,20 +571,58 @@ router.put('/programs/:id', async (req, res) => {
       await calculateProgramResults(req.params.id, io);
     }
 
+    await logAuditAction(req.user?.name || 'Admin', 'Update Program', `Updated program ID: ${req.params.id}`);
+
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-router.delete('/programs/:id', async (req, res) => {
+router.put('/programs/:id/archive', authenticate, requireAdmin, async (req, res) => {
   try {
-    await run('DELETE FROM programs WHERE id = ?', [req.params.id]);
-    await run('DELETE FROM program_judges WHERE program_id = ?', [req.params.id]);
-    await run('DELETE FROM program_participants WHERE program_id = ?', [req.params.id]);
-    await run('DELETE FROM marks WHERE program_id = ?', [req.params.id]);
-    await run('DELETE FROM results WHERE program_id = ?', [req.params.id]);
-    res.json({ success: true });
+    const targetId = req.params.id;
+    await run(`
+      UPDATE programs 
+      SET is_archived = 1, archived_at = CURRENT_TIMESTAMP, archived_by = ? 
+      WHERE id = ? OR CAST(id AS TEXT) = CAST(? AS TEXT)
+    `, [req.user?.name || 'Admin', targetId, targetId]);
+
+    await logAuditAction(req.user?.name || 'Admin', 'Archive Program', `Archived program ID: ${targetId}`);
+    res.json({ success: true, message: 'Program archived successfully' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.put('/programs/:id/restore', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const targetId = req.params.id;
+    await run(`
+      UPDATE programs 
+      SET is_archived = 0, archived_at = NULL, archived_by = NULL 
+      WHERE id = ? OR CAST(id AS TEXT) = CAST(? AS TEXT)
+    `, [targetId, targetId]);
+
+    await logAuditAction(req.user?.name || 'Admin', 'Restore Program', `Restored program ID: ${targetId}`);
+    res.json({ success: true, message: 'Program restored successfully' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.delete('/programs/:id', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const targetId = req.params.id;
+    // Soft delete to protect critical historical data
+    await run(`
+      UPDATE programs 
+      SET is_archived = 1, archived_at = CURRENT_TIMESTAMP, archived_by = ? 
+      WHERE id = ? OR CAST(id AS TEXT) = CAST(? AS TEXT)
+    `, [req.user?.name || 'Admin', targetId, targetId]);
+
+    await logAuditAction(req.user?.name || 'Admin', 'Archive Program (Delete Request)', `Archived program ID: ${targetId}`);
+    res.json({ success: true, message: 'Program archived successfully' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -891,21 +1011,34 @@ router.delete('/gallery/:id', async (req, res) => {
   }
 });
 
-router.post('/settings/reset-demo-data', async (req, res) => {
+// -------------------------------------------------------------
+// ARCHIVE MANAGEMENT & AUDIT LOGS
+// -------------------------------------------------------------
+router.get('/archive/all', authenticate, requireAdmin, async (req, res) => {
   try {
-    await run('DELETE FROM results');
-    await run('DELETE FROM marks');
-    await run('DELETE FROM program_participants');
-    await run('DELETE FROM program_judges');
-    await run('DELETE FROM students');
-    await run('DELETE FROM programs');
-    await run('DELETE FROM announcements');
-    await run('DELETE FROM gallery');
-    await run('UPDATE houses SET total_points = 0');
-    res.json({ success: true, message: 'All demo and test data permanently deleted' });
+    const students = await all('SELECT * FROM students WHERE is_archived = 1 ORDER BY archived_at DESC');
+    const programs = await all('SELECT * FROM programs WHERE is_archived = 1 ORDER BY archived_at DESC');
+    const announcements = await all('SELECT * FROM announcements WHERE is_archived = 1 ORDER BY archived_at DESC');
+    const results = await all('SELECT * FROM results WHERE is_archived = 1 ORDER BY archived_at DESC');
+
+    res.json({ students, programs, announcements, results });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
+});
+
+router.get('/audit-logs', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const logs = await all('SELECT * FROM audit_logs ORDER BY id DESC LIMIT 200');
+    res.json(logs);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Protect reset-demo-data from purging critical production records
+router.post('/settings/reset-demo-data', authenticate, requireAdmin, async (req, res) => {
+  res.status(403).json({ error: 'Production data purge is disabled to prevent accidental data loss. Please use Archiving instead.' });
 });
 
 module.exports = router;
