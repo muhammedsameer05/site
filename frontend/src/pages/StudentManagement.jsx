@@ -22,14 +22,14 @@ export default function StudentManagement() {
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  const categories = ['Kids', 'Sub Junior', 'Junior', 'Senior'];
+  const categories = ['Kiddies', 'Sub Junior', 'Junior', 'Senior', 'Super Senior'];
 
   const [formData, setFormData] = useState({
     id: null,
     admission_no: '',
     name: '',
     gender: 'male',
-    category_name: 'Kids',
+    category_name: 'Sub Junior',
     class_name: 'Class 6',
     house_id: 1,
     parent_name: '',
@@ -76,7 +76,7 @@ export default function StudentManagement() {
       admission_no: '',
       name: '',
       gender: 'male',
-      category_name: 'Kids',
+      category_name: 'Sub Junior',
       class_name: 'Class 6',
       house_id: houses[0]?.id || 1,
       parent_name: '',
@@ -93,7 +93,7 @@ export default function StudentManagement() {
       admission_no: student.admission_no || '',
       name: student.name,
       gender: student.gender || 'male',
-      category_name: student.category_name || 'Kids',
+      category_name: student.category_name || 'Sub Junior',
       class_name: student.class_name,
       house_id: student.house_id || 1,
       parent_name: student.parent_name || '',
