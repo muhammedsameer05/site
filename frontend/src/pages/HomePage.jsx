@@ -212,22 +212,12 @@ export default function HomePage({ onNavigate }) {
                       </button>
                     </div>
                   ) : (
-                    <div className="flex items-center space-x-1.5">
-                      <span className="text-2xl font-black emerald-gradient-text font-mono animate-pulse-glow px-2 py-0.5 rounded-lg">
-                        {house.total_points || 0}
-                      </span>
-                      {isAdmin && (
-                        <button
-                          onClick={() => {
-                            setEditingScoreHouseId(house.id);
-                            setInputScore(house.total_points || 0);
-                          }}
-                          className="p-1 rounded text-slate-400 hover:text-emerald-700 hover:bg-emerald-50 transition"
-                          title="Direct Edit Score"
-                        >
-                          <Edit3 className="w-3.5 h-3.5" />
-                        </button>
-                      )}
+                    <div className="flex items-center">
+                      <div className="px-4 py-1.5 bg-emerald-50/80 border-2 border-emerald-300 rounded-none shadow-xs text-center">
+                        <span className="text-2xl font-black emerald-gradient-text font-mono">
+                          {house.total_points || 0}
+                        </span>
+                      </div>
                     </div>
                   )}
                 </div>
