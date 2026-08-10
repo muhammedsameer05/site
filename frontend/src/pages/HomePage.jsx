@@ -182,7 +182,6 @@ export default function HomePage({ onNavigate }) {
                   <span className="w-8 h-8 rounded-full flex items-center justify-center text-white font-extrabold text-sm shadow-md transition-transform duration-300 group-hover:scale-110" style={{ backgroundColor: house.color_hex }}>
                     #{idx + 1}
                   </span>
-                  <span className="text-[10px] font-mono font-black text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">{house.code}</span>
                 </div>
                 <h3 className="text-lg font-extrabold mb-1 group-hover:underline" style={{ color: house.color_hex }}>
                   {house.name}

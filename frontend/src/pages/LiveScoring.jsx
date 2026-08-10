@@ -138,7 +138,6 @@ export default function LiveScoring() {
                     <h3 className="text-2xl font-black group-hover:underline" style={{ color: house.color_hex }}>
                       {house.name}
                     </h3>
-                    <p className="text-xs text-slate-500 font-mono font-bold">Code: {house.code}</p>
                   </div>
                 </div>
 

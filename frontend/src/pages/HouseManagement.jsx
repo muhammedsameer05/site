@@ -137,11 +137,6 @@ export default function HouseManagement() {
                   >
                     #{idx + 1}
                   </span>
-                  <div>
-                    <span className="text-xs font-mono font-bold text-slate-600 px-2 py-0.5 rounded bg-slate-100 border border-slate-200">
-                      {house.code}
-                    </span>
-                  </div>
                 </div>
 
                 {isAdmin && (
@@ -314,17 +309,6 @@ export default function HouseManagement() {
                   onChange={e => setFormData({ ...formData, name: e.target.value })}
                   placeholder="e.g. Abu Bakr House / Green House"
                   className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-slate-900 font-bold text-sm focus:outline-none focus:border-emerald-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-slate-700 font-bold mb-1">House Code</label>
-                <input
-                  type="text"
-                  required
-                  value={formData.code}
-                  onChange={e => setFormData({ ...formData, code: e.target.value })}
-                  className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-slate-900 font-mono focus:border-emerald-500"
                 />
               </div>
 

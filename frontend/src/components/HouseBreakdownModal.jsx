@@ -86,7 +86,7 @@ export default function HouseBreakdownModal({ house, houseId, onClose }) {
             <div>
               <h2 className="text-2xl font-black">{currentHouse.name || 'House Details'}</h2>
               <p className="text-xs font-mono font-bold text-white/80">
-                Code: {currentHouse.code || 'H-01'} | Captain: {currentHouse.captain_name || 'N/A'}
+                Captain: {currentHouse.captain_name || 'N/A'}
               </p>
             </div>
           </div>
