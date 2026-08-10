@@ -18,6 +18,10 @@ export default function HouseManagement() {
     captain_name: ''
   });
 
+  const [adjustingHouseId, setAdjustingHouseId] = useState(null);
+  const [adjustPoints, setAdjustPoints] = useState('');
+  const [adjustReason, setAdjustReason] = useState('');
+
   const loadHouses = () => {
     fetch('/api/houses')
       .then(res => res.json())
@@ -28,6 +32,27 @@ export default function HouseManagement() {
   useEffect(() => {
     loadHouses();
   }, []);
+
+  const handleAdjustPoints = async (houseId, pts, reason) => {
+    try {
+      const res = await fetch(`/api/houses/${houseId}/adjust-points`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ points: Number(pts), reason: reason || 'Admin Live House Scoring' })
+      });
+      if (res.ok) {
+        loadHouses();
+        setAdjustingHouseId(null);
+        setAdjustPoints('');
+        setAdjustReason('');
+      } else {
+        const err = await res.json();
+        alert(`Error adjusting points: ${err.error || 'Failed'}`);
+      }
+    } catch (err) {
+      alert(`Error adjusting points: ${err.message}`);
+    }
+  };
 
   const openCreateModal = () => {
     setEditingHouseId(null);
@@ -160,10 +185,98 @@ export default function HouseManagement() {
                 </div>
               </div>
 
-              <div className="flex items-center justify-between border-t border-slate-200 pt-3">
+              <div className="flex items-center justify-between border-t border-slate-200 pt-3 mb-4">
                 <span className="text-xs font-bold text-slate-600">Total Championship Points</span>
                 <span className="text-4xl font-black emerald-gradient-text font-mono">{house.total_points || 0}</span>
               </div>
+
+              {/* Admin Live House Scoring Desk */}
+              {isAdmin && (
+                <div className="bg-emerald-50/80 border border-emerald-200 p-4 rounded-2xl space-y-3 pt-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-black text-emerald-950 uppercase tracking-wider flex items-center space-x-1">
+                      <Trophy className="w-3.5 h-3.5 text-amber-500" />
+                      <span>Live House Scoring Desk</span>
+                    </span>
+                    <span className="text-[10px] font-mono text-emerald-700 font-bold">1-Click Live Adjustment</span>
+                  </div>
+
+                  {/* Quick Preset Buttons */}
+                  <div className="grid grid-cols-4 gap-2">
+                    <button
+                      onClick={() => handleAdjustPoints(house.id, 10, '1st Prize / Major Award (+10 Pts)')}
+                      className="py-1.5 px-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs shadow-xs transition"
+                    >
+                      +10 Pts
+                    </button>
+                    <button
+                      onClick={() => handleAdjustPoints(house.id, 5, '2nd Prize / Performance Bonus (+5 Pts)')}
+                      className="py-1.5 px-2 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white font-black text-xs shadow-xs transition"
+                    >
+                      +5 Pts
+                    </button>
+                    <button
+                      onClick={() => handleAdjustPoints(house.id, 1, 'Discipline / Participation Bonus (+1 Pt)')}
+                      className="py-1.5 px-2 rounded-lg bg-teal-600 hover:bg-teal-700 text-white font-black text-xs shadow-xs transition"
+                    >
+                      +1 Pt
+                    </button>
+                    <button
+                      onClick={() => handleAdjustPoints(house.id, -5, 'Penalty / Violation Deduction (-5 Pts)')}
+                      className="py-1.5 px-2 rounded-lg bg-rose-500 hover:bg-rose-600 text-white font-black text-xs shadow-xs transition"
+                    >
+                      -5 Pts
+                    </button>
+                  </div>
+
+                  {/* Custom Point Adjustment Trigger */}
+                  {adjustingHouseId === house.id ? (
+                    <div className="space-y-2 pt-2 border-t border-emerald-200">
+                      <input
+                        type="number"
+                        placeholder="Points amount (e.g. 15 or -5)"
+                        value={adjustPoints}
+                        onChange={e => setAdjustPoints(e.target.value)}
+                        className="w-full px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-bold outline-none"
+                      />
+                      <input
+                        type="text"
+                        placeholder="Reason (e.g. March Past Award / Special Bonus)"
+                        value={adjustReason}
+                        onChange={e => setAdjustReason(e.target.value)}
+                        className="w-full px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-bold outline-none"
+                      />
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => handleAdjustPoints(house.id, adjustPoints, adjustReason)}
+                          className="flex-1 py-1.5 rounded-lg bg-emerald-700 text-white font-black text-xs shadow hover:bg-emerald-800"
+                        >
+                          Apply Score
+                        </button>
+                        <button
+                          onClick={() => setAdjustingHouseId(null)}
+                          className="px-3 py-1.5 rounded-lg bg-slate-200 text-slate-700 font-bold text-xs"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        setAdjustingHouseId(house.id);
+                        setAdjustPoints('');
+                        setAdjustReason('');
+                      }}
+                      className="w-full py-1.5 rounded-xl border border-emerald-300 bg-white text-emerald-800 font-bold text-xs hover:bg-emerald-100/60 transition"
+                    >
+                      + Custom Points / Deductions
+                    </button>
+                  )}
+
+                </div>
+              )}
+
             </div>
 
           </div>

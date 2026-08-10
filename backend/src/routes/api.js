@@ -447,13 +447,37 @@ router.post('/houses', async (req, res) => {
 
 router.put('/houses/:id', async (req, res) => {
   try {
-    const { name, code, color_hex, motto, captain_name } = req.body;
+    const { name, code, color_hex, motto, captain_name, total_points } = req.body;
     await run(`
       UPDATE houses 
-      SET name = ?, code = ?, color_hex = ?, motto = ?, captain_name = ?
+      SET name = ?, code = ?, color_hex = ?, motto = ?, captain_name = ?, total_points = COALESCE(?, total_points)
       WHERE id = ?
-    `, [name, code, color_hex, motto, captain_name, req.params.id]);
+    `, [name, code, color_hex, motto, captain_name, total_points, req.params.id]);
     res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.post('/houses/:id/adjust-points', async (req, res) => {
+  try {
+    const { points, reason } = req.body;
+    const houseId = req.params.id;
+    const pts = Number(points) || 0;
+
+    await run('UPDATE houses SET total_points = MAX(0, total_points + ?) WHERE id = ?', [pts, houseId]);
+
+    // Record audit action
+    await logAuditAction(req.user?.name || 'Admin', 'House Live Point Adjustment', `Adjusted House ID ${houseId} by ${pts > 0 ? '+' : ''}${pts} pts. Reason: ${reason || 'Live Admin Scoring'}`);
+
+    const io = req.app.get('io');
+    if (io) {
+      io.emit('score_updated', { houseId });
+      io.emit('results_published', { houseId });
+    }
+
+    triggerPersistenceSync();
+    res.json({ success: true, message: `House points adjusted by ${pts} pts.` });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
