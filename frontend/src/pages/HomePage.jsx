@@ -11,17 +11,17 @@ export default function HomePage({ onNavigate }) {
   const [gallery, setGallery] = useState([]);
 
   const loadData = () => {
-    fetch('/api/houses')
+    fetch('/api/houses', { cache: 'no-store' })
       .then(res => res.json())
       .then(data => setHouses(Array.isArray(data) ? data : []))
       .catch(() => {});
 
-    fetch('/api/programs')
+    fetch('/api/programs', { cache: 'no-store' })
       .then(res => res.json())
       .then(data => setPrograms(Array.isArray(data) ? data : []))
       .catch(() => {});
 
-    fetch('/api/gallery')
+    fetch('/api/gallery', { cache: 'no-store' })
       .then(res => res.json())
       .then(data => {
         const backendItems = Array.isArray(data) ? data : [];

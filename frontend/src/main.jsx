@@ -3,6 +3,15 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
 
+// Auto-purge stale demo local caches to ensure fresh live database sync on mobile browsers
+const CACHE_VERSION = 'v5_2k26_fresh';
+if (localStorage.getItem('milad_cache_version') !== CACHE_VERSION) {
+  const savedUser = localStorage.getItem('milad_user');
+  localStorage.clear();
+  if (savedUser) localStorage.setItem('milad_user', savedUser);
+  localStorage.setItem('milad_cache_version', CACHE_VERSION);
+}
+
 class GlobalRootErrorBoundary extends Component {
   constructor(props) {
     super(props);
