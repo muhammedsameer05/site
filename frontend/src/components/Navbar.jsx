@@ -18,6 +18,7 @@ export default function Navbar({ activeTab, setActiveTab, onOpenSearch }) {
     { id: 'students', label: t('students'), icon: User, roles: ['all'] },
     { id: 'programs', label: t('programs'), icon: Calendar, roles: ['all'] },
     { id: 'timetable', label: t('timetable'), icon: Calendar, roles: ['all'] },
+    { id: 'live-scoring', label: 'Live Scoring', icon: Trophy, roles: ['super_admin', 'admin', 'stage_coordinator', 'judge'] },
     { id: 'results', label: t('results'), icon: Trophy, roles: ['all'] },
     { id: 'gallery', label: t('gallery'), icon: Sparkles, roles: ['all'] },
     { id: 'dashboard', label: 'Overview', icon: Layers, roles: ['super_admin', 'admin', 'stage_coordinator'] },
