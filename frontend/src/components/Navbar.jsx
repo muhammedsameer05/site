@@ -20,7 +20,6 @@ export default function Navbar({ activeTab, setActiveTab, onOpenSearch }) {
     { id: 'houses', label: t('houses'), icon: Shield, roles: ['super_admin', 'admin', 'stage_coordinator'] },
     { id: 'programs', label: t('programs'), icon: Calendar, roles: ['super_admin', 'admin', 'stage_coordinator'] },
     { id: 'timetable', label: t('timetable'), icon: Calendar, roles: ['all'] },
-    { id: 'judge', label: t('judge_panel'), icon: Award, roles: ['super_admin', 'admin', 'judge'] },
     { id: 'results', label: t('results'), icon: Trophy, roles: ['all'] },
     { id: 'reports', label: t('reports'), icon: Layers, roles: ['super_admin', 'admin'] },
     { id: 'gallery', label: t('gallery'), icon: Sparkles, roles: ['all'] },
@@ -28,9 +27,6 @@ export default function Navbar({ activeTab, setActiveTab, onOpenSearch }) {
   ];
 
   const visibleNav = navItems.filter(item => {
-    if (role === 'judge') {
-      return ['judge', 'timetable', 'live-scoring'].includes(item.id);
-    }
     if (role === 'student') {
       return ['students', 'results', 'live-scoring'].includes(item.id);
     }

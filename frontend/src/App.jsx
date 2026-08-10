@@ -12,7 +12,6 @@ import StudentManagement from './pages/StudentManagement';
 import HouseManagement from './pages/HouseManagement';
 import ProgramManagement from './pages/ProgramManagement';
 import Timetable from './pages/Timetable';
-import JudgePanel from './pages/JudgePanel';
 import LiveScoring from './pages/LiveScoring';
 import ResultsSystem from './pages/ResultsSystem';
 import Certificates from './pages/Certificates';
@@ -42,7 +41,7 @@ function MainContent() {
 
     // Public / Unauthenticated User Restriction Guard
     if (role === 'public') {
-      const protectedTabs = ['dashboard', 'students', 'houses', 'programs', 'judge', 'reports', 'settings'];
+      const protectedTabs = ['dashboard', 'students', 'houses', 'programs', 'reports', 'settings'];
       if (protectedTabs.includes(activeTab)) {
         return (
           <div className="glass-panel p-8 text-center rounded-3xl border border-amber-500/40 max-w-lg mx-auto my-12 bg-slate-900 shadow-2xl">
@@ -59,28 +58,9 @@ function MainContent() {
       }
     }
 
-    // Judge Portal Guard
-    if (role === 'judge') {
-      const judgeForbiddenTabs = ['dashboard', 'students', 'houses', 'programs', 'reports', 'settings'];
-      if (judgeForbiddenTabs.includes(activeTab)) {
-        return (
-          <div className="glass-panel p-8 text-center rounded-3xl border border-red-500/40 max-w-lg mx-auto my-12 bg-slate-900 shadow-2xl">
-            <h3 className="text-xl font-bold text-red-400 mb-2">Access Restricted (Judge Portal)</h3>
-            <p className="text-xs text-slate-300 mb-6">Judges are restricted exclusively to the Judge Evaluation Marks Panel.</p>
-            <button
-              onClick={() => setActiveTab('judge')}
-              className="px-6 py-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs"
-            >
-              Go to Judge Panel
-            </button>
-          </div>
-        );
-      }
-    }
-
     // Student Portal Guard
     if (role === 'student') {
-      const studentForbiddenTabs = ['dashboard', 'houses', 'programs', 'judge', 'reports', 'settings'];
+      const studentForbiddenTabs = ['dashboard', 'houses', 'programs', 'reports', 'settings'];
       if (studentForbiddenTabs.includes(activeTab)) {
         return (
           <div className="glass-panel p-8 text-center rounded-3xl border border-blue-500/40 max-w-lg mx-auto my-12 bg-slate-900 shadow-2xl">
@@ -110,8 +90,6 @@ function MainContent() {
         return <ProgramManagement />;
       case 'timetable':
         return <Timetable />;
-      case 'judge':
-        return <JudgePanel />;
       case 'live-scoring':
         return <LiveScoring />;
       case 'results':

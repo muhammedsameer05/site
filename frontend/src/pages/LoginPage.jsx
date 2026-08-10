@@ -101,8 +101,8 @@ export default function LoginPage({ onLoginSuccess }) {
         <p className="text-xs text-slate-400 font-mono mt-1">Select your designated portal to sign in with valid credentials</p>
       </div>
 
-      {/* 3 Portal Selector Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+      {/* 2 Portal Selector Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
         
         {/* Admin Portal Card */}
         <div 
@@ -119,25 +119,6 @@ export default function LoginPage({ onLoginSuccess }) {
           <h3 className="text-lg font-extrabold text-white mb-1">Admin Portal</h3>
           <p className="text-xs text-slate-400 mb-4 leading-relaxed">Requires Admin account. Full access to management modules.</p>
           <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded bg-amber-500/20 text-amber-300 border border-amber-400/40 inline-block">
-            Sign In Required
-          </span>
-        </div>
-
-        {/* Judge Portal Card */}
-        <div 
-          onClick={() => { setActivePortal('judge'); setErrorMsg(null); }}
-          className={`glass-panel p-5 rounded-2xl border-2 cursor-pointer transition-all duration-300 ${
-            activePortal === 'judge' 
-              ? 'border-amber-400 bg-emerald-950/40 shadow-2xl scale-105' 
-              : 'border-slate-800 bg-slate-900/60 hover:border-slate-700'
-          }`}
-        >
-          <div className="p-3 rounded-xl bg-emerald-500/20 text-emerald-400 w-fit mb-3">
-            <Award className="w-6 h-6" />
-          </div>
-          <h3 className="text-lg font-extrabold text-white mb-1">Judge Scoring Portal</h3>
-          <p className="text-xs text-slate-400 mb-4 leading-relaxed">Requires Judge credentials. Access exclusively to Judge Marks Panel.</p>
-          <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 inline-block">
             Sign In Required
           </span>
         </div>
