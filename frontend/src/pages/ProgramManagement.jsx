@@ -655,7 +655,7 @@ export default function ProgramManagement() {
               </button>
             </div>
 
-            <form onSubmit={handleSave} className="space-y-4 text-xs font-semibold text-slate-700">
+            <form onSubmit={handleSaveProgram} className="space-y-4 text-xs font-semibold text-slate-700">
               
               <div>
                 <label className="block mb-1 text-slate-900 font-bold">Program Code</label>
