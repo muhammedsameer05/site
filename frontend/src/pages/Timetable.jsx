@@ -99,7 +99,6 @@ export default function Timetable() {
           <table className="w-full text-left text-xs text-slate-700">
             <thead className="bg-emerald-50/80 text-emerald-950 uppercase font-mono border-b border-emerald-100 font-bold">
               <tr>
-                <th className="p-4">Time Slot</th>
                 <th className="p-4">Venue / Stage</th>
                 <th className="p-4">Program & Code</th>
                 <th className="p-4">Category & Age</th>
@@ -108,9 +107,6 @@ export default function Timetable() {
             <tbody className="divide-y divide-slate-100">
               {filtered.map((p) => (
                 <tr key={p.id} className="hover:bg-emerald-50/30 transition">
-                  <td className="p-4 font-mono text-emerald-700 font-bold">
-                    {p.start_time || '09:00'} - {p.end_time || '10:30'}
-                  </td>
                   <td className="p-4 font-bold text-slate-800">
                     {p.venue_name || 'Stage 1'}
                   </td>

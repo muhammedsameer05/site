@@ -208,11 +208,7 @@ export default function HomePage({ onNavigate }) {
                     </span>
                   </div>
 
-                  <h4 className="text-base font-bold text-slate-900 mb-1">{p.name}</h4>
-                  <div className="flex items-center space-x-2 text-xs text-slate-500 font-mono mb-2 font-bold">
-                    <Clock className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-                    <span>{p.start_time || '09:00 AM'}</span>
-                  </div>
+                  <h4 className="text-base font-bold text-slate-900 mb-2">{p.name}</h4>
 
                   {/* Compact Winners Podium */}
                   {p.winners && p.winners.length > 0 && (

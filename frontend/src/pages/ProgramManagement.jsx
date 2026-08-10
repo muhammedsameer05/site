@@ -306,10 +306,6 @@ export default function ProgramManagement() {
 
                 <div className="flex items-center space-x-3 text-xs text-slate-500 font-mono mb-2 font-bold">
                   <span className="flex items-center space-x-1">
-                    <Clock className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-                    <span>{p.start_time || '09:00'} - {p.end_time || '10:30'}</span>
-                  </span>
-                  <span className="flex items-center space-x-1">
                     <Users className="w-3.5 h-3.5 text-blue-600 shrink-0" />
                     <span>{p.participant_count || 0} / {p.max_participants || 20}</span>
                   </span>
@@ -687,27 +683,7 @@ export default function ProgramManagement() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block mb-1 text-slate-900 font-bold">Start Time</label>
-                  <input 
-                    type="time"
-                    value={formData.start_time}
-                    onChange={e => setFormData({ ...formData, start_time: e.target.value })}
-                    className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-slate-900 font-mono font-bold focus:border-emerald-500 focus:outline-none"
-                  />
-                </div>
 
-                <div>
-                  <label className="block mb-1 text-slate-900 font-bold">End Time</label>
-                  <input 
-                    type="time"
-                    value={formData.end_time}
-                    onChange={e => setFormData({ ...formData, end_time: e.target.value })}
-                    className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-slate-900 font-mono font-bold focus:border-emerald-500 focus:outline-none"
-                  />
-                </div>
-              </div>
 
               <div className="flex items-center justify-end space-x-3 pt-4 border-t border-slate-200">
                 <button
