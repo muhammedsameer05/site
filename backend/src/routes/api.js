@@ -434,6 +434,56 @@ router.get('/houses', async (req, res) => {
   }
 });
 
+router.get('/houses/:id/breakdown', async (req, res) => {
+  try {
+    const houseId = req.params.id;
+    const house = await get('SELECT * FROM houses WHERE id = ? OR CAST(id AS TEXT) = CAST(? AS TEXT)', [houseId, houseId]);
+    if (!house) return res.status(404).json({ error: 'House not found' });
+
+    // Fetch all winning results for students belonging to this house
+    const results = await all(`
+      SELECT r.*, 
+             s.name as student_name, 
+             s.student_id as student_code, 
+             s.chest_no, 
+             s.class_name,
+             p.name as program_name, 
+             p.code as program_code,
+             c.name as category_name
+      FROM results r
+      JOIN students s ON (
+        CAST(r.student_id AS TEXT) = CAST(s.id AS TEXT) OR 
+        r.student_id = s.student_id OR 
+        r.student_id = s.admission_no OR
+        s.name LIKE r.student_id
+      )
+      JOIN programs p ON (
+        CAST(r.program_id AS TEXT) = CAST(p.id AS TEXT) OR 
+        r.program_id = p.code
+      )
+      LEFT JOIN categories c ON p.category_id = c.id
+      WHERE (s.house_id = ? OR CAST(s.house_id AS TEXT) = CAST(? AS TEXT))
+        AND r.prize IN ('1st', '2nd', '3rd')
+      ORDER BY r.id DESC
+    `, [houseId, houseId]);
+
+    // Fetch manual point adjustment audit logs
+    const adjustments = await all(`
+      SELECT * FROM audit_logs 
+      WHERE (details LIKE ? OR action LIKE ?)
+      ORDER BY id DESC
+    `, [`%House ID ${houseId}%`, `%House Live Point Adjustment%`]);
+
+    res.json({
+      house,
+      results: results || [],
+      adjustments: adjustments || []
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 router.post('/houses', async (req, res) => {
   try {
     const { name, code, color_hex, motto, captain_name } = req.body;

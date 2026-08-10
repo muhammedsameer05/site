@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Hero from '../components/Hero';
+import HouseBreakdownModal from '../components/HouseBreakdownModal';
 import { 
   Trophy, Calendar, Clock, ArrowRight, Award, Sparkles, Image as ImageIcon, Edit3, Check, Plus, Minus
 } from 'lucide-react';
@@ -15,6 +16,7 @@ export default function HomePage({ onNavigate }) {
   const [gallery, setGallery] = useState([]);
   const [editingScoreHouseId, setEditingScoreHouseId] = useState(null);
   const [inputScore, setInputScore] = useState('');
+  const [selectedHouseBreakdownId, setSelectedHouseBreakdownId] = useState(null);
 
   const loadData = () => {
     fetch('/api/houses', { cache: 'no-store' })
@@ -170,56 +172,41 @@ export default function HomePage({ onNavigate }) {
           {houses.map((house, idx) => (
             <div 
               key={house.id} 
-              className="glass-panel card-hover-effect p-5 rounded-2xl border bg-white shadow-sm flex flex-col justify-between"
+              onClick={() => setSelectedHouseBreakdownId(house.id)}
+              className="glass-panel card-hover-effect btn-interactive p-5 rounded-2xl border bg-white shadow-sm flex flex-col justify-between cursor-pointer group"
               style={{ borderColor: `${house.color_hex}60` }}
+              title="Click to view full house score breakdown & winner results"
             >
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <span className="w-8 h-8 rounded-full flex items-center justify-center text-white font-extrabold text-sm shadow-md transition-transform duration-300 hover:scale-110" style={{ backgroundColor: house.color_hex }}>
+                  <span className="w-8 h-8 rounded-full flex items-center justify-center text-white font-extrabold text-sm shadow-md transition-transform duration-300 group-hover:scale-110" style={{ backgroundColor: house.color_hex }}>
                     #{idx + 1}
                   </span>
-                  <span className="text-xs font-mono font-bold text-slate-500">{house.code}</span>
+                  <span className="text-[10px] font-mono font-black text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">{house.code}</span>
                 </div>
-                <h3 className="text-lg font-extrabold mb-1" style={{ color: house.color_hex }}>
+                <h3 className="text-lg font-extrabold mb-1 group-hover:underline" style={{ color: house.color_hex }}>
                   {house.name}
                 </h3>
-                <p className="text-xs text-slate-500 italic mb-4 line-clamp-1 font-medium">{house.motto || 'Virtue & Faith'}</p>
+                <p className="text-xs text-slate-500 italic mb-3 line-clamp-1 font-medium">{house.motto || 'Virtue & Faith'}</p>
               </div>
               
               <div>
                 <div className="flex items-center justify-between border-t border-slate-200 pt-3">
                   <span className="text-xs font-bold text-slate-600">Total Points</span>
                   
-                  {isAdmin && editingScoreHouseId === house.id ? (
-                    <div className="flex items-center space-x-1">
-                      <input
-                        type="number"
-                        autoFocus
-                        value={inputScore}
-                        onChange={(e) => setInputScore(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') handleUpdateHouseScore(house.id, inputScore);
-                          if (e.key === 'Escape') setEditingScoreHouseId(null);
-                        }}
-                        className="w-16 px-1.5 py-0.5 border-2 border-emerald-500 rounded text-center font-mono font-black text-sm text-emerald-950 bg-white"
-                      />
-                      <button
-                        onClick={() => handleUpdateHouseScore(house.id, inputScore)}
-                        className="p-1 rounded bg-emerald-600 text-white hover:bg-emerald-700"
-                        title="Save Score"
-                      >
-                        <Check className="w-3.5 h-3.5" />
-                      </button>
+                  <div className="flex items-center">
+                    <div className="px-5 py-1.5 bg-emerald-50/60 border border-slate-200 rounded-xl shadow-xs text-center min-w-16 flex items-center justify-center">
+                      <span className="text-2xl font-black emerald-gradient-text font-mono">
+                        {house.total_points || 0}
+                      </span>
                     </div>
-                  ) : (
-                    <div className="flex items-center">
-                      <div className="px-5 py-1.5 bg-emerald-50/60 border border-slate-200 rounded-xl shadow-xs text-center min-w-16 flex items-center justify-center">
-                        <span className="text-2xl font-black emerald-gradient-text font-mono">
-                          {house.total_points || 0}
-                        </span>
-                      </div>
-                    </div>
-                  )}
+                  </div>
+                </div>
+
+                <div className="mt-2 text-right">
+                  <span className="text-[10px] font-black text-emerald-700 underline group-hover:text-emerald-900 transition">
+                    View Score Breakdown →
+                  </span>
                 </div>
               </div>
 
@@ -227,6 +214,14 @@ export default function HomePage({ onNavigate }) {
           ))}
         </div>
       </section>
+
+      {/* House Breakdown Modal */}
+      {selectedHouseBreakdownId && (
+        <HouseBreakdownModal 
+          houseId={selectedHouseBreakdownId} 
+          onClose={() => setSelectedHouseBreakdownId(null)} 
+        />
+      )}
 
       {/* Upcoming & Completed Programs Grid */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

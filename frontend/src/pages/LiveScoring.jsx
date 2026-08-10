@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Trophy, Radio, Sparkles, Award, RefreshCw, Search, Calendar, User, Shield } from 'lucide-react';
 import { io } from 'socket.io-client';
 import confetti from 'canvas-confetti';
+import HouseBreakdownModal from '../components/HouseBreakdownModal';
 
 export default function LiveScoring() {
   const [houses, setHouses] = useState([]);
@@ -9,6 +10,7 @@ export default function LiveScoring() {
   const [results, setResults] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedHouseBreakdownId, setSelectedHouseBreakdownId] = useState(null);
   const [liveLog, setLiveLog] = useState([
     { id: 1, time: 'System Ready', text: 'Live scoring websocket stream active. Real-time updates enabled.' }
   ]);
@@ -119,19 +121,21 @@ export default function LiveScoring() {
           {houses.map((house, idx) => (
             <div
               key={house.id}
-              className="glass-panel p-6 rounded-3xl border-2 bg-white shadow-md relative overflow-hidden flex flex-col justify-between"
+              onClick={() => setSelectedHouseBreakdownId(house.id)}
+              className="glass-panel p-6 rounded-3xl border-2 bg-white shadow-md relative overflow-hidden flex flex-col justify-between cursor-pointer hover:shadow-xl transition-all duration-300 group"
               style={{ borderColor: `${house.color_hex}80` }}
+              title="Click to view full house score breakdown & winner results"
             >
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center space-x-3">
                   <span 
-                    className="w-12 h-12 rounded-2xl flex items-center justify-center font-black text-white text-xl shadow-md"
+                    className="w-12 h-12 rounded-2xl flex items-center justify-center font-black text-white text-xl shadow-md transition-transform duration-300 group-hover:scale-110"
                     style={{ backgroundColor: house.color_hex }}
                   >
                     #{idx + 1}
                   </span>
                   <div>
-                    <h3 className="text-2xl font-black" style={{ color: house.color_hex }}>
+                    <h3 className="text-2xl font-black group-hover:underline" style={{ color: house.color_hex }}>
                       {house.name}
                     </h3>
                     <p className="text-xs text-slate-500 font-mono font-bold">Code: {house.code}</p>
@@ -150,12 +154,20 @@ export default function LiveScoring() {
 
               <div className="text-xs text-slate-600 font-medium border-t border-slate-100 pt-3 flex justify-between items-center">
                 <span className="italic">"{house.motto || 'Faith & Devotion'}"</span>
-                <span className="font-bold text-slate-800 font-mono">Captain: {house.captain_name || 'N/A'}</span>
+                <span className="font-bold text-emerald-700 underline text-xs group-hover:text-emerald-900 transition">View Breakdown →</span>
               </div>
             </div>
           ))}
         </div>
       </div>
+
+      {/* House Breakdown Modal */}
+      {selectedHouseBreakdownId && (
+        <HouseBreakdownModal 
+          houseId={selectedHouseBreakdownId} 
+          onClose={() => setSelectedHouseBreakdownId(null)} 
+        />
+      )}
 
       {/* SECTION 2: OFFICIAL COMPETITION RESULTS & STUDENT WINNERS */}
       <div className="space-y-6 pt-4">
