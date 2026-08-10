@@ -103,7 +103,6 @@ export default function Timetable() {
                 <th className="p-4">Venue / Stage</th>
                 <th className="p-4">Program & Code</th>
                 <th className="p-4">Category & Age</th>
-                <th className="p-4 text-center">Status</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -122,17 +121,6 @@ export default function Timetable() {
                   <td className="p-4 font-mono">
                     <span className="px-2 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-300 font-bold">
                       {p.category_name} ({p.age_group})
-                    </span>
-                  </td>
-                  <td className="p-4 text-center">
-                    <span className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase ${
-                      p.status === 'running' 
-                        ? 'bg-amber-100 text-amber-900 border border-amber-300 animate-pulse'
-                        : p.status === 'completed'
-                        ? 'bg-emerald-100 text-emerald-900 border border-emerald-300'
-                        : 'bg-slate-100 text-slate-600 border border-slate-200'
-                    }`}>
-                      {p.status}
                     </span>
                   </td>
                 </tr>

@@ -206,15 +206,6 @@ export default function HomePage({ onNavigate }) {
                     <span className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-100 text-emerald-900 border border-emerald-300">
                       {p.category_name} • {p.type || 'individual'}
                     </span>
-                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase ${
-                      p.status === 'running' 
-                        ? 'bg-amber-100 text-amber-900 border border-amber-300 animate-pulse'
-                        : p.status === 'completed'
-                        ? 'bg-emerald-100 text-emerald-900 border border-emerald-300'
-                        : 'bg-slate-100 text-slate-600 border border-slate-200'
-                    }`}>
-                      {p.status}
-                    </span>
                   </div>
 
                   <h4 className="text-base font-bold text-slate-900 mb-1">{p.name}</h4>

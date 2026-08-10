@@ -355,34 +355,8 @@ export default function ProgramManagement() {
                   </div>
                 )}
               </div>
-
-            {/* Status Controls */}
-            <div className="flex items-center justify-between border-t border-slate-200 pt-3">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700">Status: {p.status}</span>
-
-              {isAdmin && (
-                <div className="flex items-center space-x-1">
-                  {p.status !== 'running' && (
-                    <button
-                      onClick={() => updateStatus(p.id, 'running')}
-                      className="px-2.5 py-1 rounded bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 text-[10px] font-bold"
-                    >
-                      Start Live
-                    </button>
-                  )}
-                  {p.status !== 'completed' && (
-                    <button
-                      onClick={() => updateStatus(p.id, 'completed')}
-                      className="px-2.5 py-1 rounded bg-emerald-100 hover:bg-emerald-200 text-emerald-900 border border-emerald-300 text-[10px] font-bold"
-                    >
-                      Mark Done
-                    </button>
-                  )}
-                </div>
-              )}
             </div>
           </div>
-        </div>
         ))}
       </div>
 
