@@ -865,4 +865,21 @@ router.delete('/gallery/:id', async (req, res) => {
   }
 });
 
+router.post('/settings/reset-demo-data', async (req, res) => {
+  try {
+    await run('DELETE FROM results');
+    await run('DELETE FROM marks');
+    await run('DELETE FROM program_participants');
+    await run('DELETE FROM program_judges');
+    await run('DELETE FROM students');
+    await run('DELETE FROM programs');
+    await run('DELETE FROM announcements');
+    await run('DELETE FROM gallery');
+    await run('UPDATE houses SET total_points = 0');
+    res.json({ success: true, message: 'All demo and test data permanently deleted' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;

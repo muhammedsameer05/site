@@ -212,12 +212,15 @@ async function initDb() {
     uploaded_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
 
-  // Unconditionally purge old demo unsplash photos from database
-  await run(`
-    DELETE FROM gallery 
-    WHERE url LIKE '%unsplash.com%' 
-       OR title IN ('Opening Ceremony & Qiraat Recitation', 'Duff Group Performance', 'Qiraat Recitation Competition Stage', 'Duff & Mawlid Group Performance')
-  `);
+  // Unconditionally purge sample/example demo data so database starts 100% clean
+  await run(`DELETE FROM results WHERE student_id IN (SELECT id FROM students WHERE admission_no LIKE 'ADM-%') OR program_id IN (1, 2, 3, 4, 5, 6, 7, 8)`);
+  await run(`DELETE FROM marks WHERE student_id IN (SELECT id FROM students WHERE admission_no LIKE 'ADM-%') OR program_id IN (1, 2, 3, 4, 5, 6, 7, 8)`);
+  await run(`DELETE FROM program_participants WHERE student_id IN (SELECT id FROM students WHERE admission_no LIKE 'ADM-%') OR chest_no IN (101, 102, 103, 104, 105, 201, 202, 203)`);
+  await run(`DELETE FROM students WHERE admission_no LIKE 'ADM-%' OR name IN ('Muhammed Danish', 'Ahmad Zayan', 'Fathima Zahra', 'Aisha Raihana', 'Omar Abdullah')`);
+  await run(`DELETE FROM program_judges WHERE program_id IN (1, 2, 3, 4, 5, 6, 7, 8)`);
+  await run(`DELETE FROM programs WHERE code IN ('PRG-101', 'PRG-102', 'PRG-103', 'PRG-104', 'PRG-105', 'PRG-106', 'PRG-107', 'PRG-108')`);
+  await run(`DELETE FROM announcements WHERE title IN ('Welcome to Milad-un-Nabi Festival 2026', 'Live Leaderboard Active')`);
+  await run(`DELETE FROM gallery WHERE url LIKE '%unsplash.com%' OR title IN ('Opening Ceremony & Qiraat Recitation', 'Duff Group Performance', 'Qiraat Recitation Competition Stage', 'Duff & Mawlid Group Performance')`);
 
   await run(`CREATE TABLE IF NOT EXISTS settings (
     key_name TEXT PRIMARY KEY,
