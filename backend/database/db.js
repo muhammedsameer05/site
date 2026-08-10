@@ -278,11 +278,22 @@ async function initDb() {
   const persistence = require('./persistence');
   await persistence.restoreFromDatabaseSnapshot({ run, get, all });
 
-  // Automatically purge legacy sample demo students so deleted demo data disappears immediately
+  // Automatically purge legacy sample demo students and sample results so deleted demo data disappears immediately
   try {
     await run("DELETE FROM students WHERE admission_no LIKE 'ADM-2024-%' OR name IN ('Muhammed Danish', 'Ahmad Zayan', 'Fathima Zahra', 'Aisha Raihana', 'Omar Abdullah')");
     await run("DELETE FROM program_participants WHERE student_id IN (1,2,3,4,5)");
     await run("DELETE FROM results WHERE student_id IN (1,2,3,4,5)");
+    await run("DELETE FROM marks WHERE student_id IN (1,2,3,4,5)");
+    
+    // Recalculate true house points dynamically from current valid results
+    await run('UPDATE houses SET total_points = 0');
+    const validResults = await all('SELECT r.points_awarded, s.house_id FROM results r JOIN students s ON (r.student_id = s.id OR r.student_id = s.student_id OR CAST(r.student_id AS TEXT) = CAST(s.id AS TEXT))');
+    for (let r of validResults) {
+      if (r.house_id) {
+        await run('UPDATE houses SET total_points = total_points + ? WHERE id = ?', [r.points_awarded, r.house_id]);
+      }
+    }
+
     await persistence.syncDatabaseSnapshot({ run, get, all });
   } catch (e) {}
 

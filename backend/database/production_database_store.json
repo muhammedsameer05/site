@@ -130,64 +130,7 @@
       "created_at": "2026-08-07 20:53:05"
     }
   ],
-  "program_participants": [
-    {
-      "id": 1,
-      "program_id": 1,
-      "student_id": 1,
-      "chest_no": 101,
-      "attendance": "present"
-    },
-    {
-      "id": 2,
-      "program_id": 1,
-      "student_id": 2,
-      "chest_no": 102,
-      "attendance": "present"
-    },
-    {
-      "id": 3,
-      "program_id": 1,
-      "student_id": 3,
-      "chest_no": 103,
-      "attendance": "present"
-    },
-    {
-      "id": 4,
-      "program_id": 1,
-      "student_id": 4,
-      "chest_no": 104,
-      "attendance": "present"
-    },
-    {
-      "id": 5,
-      "program_id": 1,
-      "student_id": 5,
-      "chest_no": 105,
-      "attendance": "present"
-    },
-    {
-      "id": 6,
-      "program_id": 4,
-      "student_id": 1,
-      "chest_no": 201,
-      "attendance": "present"
-    },
-    {
-      "id": 7,
-      "program_id": 4,
-      "student_id": 2,
-      "chest_no": 202,
-      "attendance": "present"
-    },
-    {
-      "id": 8,
-      "program_id": 4,
-      "student_id": 3,
-      "chest_no": 203,
-      "attendance": "present"
-    }
-  ],
+  "program_participants": [],
   "houses": [
     {
       "id": 1,
@@ -196,7 +139,7 @@
       "color_hex": "#10B981",
       "motto": "Courage and Devotion in Faith",
       "captain_name": "Ahmad Bin Ziyad",
-      "total_points": 145,
+      "total_points": 0,
       "created_at": "2026-08-07 20:53:05"
     },
     {
@@ -206,7 +149,7 @@
       "color_hex": "#3B82F6",
       "motto": "Knowledge is Light and Guidance",
       "captain_name": "Muhammed Fayaz",
-      "total_points": 132,
+      "total_points": 0,
       "created_at": "2026-08-07 20:53:05"
     }
   ],
@@ -277,38 +220,7 @@
       "location": "Madrasa Courtyard Area"
     }
   ],
-  "results": [
-    {
-      "id": 1,
-      "program_id": 4,
-      "student_id": 1,
-      "total_score": 97.5,
-      "prize": "1st",
-      "points_awarded": 10,
-      "tie_breaker_note": null,
-      "published_at": "2026-08-07 20:53:05"
-    },
-    {
-      "id": 2,
-      "program_id": 4,
-      "student_id": 2,
-      "total_score": 90,
-      "prize": "2nd",
-      "points_awarded": 7,
-      "tie_breaker_note": null,
-      "published_at": "2026-08-07 20:53:05"
-    },
-    {
-      "id": 3,
-      "program_id": 4,
-      "student_id": 3,
-      "total_score": 83.5,
-      "prize": "3rd",
-      "points_awarded": 5,
-      "tie_breaker_note": null,
-      "published_at": "2026-08-07 20:53:05"
-    }
-  ],
+  "results": [],
   "announcements": [
     {
       "id": 1,
@@ -347,59 +259,7 @@
       "uploaded_at": "2026-08-07 20:53:05"
     }
   ],
-  "marks": [
-    {
-      "id": 1,
-      "program_id": 4,
-      "student_id": 1,
-      "judge_id": 2,
-      "presentation": 14,
-      "pronunciation": 14.5,
-      "confidence": 13,
-      "voice": 13.5,
-      "content": 14,
-      "memorization": 10,
-      "time_management": 9.5,
-      "overall_impression": 9,
-      "total_mark": 97.5,
-      "status": "final",
-      "submitted_at": "2026-08-07 20:53:05"
-    },
-    {
-      "id": 2,
-      "program_id": 4,
-      "student_id": 2,
-      "judge_id": 2,
-      "presentation": 13,
-      "pronunciation": 13,
-      "confidence": 12.5,
-      "voice": 12,
-      "content": 13,
-      "memorization": 9,
-      "time_management": 9,
-      "overall_impression": 8.5,
-      "total_mark": 90,
-      "status": "final",
-      "submitted_at": "2026-08-07 20:53:05"
-    },
-    {
-      "id": 3,
-      "program_id": 4,
-      "student_id": 3,
-      "judge_id": 2,
-      "presentation": 12,
-      "pronunciation": 12.5,
-      "confidence": 11.5,
-      "voice": 11,
-      "content": 12,
-      "memorization": 8.5,
-      "time_management": 8,
-      "overall_impression": 8,
-      "total_mark": 83.5,
-      "status": "final",
-      "submitted_at": "2026-08-07 20:53:05"
-    }
-  ],
+  "marks": [],
   "audit_logs": [],
-  "last_synced": "2026-08-10T16:40:37.332Z"
+  "last_synced": "2026-08-10T18:00:00.000Z"
 }
