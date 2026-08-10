@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Plus, Users, Clock, Edit, Trash2, Award } from 'lucide-react';
+import { Calendar, Plus, Users, Clock, Edit, Trash2, Award, Trophy, CheckCircle, X, Sparkles } from 'lucide-react';
 
 export default function ProgramManagement() {
   const [programs, setPrograms] = useState([]);
@@ -18,6 +18,17 @@ export default function ProgramManagement() {
     max_participants: 15,
     status: 'pending'
   });
+
+  // Modal & state for adding 1st, 2nd, 3rd winners directly
+  const [showWinnersModal, setShowWinnersModal] = useState(false);
+  const [targetProgramForWinners, setTargetProgramForWinners] = useState(null);
+  const [allStudentsList, setAllStudentsList] = useState([]);
+  const [winnersForm, setWinnersForm] = useState({
+    first_student_id: '',
+    second_student_id: '',
+    third_student_id: ''
+  });
+  const [winnersSaving, setWinnersSaving] = useState(false);
 
   const loadData = () => {
     fetch('/api/programs')
@@ -125,6 +136,68 @@ export default function ProgramManagement() {
       .catch(() => {});
   };
 
+  // Open Winners Assignment Modal
+  const handleOpenWinnersModal = (program) => {
+    setTargetProgramForWinners(program);
+
+    const existing1st = program.winners?.find(w => w.prize === '1st')?.student_id || '';
+    const existing2nd = program.winners?.find(w => w.prize === '2nd')?.student_id || '';
+    const existing3rd = program.winners?.find(w => w.prize === '3rd')?.student_id || '';
+
+    setWinnersForm({
+      first_student_id: existing1st,
+      second_student_id: existing2nd,
+      third_student_id: existing3rd
+    });
+
+    fetch('/api/students')
+      .then(res => res.json())
+      .then(data => {
+        const backendItems = Array.isArray(data) ? data : [];
+        const customItems = JSON.parse(localStorage.getItem('milad_custom_students') || '[]');
+        const deletedIds = JSON.parse(localStorage.getItem('milad_deleted_student_ids') || '[]');
+
+        const filteredBackend = backendItems.filter(s => !deletedIds.includes(String(s.id)));
+        const filteredCustom = customItems.filter(s => !deletedIds.includes(String(s.id)));
+
+        const merged = [...filteredCustom, ...filteredBackend];
+        const unique = Array.from(new Map(merged.map(s => [String(s.id || s.admission_no), s])).values());
+        setAllStudentsList(unique);
+      })
+      .catch(() => {
+        const cached = JSON.parse(localStorage.getItem('milad_cached_students') || '[]');
+        setAllStudentsList(cached);
+      });
+
+    setShowWinnersModal(true);
+  };
+
+  // Save manual winners
+  const handleSaveWinners = (e) => {
+    e.preventDefault();
+    if (!targetProgramForWinners) return;
+
+    setWinnersSaving(true);
+    const pId = targetProgramForWinners.id;
+
+    fetch(`/api/results/manual/${pId}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(winnersForm)
+    })
+      .then(res => res.json())
+      .then(() => {
+        setWinnersSaving(false);
+        setShowWinnersModal(false);
+        loadData();
+      })
+      .catch(() => {
+        setWinnersSaving(false);
+        setShowWinnersModal(false);
+        loadData();
+      });
+  };
+
   return (
     <div className="space-y-6">
       
@@ -135,15 +208,27 @@ export default function ProgramManagement() {
             <Calendar className="w-6 h-6 text-amber-400" />
             <span>Program & Competition Management</span>
           </h1>
-          <p className="text-xs text-slate-400 font-mono">Create, edit programs, assign judges, and manage live execution status</p>
+          <p className="text-xs text-slate-400 font-mono">Create, edit programs, assign 1st/2nd/3rd winners, and manage live execution status</p>
         </div>
 
         <button
           onClick={() => {
-            setFormData({ id: null, code: `PRG-${100 + programs.length + 1}`, name: '', category_id: 1, type: 'individual', venue_id: 1, program_date: '2026-08-15', start_time: '09:00', end_time: '10:30', max_participants: 15, status: 'pending' });
+            setFormData({
+              id: null,
+              code: `PRG-${Date.now().toString().slice(-4)}`,
+              name: '',
+              category_id: 1,
+              type: 'individual',
+              venue_id: 1,
+              program_date: '2026-08-15',
+              start_time: '09:00',
+              end_time: '10:30',
+              max_participants: 15,
+              status: 'pending'
+            });
             setShowModal(true);
           }}
-          className="flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs shadow-lg transition"
+          className="flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black text-xs shadow-lg transition"
         >
           <Plus className="w-4 h-4" />
           <span>Create New Program</span>
@@ -153,7 +238,7 @@ export default function ProgramManagement() {
       {/* Program Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {programs.map((p) => (
-          <div key={p.id} className="glass-panel p-5 rounded-2xl border border-slate-800 flex flex-col justify-between space-y-4 hover:border-amber-400/40 transition">
+          <div key={p.id} className="glass-panel p-5 rounded-2xl border border-slate-800 flex flex-col justify-between space-y-4 hover:border-amber-400/40 transition relative">
             
             <div>
               <div className="flex items-center justify-between mb-2">
@@ -168,7 +253,6 @@ export default function ProgramManagement() {
                 </span>
 
                 <div className="flex items-center space-x-2">
-                  {/* Edit & Delete Action Icons */}
                   <button
                     onClick={() => {
                       setFormData({
@@ -207,7 +291,7 @@ export default function ProgramManagement() {
                 {p.category_name || 'Category'} | <span className="capitalize font-bold text-amber-300">{p.type || 'individual'}</span>
               </p>
 
-              <div className="space-y-1 text-xs text-slate-400 font-mono border-t border-slate-800/80 pt-3">
+              <div className="space-y-1 text-xs text-slate-400 font-mono border-t border-slate-800/80 pt-3 mb-3">
                 <div className="flex items-center space-x-2">
                   <Clock className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
                   <span>{p.start_time || '09:00'} - {p.end_time || '10:30'}</span>
@@ -218,9 +302,18 @@ export default function ProgramManagement() {
                 </div>
               </div>
 
+              {/* Add 1st, 2nd, 3rd Winners Button */}
+              <button
+                onClick={() => handleOpenWinnersModal(p)}
+                className="w-full mb-3 py-2 px-3 rounded-xl bg-gradient-to-r from-amber-500/20 to-amber-600/30 hover:from-amber-500/30 hover:to-amber-600/40 text-amber-300 border border-amber-400/50 text-xs font-bold flex items-center justify-center space-x-2 transition shadow-sm"
+              >
+                <Trophy className="w-4 h-4 text-amber-400" />
+                <span>🏆 Add / Edit 1st, 2nd, 3rd Winners</span>
+              </button>
+
               {/* Winners Podium Display */}
               {p.winners && p.winners.length > 0 && (
-                <div className="mt-3 p-3 rounded-xl bg-slate-900/90 border border-amber-400/40 space-y-2">
+                <div className="p-3 rounded-xl bg-slate-900/90 border border-amber-400/40 space-y-2">
                   <div className="flex items-center space-x-1.5 text-[10px] font-bold uppercase tracking-widest text-amber-400 border-b border-slate-800 pb-1.5">
                     <Award className="w-3.5 h-3.5 text-amber-400" />
                     <span>Official Winners Podium</span>
@@ -275,111 +368,224 @@ export default function ProgramManagement() {
         ))}
       </div>
 
-      {/* Create / Edit Program Modal */}
-      {showModal && (
+      {/* Assign 1st, 2nd, 3rd Winners Modal */}
+      {showWinnersModal && targetProgramForWinners && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4 overflow-y-auto">
-          <div className="glass-panel w-full max-w-lg rounded-2xl border border-amber-400/40 p-6 shadow-2xl bg-slate-900 text-white my-8">
-            <h3 className="text-lg font-bold emerald-gradient-text mb-4">
-              {formData.id ? 'Edit Program Details' : 'Create New Program'}
-            </h3>
+          <div className="glass-panel p-6 rounded-3xl border border-amber-500/50 max-w-lg w-full bg-slate-900 shadow-2xl space-y-6">
             
-            <form onSubmit={handleSave} className="grid grid-cols-2 gap-4 text-xs">
-              <div className="col-span-2">
-                <label className="block text-slate-400 mb-1">Program Name</label>
-                <input
-                  type="text"
-                  required
-                  value={formData.name}
-                  onChange={e => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="Quran Recitation"
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-white"
-                />
-              </div>
-
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
               <div>
-                <label className="block text-slate-400 mb-1">Category</label>
+                <h3 className="text-lg font-extrabold text-white flex items-center space-x-2">
+                  <Trophy className="w-5 h-5 text-amber-400" />
+                  <span>Assign 1st, 2nd, 3rd Winners</span>
+                </h3>
+                <p className="text-xs text-amber-300 font-bold">{targetProgramForWinners.name}</p>
+              </div>
+              <button 
+                onClick={() => setShowWinnersModal(false)}
+                className="p-1 rounded-lg bg-slate-800 text-slate-400 hover:text-white"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveWinners} className="space-y-4">
+              
+              {/* 🥇 1st Place Selector */}
+              <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/40 space-y-1.5">
+                <label className="text-xs font-bold text-amber-300 flex items-center space-x-1.5">
+                  <span className="text-base">🥇</span>
+                  <span>1st Place Winner (10 Points)</span>
+                </label>
                 <select
-                  value={formData.category_id}
-                  onChange={e => setFormData({ ...formData, category_id: e.target.value })}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-white"
+                  value={winnersForm.first_student_id}
+                  onChange={e => setWinnersForm({ ...winnersForm, first_student_id: e.target.value })}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-white focus:border-amber-400"
                 >
-                  {categories.map(c => (
-                    <option key={c.id} value={c.id}>{c.name}</option>
+                  <option value="">-- Select 1st Place Student --</option>
+                  {allStudentsList.map(st => (
+                    <option key={st.id || st.admission_no} value={st.id || st.student_id}>
+                      {st.name} ({st.class_name} | {st.house_name || 'House'})
+                    </option>
                   ))}
                 </select>
               </div>
 
-              <div>
-                <label className="block text-slate-400 mb-1">Event Type</label>
+              {/* 🥈 2nd Place Selector */}
+              <div className="p-3.5 rounded-2xl bg-slate-800/80 border border-slate-600/40 space-y-1.5">
+                <label className="text-xs font-bold text-slate-200 flex items-center space-x-1.5">
+                  <span className="text-base">🥈</span>
+                  <span>2nd Place Winner (7 Points)</span>
+                </label>
                 <select
-                  value={formData.type}
-                  onChange={e => setFormData({ ...formData, type: e.target.value })}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-white font-semibold capitalize"
+                  value={winnersForm.second_student_id}
+                  onChange={e => setWinnersForm({ ...winnersForm, second_student_id: e.target.value })}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-white focus:border-amber-400"
                 >
-                  <option value="individual">Individual</option>
-                  <option value="group">Group</option>
+                  <option value="">-- Select 2nd Place Student --</option>
+                  {allStudentsList.map(st => (
+                    <option key={st.id || st.admission_no} value={st.id || st.student_id}>
+                      {st.name} ({st.class_name} | {st.house_name || 'House'})
+                    </option>
+                  ))}
                 </select>
               </div>
 
-              <div>
-                <label className="block text-slate-400 mb-1">Max Participants</label>
-                <input
-                  type="number"
-                  value={formData.max_participants}
-                  onChange={e => setFormData({ ...formData, max_participants: e.target.value })}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-white"
-                />
-              </div>
-
-              <div>
-                <label className="block text-slate-400 mb-1">Execution Status</label>
+              {/* 🥉 3rd Place Selector */}
+              <div className="p-3.5 rounded-2xl bg-amber-900/20 border border-amber-700/40 space-y-1.5">
+                <label className="text-xs font-bold text-amber-400 flex items-center space-x-1.5">
+                  <span className="text-base">🥉</span>
+                  <span>3rd Place Winner (5 Points)</span>
+                </label>
                 <select
-                  value={formData.status}
-                  onChange={e => setFormData({ ...formData, status: e.target.value })}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-white font-bold"
+                  value={winnersForm.third_student_id}
+                  onChange={e => setWinnersForm({ ...winnersForm, third_student_id: e.target.value })}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-white focus:border-amber-400"
                 >
-                  <option value="pending">Pending</option>
-                  <option value="running">Running (Live)</option>
-                  <option value="completed">Completed</option>
+                  <option value="">-- Select 3rd Place Student --</option>
+                  {allStudentsList.map(st => (
+                    <option key={st.id || st.admission_no} value={st.id || st.student_id}>
+                      {st.name} ({st.class_name} | {st.house_name || 'House'})
+                    </option>
+                  ))}
                 </select>
               </div>
 
-              <div>
-                <label className="block text-slate-400 mb-1">Start Time</label>
-                <input
-                  type="time"
-                  value={formData.start_time}
-                  onChange={e => setFormData({ ...formData, start_time: e.target.value })}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-white"
-                />
-              </div>
-
-              <div>
-                <label className="block text-slate-400 mb-1">End Time</label>
-                <input
-                  type="time"
-                  value={formData.end_time}
-                  onChange={e => setFormData({ ...formData, end_time: e.target.value })}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-white"
-                />
-              </div>
-
-              <div className="col-span-2 flex justify-end space-x-3 pt-2 border-t border-slate-800">
+              <div className="flex items-center justify-end space-x-3 pt-4 border-t border-slate-800">
                 <button
                   type="button"
-                  onClick={() => setShowModal(false)}
-                  className="px-4 py-2 rounded-xl glass-panel text-slate-400 hover:text-white"
+                  onClick={() => setShowWinnersModal(false)}
+                  className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold"
                 >
                   Cancel
                 </button>
+
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold"
+                  disabled={winnersSaving}
+                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black text-xs shadow-lg flex items-center space-x-2"
                 >
-                  {formData.id ? 'Save Program Changes' : 'Create Program'}
+                  <CheckCircle className="w-4 h-4" />
+                  <span>{winnersSaving ? 'Saving Winners...' : 'Save & Publish Winners'}</span>
                 </button>
               </div>
+
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Create / Edit Program Modal */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4 overflow-y-auto">
+          <div className="glass-panel p-6 rounded-3xl border border-emerald-500/40 max-w-lg w-full bg-slate-900 shadow-2xl space-y-4">
+            
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <h3 className="text-lg font-bold text-white">
+                {formData.id ? 'Edit Program' : 'Create New Program'}
+              </h3>
+              <button 
+                onClick={() => setShowModal(false)}
+                className="p-1 rounded-lg bg-slate-800 text-slate-400 hover:text-white"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleSave} className="space-y-4 text-xs font-semibold text-slate-300">
+              
+              <div>
+                <label className="block mb-1">Program Code</label>
+                <input 
+                  type="text"
+                  required
+                  value={formData.code}
+                  onChange={e => setFormData({ ...formData, code: e.target.value })}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-mono"
+                  placeholder="e.g. PRG-101"
+                />
+              </div>
+
+              <div>
+                <label className="block mb-1">Program Name / Title</label>
+                <input 
+                  type="text"
+                  required
+                  value={formData.name}
+                  onChange={e => setFormData({ ...formData, name: e.target.value })}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-bold"
+                  placeholder="e.g. Quran Recitation (Tilawat)"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block mb-1">Category</label>
+                  <select
+                    value={formData.category_id}
+                    onChange={e => setFormData({ ...formData, category_id: parseInt(e.target.value) })}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white"
+                  >
+                    {categories.map(c => (
+                      <option key={c.id} value={c.id}>{c.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block mb-1">Competition Type</label>
+                  <select
+                    value={formData.type}
+                    onChange={e => setFormData({ ...formData, type: e.target.value })}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white"
+                  >
+                    <option value="individual">Individual</option>
+                    <option value="group">Group</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block mb-1">Start Time</label>
+                  <input 
+                    type="time"
+                    value={formData.start_time}
+                    onChange={e => setFormData({ ...formData, start_time: e.target.value })}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-mono"
+                  />
+                </div>
+
+                <div>
+                  <label className="block mb-1">End Time</label>
+                  <input 
+                    type="time"
+                    value={formData.end_time}
+                    onChange={e => setFormData({ ...formData, end_time: e.target.value })}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-mono"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end space-x-3 pt-4 border-t border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setShowModal(false)}
+                  className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 font-bold"
+                >
+                  Cancel
+                </button>
+
+                <button
+                  type="submit"
+                  className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold shadow-lg"
+                >
+                  {formData.id ? 'Save Changes' : 'Create Program'}
+                </button>
+              </div>
+
+            </form>
+
           </div>
         </div>
       )}

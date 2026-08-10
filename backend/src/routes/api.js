@@ -603,6 +603,58 @@ router.post('/results/calculate/:programId', async (req, res) => {
   }
 });
 
+router.post('/results/manual/:programId', async (req, res) => {
+  try {
+    const { programId } = req.params;
+    const { first_student_id, second_student_id, third_student_id } = req.body;
+
+    await run('DELETE FROM results WHERE (program_id = ? OR CAST(program_id AS TEXT) = CAST(? AS TEXT))', [programId, programId]);
+
+    const winnersInput = [
+      { studentId: first_student_id, prize: '1st', points: 10, score: 100 },
+      { studentId: second_student_id, prize: '2nd', points: 7, score: 90 },
+      { studentId: third_student_id, prize: '3rd', points: 5, score: 80 }
+    ];
+
+    for (let w of winnersInput) {
+      if (!w.studentId) continue;
+
+      const studentObj = await get(`
+        SELECT id FROM students 
+        WHERE id = ? OR student_id = ? OR admission_no = ? OR CAST(id AS TEXT) = CAST(? AS TEXT)
+      `, [w.studentId, w.studentId, w.studentId, w.studentId]);
+
+      const targetDbId = studentObj ? studentObj.id : w.studentId;
+
+      await run(`
+        INSERT INTO results (program_id, student_id, total_score, prize, points_awarded)
+        VALUES (?, ?, ?, ?, ?)
+      `, [programId, targetDbId, w.score, w.prize, w.points]);
+    }
+
+    // Reset and recalculate house total points across all results
+    await run('UPDATE houses SET total_points = 0');
+    const allResults = await all('SELECT r.points_awarded, s.house_id FROM results r JOIN students s ON (r.student_id = s.id OR r.student_id = s.student_id OR CAST(r.student_id AS TEXT) = CAST(s.id AS TEXT))');
+    for (let r of allResults) {
+      if (r.house_id) {
+        await run('UPDATE houses SET total_points = total_points + ? WHERE id = ?', [r.points_awarded, r.house_id]);
+      }
+    }
+
+    await run("UPDATE programs SET status = 'completed' WHERE (id = ? OR CAST(id AS TEXT) = CAST(? AS TEXT))", [programId, programId]);
+
+    const io = req.app.get('io');
+    if (io) {
+      io.emit('results_published', { programId });
+      io.emit('score_updated', { programId });
+    }
+
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 router.get('/results/program/:programId', async (req, res) => {
   try {
     let results = await all(`
