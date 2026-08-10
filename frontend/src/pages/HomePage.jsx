@@ -231,40 +231,6 @@ export default function HomePage({ onNavigate }) {
                     </div>
                   )}
                 </div>
-
-                {/* Admin Quick Live Score Adjustment Controls */}
-                {isAdmin && (
-                  <div className="mt-3 pt-2 border-t border-slate-100 grid grid-cols-4 gap-1">
-                    <button
-                      onClick={() => handleUpdateHouseScore(house.id, (house.total_points || 0) + 10)}
-                      className="py-1 px-1.5 rounded-lg bg-emerald-100 hover:bg-emerald-600 hover:text-white text-emerald-900 font-extrabold text-[11px] transition text-center"
-                      title="Add 10 Points"
-                    >
-                      +10
-                    </button>
-                    <button
-                      onClick={() => handleUpdateHouseScore(house.id, (house.total_points || 0) + 5)}
-                      className="py-1 px-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-500 hover:text-white text-emerald-800 font-extrabold text-[11px] transition text-center"
-                      title="Add 5 Points"
-                    >
-                      +5
-                    </button>
-                    <button
-                      onClick={() => handleUpdateHouseScore(house.id, (house.total_points || 0) + 1)}
-                      className="py-1 px-1.5 rounded-lg bg-teal-50 hover:bg-teal-600 hover:text-white text-teal-800 font-extrabold text-[11px] transition text-center"
-                      title="Add 1 Point"
-                    >
-                      +1
-                    </button>
-                    <button
-                      onClick={() => handleUpdateHouseScore(house.id, Math.max(0, (house.total_points || 0) - 5))}
-                      className="py-1 px-1.5 rounded-lg bg-rose-50 hover:bg-rose-500 hover:text-white text-rose-800 font-extrabold text-[11px] transition text-center"
-                      title="Deduct 5 Points"
-                    >
-                      -5
-                    </button>
-                  </div>
-                )}
               </div>
 
             </div>
