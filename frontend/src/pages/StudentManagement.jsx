@@ -28,6 +28,7 @@ export default function StudentManagement() {
     id: null,
     admission_no: '',
     name: '',
+    gender: 'male',
     category_name: 'Sub Junior',
     class_name: 'Class 6',
     house_id: 1,
@@ -74,6 +75,7 @@ export default function StudentManagement() {
       id: null,
       admission_no: '',
       name: '',
+      gender: 'male',
       category_name: 'Sub Junior',
       class_name: 'Class 6',
       house_id: houses[0]?.id || 1,
@@ -90,6 +92,7 @@ export default function StudentManagement() {
       id: student.id,
       admission_no: student.admission_no || '',
       name: student.name,
+      gender: student.gender || 'male',
       category_name: student.category_name || 'Sub Junior',
       class_name: student.class_name,
       house_id: student.house_id || 1,
@@ -231,6 +234,7 @@ export default function StudentManagement() {
               <tr>
                 <th className="p-4">Code No</th>
                 <th className="p-4">Student Name</th>
+                <th className="p-4">Gender</th>
                 <th className="p-4">Category</th>
                 <th className="p-4">Class</th>
                 <th className="p-4">House</th>
@@ -242,6 +246,15 @@ export default function StudentManagement() {
                 <tr key={s.id} className="hover:bg-emerald-50/30 transition">
                   <td className="p-4 font-mono text-emerald-700 font-bold">{s.admission_no || s.student_id}</td>
                   <td className="p-4 font-bold text-slate-900 text-sm">{s.name}</td>
+                  <td className="p-4 font-semibold text-slate-700">
+                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase border ${
+                      (s.gender || 'male').toLowerCase() === 'female'
+                        ? 'bg-pink-100 text-pink-900 border-pink-300'
+                        : 'bg-blue-100 text-blue-900 border-blue-300'
+                    }`}>
+                      {s.gender || 'male'}
+                    </span>
+                  </td>
                   <td className="p-4 font-semibold text-amber-900">
                     <span className="px-2.5 py-1 rounded-lg bg-amber-100 border border-amber-300 text-amber-900 text-[11px] font-bold">
                       {s.category_name || 'Kiddies'}
@@ -331,8 +344,20 @@ export default function StudentManagement() {
                 </div>
               </div>
 
-              {/* Row 2: Category, Class & House */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Row 2: Gender, Category, Class & House */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                  <label className="block text-slate-700 font-bold mb-1.5">Gender</label>
+                  <select
+                    value={formData.gender || 'male'}
+                    onChange={e => setFormData({ ...formData, gender: e.target.value })}
+                    className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-slate-900 font-bold focus:border-emerald-500 focus:outline-none"
+                  >
+                    <option value="male">Male (ആൺകുട്ടി)</option>
+                    <option value="female">Female (പെൺകുട്ടി)</option>
+                  </select>
+                </div>
+
                 <div>
                   <label className="block text-slate-700 font-bold mb-1.5">Category</label>
                   <select
