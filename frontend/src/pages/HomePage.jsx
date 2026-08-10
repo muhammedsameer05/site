@@ -142,66 +142,58 @@ export default function HomePage({ onNavigate }) {
             No scheduled competition programs added yet. Admin can create new programs in Program Management.
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {programs.map((p) => (
-              <div key={p.id} className="glass-panel p-5 rounded-2xl border border-slate-800/90 flex flex-col justify-between space-y-4 hover:border-amber-400/40 transition shadow-lg h-full">
+              <div key={p.id} className="glass-panel p-4 rounded-xl border border-slate-800/80 hover:border-amber-400/40 transition shadow-md flex flex-col justify-between">
                 
-                <div className="flex flex-col justify-between h-full">
-                  <div>
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-md bg-slate-900/90 text-emerald-400 border border-emerald-500/30">
-                        {p.category_name} • {p.type || 'individual'}
-                      </span>
-                      <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${
-                        p.status === 'running' 
-                          ? 'bg-amber-500/20 text-amber-300 border border-amber-400/40 animate-pulse'
-                          : p.status === 'completed'
-                          ? 'bg-emerald-950/80 text-emerald-300 border border-emerald-500/40'
-                          : 'bg-slate-800/80 text-slate-300 border border-slate-700'
-                      }`}>
-                        {p.status}
-                      </span>
-                    </div>
-
-                    <h4 className="text-lg font-extrabold text-white mb-1.5">{p.name}</h4>
-                    <div className="flex items-center space-x-4 text-xs text-slate-400 font-mono mb-3">
-                      <span className="flex items-center space-x-1.5">
-                        <Clock className="w-3.5 h-3.5 text-amber-400" />
-                        <span>{p.start_time || '09:00 AM'}</span>
-                      </span>
-                    </div>
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-900 text-emerald-400 border border-emerald-500/30">
+                      {p.category_name} • {p.type || 'individual'}
+                    </span>
+                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase ${
+                      p.status === 'running' 
+                        ? 'bg-amber-500/20 text-amber-300 border border-amber-400/40 animate-pulse'
+                        : p.status === 'completed'
+                        ? 'bg-emerald-950/80 text-emerald-300 border border-emerald-500/40'
+                        : 'bg-slate-800 text-slate-400'
+                    }`}>
+                      {p.status}
+                    </span>
                   </div>
 
-                  {/* Winners Podium Display or Clean Placeholder for Equal Card Height */}
-                  {p.winners && p.winners.length > 0 ? (
-                    <div className="p-3.5 rounded-xl bg-gradient-to-b from-slate-900/90 to-slate-950/90 border border-amber-400/30 shadow-md space-y-2">
-                      <div className="flex items-center space-x-1.5 text-[10px] font-black uppercase tracking-widest text-amber-400 border-b border-amber-400/20 pb-1.5">
-                        <Award className="w-3.5 h-3.5 text-amber-400" />
-                        <span>Official Winners Podium</span>
+                  <h4 className="text-base font-bold text-white mb-1">{p.name}</h4>
+                  <div className="flex items-center space-x-2 text-xs text-slate-400 font-mono mb-2">
+                    <Clock className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                    <span>{p.start_time || '09:00 AM'}</span>
+                  </div>
+
+                  {/* Compact Winners Podium */}
+                  {p.winners && p.winners.length > 0 && (
+                    <div className="mt-2.5 p-2.5 rounded-lg bg-slate-950/80 border border-amber-400/30 space-y-1.5">
+                      <div className="flex items-center space-x-1.5 text-[9px] font-black uppercase tracking-widest text-amber-400 border-b border-slate-800/80 pb-1">
+                        <Award className="w-3 h-3 text-amber-400" />
+                        <span>Winners Podium</span>
                       </div>
-                      <div className="space-y-1.5">
+                      <div className="space-y-1">
                         {p.winners.map((w, idx) => (
                           <div key={idx} className="flex items-center justify-between text-xs">
                             <div className="flex items-center space-x-2">
-                              <span className={`px-2 py-0.5 rounded font-black text-[10px] uppercase shadow-sm ${
-                                w.prize === '1st' ? 'bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950' :
-                                w.prize === '2nd' ? 'bg-gradient-to-r from-slate-200 to-slate-300 text-slate-950' :
-                                'bg-gradient-to-r from-amber-700 to-amber-800 text-amber-100'
+                              <span className={`px-1.5 py-0.2 rounded font-black text-[9px] uppercase ${
+                                w.prize === '1st' ? 'bg-amber-400 text-slate-950' :
+                                w.prize === '2nd' ? 'bg-slate-300 text-slate-950' :
+                                'bg-amber-700 text-white'
                               }`}>
                                 {w.prize === '1st' ? '🥇 1st' : w.prize === '2nd' ? '🥈 2nd' : '🥉 3rd'}
                               </span>
-                              <span className="text-white font-extrabold">{w.student_name}</span>
+                              <span className="text-white font-bold">{w.student_name}</span>
                             </div>
-                            <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full border shadow-sm" style={{ color: w.house_color || '#10b981', borderColor: `${w.house_color || '#10b981'}60`, backgroundColor: `${w.house_color || '#10b981'}15` }}>
+                            <span className="text-[9px] font-bold px-1.5 py-0.2 rounded border" style={{ color: w.house_color || '#10b981', borderColor: `${w.house_color || '#10b981'}50` }}>
                               {w.house_name}
                             </span>
                           </div>
                         ))}
                       </div>
-                    </div>
-                  ) : (
-                    <div className="p-3.5 rounded-xl bg-slate-900/30 border border-dashed border-slate-800/80 flex items-center justify-center text-[11px] text-slate-500 font-mono min-h-[110px]">
-                      {p.status === 'running' ? '⏳ Competition currently in progress...' : '📅 Results pending winner announcement'}
                     </div>
                   )}
 
