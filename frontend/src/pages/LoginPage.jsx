@@ -90,15 +90,15 @@ export default function LoginPage({ onLoginSuccess }) {
       
       {/* Title */}
       <div className="text-center mb-8">
-        <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-emerald-600 to-amber-400 p-0.5 mx-auto mb-3 shadow-xl flex items-center justify-center">
-          <div className="w-full h-full bg-slate-900 rounded-full flex items-center justify-center">
-            <span className="text-2xl font-black gold-gradient-text font-serif">م</span>
+        <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-emerald-500 to-amber-400 p-0.5 mx-auto mb-3 shadow-md flex items-center justify-center">
+          <div className="w-full h-full bg-white rounded-full flex items-center justify-center border border-emerald-200">
+            <span className="text-2xl font-black emerald-gradient-text font-serif">م</span>
           </div>
         </div>
-        <h1 className="text-3xl font-black text-white tracking-tight">
-          Madrasa Milad <span className="gold-gradient-text">Authentication Portals</span>
+        <h1 className="text-3xl font-black text-slate-900 tracking-tight">
+          Madrasa Milad <span className="emerald-gradient-text">Authentication Portals</span>
         </h1>
-        <p className="text-xs text-slate-400 font-mono mt-1">Select your designated portal to sign in with valid credentials</p>
+        <p className="text-xs text-slate-500 font-mono mt-1 font-bold">Select your designated portal to sign in with valid credentials</p>
       </div>
 
       {/* 2 Portal Selector Cards */}
@@ -109,16 +109,16 @@ export default function LoginPage({ onLoginSuccess }) {
           onClick={() => { setActivePortal('admin'); setErrorMsg(null); }}
           className={`glass-panel p-5 rounded-2xl border-2 cursor-pointer transition-all duration-300 ${
             activePortal === 'admin' 
-              ? 'border-amber-400 bg-emerald-950/40 shadow-2xl scale-105' 
-              : 'border-slate-800 bg-slate-900/60 hover:border-slate-700'
+              ? 'border-emerald-500 bg-emerald-50/80 shadow-md scale-105' 
+              : 'border-slate-200 bg-white hover:border-emerald-300'
           }`}
         >
-          <div className="p-3 rounded-xl bg-amber-500/20 text-amber-400 w-fit mb-3">
+          <div className="p-3 rounded-xl bg-emerald-100 text-emerald-800 w-fit mb-3">
             <Shield className="w-6 h-6" />
           </div>
-          <h3 className="text-lg font-extrabold text-white mb-1">Admin Portal</h3>
-          <p className="text-xs text-slate-400 mb-4 leading-relaxed">Requires Admin account. Full access to management modules.</p>
-          <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded bg-amber-500/20 text-amber-300 border border-amber-400/40 inline-block">
+          <h3 className="text-lg font-extrabold text-slate-900 mb-1">Admin Portal</h3>
+          <p className="text-xs text-slate-600 mb-4 leading-relaxed font-medium">Requires Admin account. Full access to management modules.</p>
+          <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded bg-emerald-100 text-emerald-900 border border-emerald-300 inline-block">
             Sign In Required
           </span>
         </div>
@@ -128,16 +128,16 @@ export default function LoginPage({ onLoginSuccess }) {
           onClick={() => { setActivePortal('student'); setErrorMsg(null); }}
           className={`glass-panel p-5 rounded-2xl border-2 cursor-pointer transition-all duration-300 ${
             activePortal === 'student' 
-              ? 'border-amber-400 bg-emerald-950/40 shadow-2xl scale-105' 
-              : 'border-slate-800 bg-slate-900/60 hover:border-slate-700'
+              ? 'border-emerald-500 bg-emerald-50/80 shadow-md scale-105' 
+              : 'border-slate-200 bg-white hover:border-emerald-300'
           }`}
         >
-          <div className="p-3 rounded-xl bg-blue-500/20 text-blue-400 w-fit mb-3">
+          <div className="p-3 rounded-xl bg-blue-100 text-blue-800 w-fit mb-3">
             <User className="w-6 h-6" />
           </div>
-          <h3 className="text-lg font-extrabold text-white mb-1">Student Portal</h3>
-          <p className="text-xs text-slate-400 mb-4 leading-relaxed">Requires Student account. Access to personal details & ID card.</p>
-          <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded bg-blue-500/20 text-blue-300 border border-blue-500/40 inline-block">
+          <h3 className="text-lg font-extrabold text-slate-900 mb-1">Student Portal</h3>
+          <p className="text-xs text-slate-600 mb-4 leading-relaxed font-medium">Requires Student account. Access to personal details & ID card.</p>
+          <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded bg-blue-100 text-blue-900 border border-blue-300 inline-block">
             Sign In Required
           </span>
         </div>
@@ -145,22 +145,22 @@ export default function LoginPage({ onLoginSuccess }) {
       </div>
 
       {/* Form Login Box */}
-      <div className="glass-panel max-w-md mx-auto p-6 sm:p-8 rounded-3xl border border-amber-400/40 bg-slate-900/90 shadow-2xl">
-        <h2 className="text-xl font-extrabold text-white mb-1 flex items-center space-x-2">
-          <Lock className="w-5 h-5 text-amber-400" />
+      <div className="glass-panel max-w-md mx-auto p-6 sm:p-8 rounded-3xl border border-slate-200 bg-white shadow-xl">
+        <h2 className="text-xl font-extrabold text-slate-900 mb-1 flex items-center space-x-2">
+          <Lock className="w-5 h-5 text-emerald-600" />
           <span className="capitalize">{activePortal} Sign In</span>
         </h2>
-        <p className="text-xs text-slate-400 mb-6">Enter your username/email and password to log into the {activePortal} portal</p>
+        <p className="text-xs text-slate-500 mb-6 font-medium">Enter your username/email and password to log into the {activePortal} portal</p>
 
         {errorMsg && (
-          <div className="p-3 mb-4 rounded-xl bg-red-950 text-red-300 border border-red-500/40 text-xs font-bold">
+          <div className="p-3 mb-4 rounded-xl bg-red-50 text-red-700 border border-red-200 text-xs font-bold">
             {errorMsg}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4 text-xs">
           <div>
-            <label className="block text-slate-300 font-bold mb-1">
+            <label className="block text-slate-700 font-bold mb-1">
               Username or Email
             </label>
             <input
@@ -169,26 +169,26 @@ export default function LoginPage({ onLoginSuccess }) {
               value={credentials.username}
               onChange={e => setCredentials({ ...credentials, username: e.target.value })}
               placeholder={activePortal === 'judge' ? 'judge' : activePortal === 'student' ? 'student' : 'admin'}
-              className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white focus:outline-none focus:border-amber-400"
+              className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-slate-900 font-bold focus:outline-none focus:border-emerald-500"
             />
           </div>
 
           <div>
-            <label className="block text-slate-300 font-bold mb-1">Password</label>
+            <label className="block text-slate-700 font-bold mb-1">Password</label>
             <input
               type="password"
               required
               value={credentials.password}
               onChange={e => setCredentials({ ...credentials, password: e.target.value })}
               placeholder="••••••••"
-              className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white focus:outline-none focus:border-amber-400"
+              className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-slate-900 font-bold focus:outline-none focus:border-emerald-500"
             />
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:brightness-110 text-slate-950 font-black text-sm shadow-lg shadow-amber-500/20 transition flex items-center justify-center space-x-2 disabled:opacity-50"
+            className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-sm shadow-md transition flex items-center justify-center space-x-2 disabled:opacity-50"
           >
             <span>{loading ? 'Authenticating Credentials...' : `Sign In to ${activePortal.toUpperCase()} Portal`}</span>
             <ArrowRight className="w-4 h-4" />

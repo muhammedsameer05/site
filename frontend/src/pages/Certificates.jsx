@@ -34,23 +34,23 @@ export default function Certificates() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-extrabold emerald-gradient-text flex items-center space-x-2">
-            <Award className="w-6 h-6 text-amber-400" />
+            <Award className="w-6 h-6 text-emerald-600" />
             <span>Digital PDF Certificate Generator</span>
           </h1>
-          <p className="text-xs text-slate-400 font-mono">Generate official certificates for Winners, Participants, Judges, Volunteers & Coordinators</p>
+          <p className="text-xs text-slate-500 font-mono font-bold">Generate official certificates for Winners, Participants, Judges, Volunteers & Coordinators</p>
         </div>
 
         <div className="flex items-center space-x-3">
           <button
             onClick={() => window.print()}
-            className="flex items-center space-x-2 px-4 py-2.5 rounded-xl glass-panel text-slate-300 hover:text-white border border-slate-700 text-xs font-bold transition"
+            className="flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 text-xs font-bold transition shadow-sm"
           >
-            <Printer className="w-4 h-4" />
+            <Printer className="w-4 h-4 text-emerald-600" />
             <span>Print</span>
           </button>
           <button
             onClick={generatePDF}
-            className="flex items-center space-x-2 px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs shadow-lg transition"
+            className="flex items-center space-x-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-md transition"
           >
             <Download className="w-4 h-4" />
             <span>Download PDF</span>
@@ -59,13 +59,13 @@ export default function Certificates() {
       </div>
 
       {/* Control Inputs */}
-      <div className="glass-panel p-4 rounded-xl border border-slate-800 grid grid-cols-1 sm:grid-cols-4 gap-4 text-xs">
+      <div className="glass-panel p-4 rounded-2xl border border-slate-200 bg-white grid grid-cols-1 sm:grid-cols-4 gap-4 text-xs font-semibold shadow-sm">
         <div>
-          <label className="block text-slate-400 mb-1">Certificate Type</label>
+          <label className="block text-slate-700 font-bold mb-1">Certificate Type</label>
           <select
             value={certData.type}
             onChange={e => setCertData({ ...certData, type: e.target.value })}
-            className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white font-bold"
+            className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2 text-slate-900 font-bold focus:border-emerald-500"
           >
             <option value="winner">Winner Certificate</option>
             <option value="participation">Participation Certificate</option>
@@ -76,32 +76,32 @@ export default function Certificates() {
         </div>
 
         <div>
-          <label className="block text-slate-400 mb-1">Recipient Name</label>
+          <label className="block text-slate-700 font-bold mb-1">Recipient Name</label>
           <input
             type="text"
             value={certData.recipient_name}
             onChange={e => setCertData({ ...certData, recipient_name: e.target.value })}
-            className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white"
+            className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2 text-slate-900 focus:border-emerald-500 font-bold"
           />
         </div>
 
         <div>
-          <label className="block text-slate-400 mb-1">Program / Competition</label>
+          <label className="block text-slate-700 font-bold mb-1">Program / Competition</label>
           <input
             type="text"
             value={certData.program_name}
             onChange={e => setCertData({ ...certData, program_name: e.target.value })}
-            className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white"
+            className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2 text-slate-900 focus:border-emerald-500 font-bold"
           />
         </div>
 
         <div>
-          <label className="block text-slate-400 mb-1">Prize / Rank</label>
+          <label className="block text-slate-700 font-bold mb-1">Prize / Rank</label>
           <input
             type="text"
             value={certData.prize}
             onChange={e => setCertData({ ...certData, prize: e.target.value })}
-            className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white"
+            className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2 text-slate-900 focus:border-emerald-500 font-bold"
           />
         </div>
       </div>

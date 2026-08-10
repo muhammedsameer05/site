@@ -65,14 +65,14 @@ export default function HomePage({ onNavigate }) {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h2 className="text-2xl font-extrabold emerald-gradient-text flex items-center space-x-2">
-              <Trophy className="w-6 h-6 text-amber-400" />
+              <Trophy className="w-6 h-6 text-emerald-600" />
               <span>Live House Standings</span>
             </h2>
-            <p className="text-xs text-slate-400">Instant score tallies updated live</p>
+            <p className="text-xs text-slate-500 font-bold">Instant score tallies updated live</p>
           </div>
           <button
             onClick={() => onNavigate('live-scoring')}
-            className="flex items-center space-x-1 text-xs font-bold text-amber-400 hover:text-amber-300"
+            className="flex items-center space-x-1 text-xs font-bold text-emerald-700 hover:text-emerald-900"
           >
             <span>View Full Leaderboard</span>
             <ArrowRight className="w-4 h-4" />
@@ -83,23 +83,23 @@ export default function HomePage({ onNavigate }) {
           {houses.map((house, idx) => (
             <div 
               key={house.id} 
-              className="glass-panel p-5 rounded-2xl border transition hover:scale-105 duration-200"
+              className="glass-panel p-5 rounded-2xl border bg-white transition hover:scale-105 duration-200 shadow-sm"
               style={{ borderColor: `${house.color_hex}60` }}
             >
               <div className="flex items-center justify-between mb-3">
-                <span className="w-8 h-8 rounded-full flex items-center justify-center text-white font-extrabold text-sm shadow-md" style={{ backgroundColor: house.color_hex }}>
+                <span className="w-8 h-8 rounded-full flex items-center justify-center text-white font-extrabold text-sm shadow-sm" style={{ backgroundColor: house.color_hex }}>
                   #{idx + 1}
                 </span>
-                <span className="text-xs font-mono font-bold text-slate-400">{house.code}</span>
+                <span className="text-xs font-mono font-bold text-slate-500">{house.code}</span>
               </div>
-              <h3 className="text-lg font-extrabold text-white mb-1" style={{ color: house.color_hex }}>
+              <h3 className="text-lg font-extrabold mb-1" style={{ color: house.color_hex }}>
                 {house.name}
               </h3>
-              <p className="text-xs text-slate-400 italic mb-4 line-clamp-1">{house.motto || 'Virtue & Faith'}</p>
+              <p className="text-xs text-slate-500 italic mb-4 line-clamp-1 font-medium">{house.motto || 'Virtue & Faith'}</p>
               
-              <div className="flex items-baseline justify-between border-t border-slate-800 pt-3">
-                <span className="text-xs font-semibold text-slate-400">Total Points</span>
-                <span className="text-2xl font-black gold-gradient-text font-mono">{house.total_points || 0}</span>
+              <div className="flex items-baseline justify-between border-t border-slate-200 pt-3">
+                <span className="text-xs font-bold text-slate-600">Total Points</span>
+                <span className="text-2xl font-black emerald-gradient-text font-mono">{house.total_points || 0}</span>
               </div>
             </div>
           ))}
@@ -110,15 +110,15 @@ export default function HomePage({ onNavigate }) {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="text-2xl font-extrabold text-white flex items-center space-x-2">
-              <Calendar className="w-6 h-6 text-emerald-400" />
+            <h2 className="text-2xl font-extrabold text-slate-900 flex items-center space-x-2">
+              <Calendar className="w-6 h-6 text-emerald-600" />
               <span>Programs & Competition Results</span>
             </h2>
-            <p className="text-xs text-slate-400">Featured competitions scheduled & official winners</p>
+            <p className="text-xs text-slate-500 font-bold">Featured competitions scheduled & official winners</p>
           </div>
           <button
             onClick={() => onNavigate('timetable')}
-            className="flex items-center space-x-1 text-xs font-bold text-emerald-400 hover:text-emerald-300"
+            className="flex items-center space-x-1 text-xs font-bold text-emerald-700 hover:text-emerald-900"
           >
             <span>Full Schedule</span>
             <ArrowRight className="w-4 h-4" />
@@ -126,41 +126,41 @@ export default function HomePage({ onNavigate }) {
         </div>
 
         {programs.length === 0 ? (
-          <div className="glass-panel p-8 text-center rounded-2xl border border-slate-800 text-slate-400 text-xs">
+          <div className="glass-panel p-8 text-center rounded-2xl border border-slate-200 bg-white text-slate-500 text-xs font-medium">
             No scheduled competition programs added yet. Admin can create new programs in Program Management.
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {programs.map((p) => (
-              <div key={p.id} className="glass-panel p-4 rounded-xl border border-slate-800/80 hover:border-amber-400/40 transition shadow-md flex flex-col justify-between">
+              <div key={p.id} className="glass-panel p-4 rounded-2xl border border-slate-200 bg-white hover:border-emerald-300 transition shadow-sm flex flex-col justify-between">
                 
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-900 text-emerald-400 border border-emerald-500/30">
+                    <span className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-100 text-emerald-900 border border-emerald-300">
                       {p.category_name} • {p.type || 'individual'}
                     </span>
                     <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase ${
                       p.status === 'running' 
-                        ? 'bg-amber-500/20 text-amber-300 border border-amber-400/40 animate-pulse'
+                        ? 'bg-amber-100 text-amber-900 border border-amber-300 animate-pulse'
                         : p.status === 'completed'
-                        ? 'bg-emerald-950/80 text-emerald-300 border border-emerald-500/40'
-                        : 'bg-slate-800 text-slate-400'
+                        ? 'bg-emerald-100 text-emerald-900 border border-emerald-300'
+                        : 'bg-slate-100 text-slate-600 border border-slate-200'
                     }`}>
                       {p.status}
                     </span>
                   </div>
 
-                  <h4 className="text-base font-bold text-white mb-1">{p.name}</h4>
-                  <div className="flex items-center space-x-2 text-xs text-slate-400 font-mono mb-2">
-                    <Clock className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                  <h4 className="text-base font-bold text-slate-900 mb-1">{p.name}</h4>
+                  <div className="flex items-center space-x-2 text-xs text-slate-500 font-mono mb-2 font-bold">
+                    <Clock className="w-3.5 h-3.5 text-amber-600 shrink-0" />
                     <span>{p.start_time || '09:00 AM'}</span>
                   </div>
 
                   {/* Compact Winners Podium */}
                   {p.winners && p.winners.length > 0 && (
-                    <div className="mt-2.5 p-2.5 rounded-lg bg-slate-950/80 border border-amber-400/30 space-y-1.5">
-                      <div className="flex items-center space-x-1.5 text-[9px] font-black uppercase tracking-widest text-amber-400 border-b border-slate-800/80 pb-1">
-                        <Award className="w-3 h-3 text-amber-400" />
+                    <div className="mt-2.5 p-2.5 rounded-lg bg-slate-50 border border-slate-200 space-y-1.5">
+                      <div className="flex items-center space-x-1.5 text-[9px] font-black uppercase tracking-widest text-amber-800 border-b border-slate-200 pb-1">
+                        <Award className="w-3 h-3 text-amber-600" />
                         <span>Winners Podium</span>
                       </div>
                       <div className="space-y-1">
@@ -174,7 +174,7 @@ export default function HomePage({ onNavigate }) {
                               }`}>
                                 {w.prize === '1st' ? '🥇 1st' : w.prize === '2nd' ? '🥈 2nd' : '🥉 3rd'}
                               </span>
-                              <span className="text-white font-bold">{w.student_name}</span>
+                              <span className="text-slate-900 font-bold">{w.student_name}</span>
                             </div>
                             <span className="text-[9px] font-bold px-1.5 py-0.2 rounded border" style={{ color: w.house_color || '#10b981', borderColor: `${w.house_color || '#10b981'}50` }}>
                               {w.house_name}
@@ -198,14 +198,14 @@ export default function HomePage({ onNavigate }) {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h2 className="text-2xl font-extrabold emerald-gradient-text flex items-center space-x-2">
-              <Sparkles className="w-6 h-6 text-amber-400" />
+              <Sparkles className="w-6 h-6 text-emerald-600" />
               <span>Milad Festival Photo Gallery</span>
             </h2>
-            <p className="text-xs text-slate-400">Stage performances, Qiraat competitions & festival highlights</p>
+            <p className="text-xs text-slate-500 font-bold">Stage performances, Qiraat competitions & festival highlights</p>
           </div>
           <button
             onClick={() => onNavigate('gallery')}
-            className="flex items-center space-x-1 text-xs font-bold text-amber-400 hover:text-amber-300"
+            className="flex items-center space-x-1 text-xs font-bold text-emerald-700 hover:text-emerald-900"
           >
             <span>View Full Gallery</span>
             <ArrowRight className="w-4 h-4" />
@@ -213,7 +213,7 @@ export default function HomePage({ onNavigate }) {
         </div>
 
         {gallery.length === 0 ? (
-          <div className="glass-panel p-8 text-center rounded-2xl border border-slate-800 text-slate-400 text-xs">
+          <div className="glass-panel p-8 text-center rounded-2xl border border-slate-200 bg-white text-slate-500 text-xs font-medium">
             No gallery photos uploaded yet. Admins can upload event photos in the Gallery tab.
           </div>
         ) : (
@@ -222,18 +222,18 @@ export default function HomePage({ onNavigate }) {
               <div 
                 key={item.id}
                 onClick={() => onNavigate('gallery')}
-                className="group glass-panel rounded-2xl border border-slate-800 overflow-hidden cursor-pointer hover:border-amber-400/50 transition duration-300 relative flex flex-col justify-between"
+                className="group glass-panel rounded-2xl border border-slate-200 bg-white overflow-hidden cursor-pointer hover:border-emerald-400 transition duration-300 relative flex flex-col justify-between shadow-sm"
               >
-                <div className="h-48 overflow-hidden bg-slate-950">
+                <div className="h-48 overflow-hidden bg-slate-100">
                   <img 
                     src={item.url} 
                     alt={item.title} 
                     className="w-full h-full object-cover group-hover:scale-110 transition duration-500"
                   />
                 </div>
-                <div className="p-4 bg-slate-900/90">
-                  <h4 className="text-sm font-bold text-white group-hover:text-amber-300 transition">{item.title}</h4>
-                  {item.caption && <p className="text-xs text-slate-400 mt-1 line-clamp-1">{item.caption}</p>}
+                <div className="p-4 bg-white">
+                  <h4 className="text-sm font-bold text-slate-900 group-hover:text-emerald-700 transition">{item.title}</h4>
+                  {item.caption && <p className="text-xs text-slate-500 mt-1 line-clamp-1">{item.caption}</p>}
                 </div>
               </div>
             ))}

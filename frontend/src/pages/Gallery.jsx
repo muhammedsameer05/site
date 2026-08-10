@@ -186,7 +186,7 @@ export default function Gallery() {
               setPreviewUrl('');
               setShowUploadModal(true);
             }}
-            className="flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs shadow-lg transition"
+            className="flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-md transition"
           >
             <Plus className="w-4 h-4" />
             <span>Add Image to Gallery</span>
@@ -196,7 +196,7 @@ export default function Gallery() {
 
       {/* Gallery Grid */}
       {items.length === 0 ? (
-        <div className="glass-panel p-12 text-center rounded-2xl border border-slate-800 text-slate-400 text-xs">
+        <div className="glass-panel p-12 text-center rounded-2xl border border-slate-200 bg-white text-slate-500 text-xs font-medium">
           No gallery photos uploaded yet. {isAdmin ? 'Click "+ Add Image to Gallery" above to upload photos.' : 'Check back during live festival events!'}
         </div>
       ) : (
@@ -205,9 +205,9 @@ export default function Gallery() {
             <div 
               key={item.id || idx}
               onClick={() => setLightbox(item)}
-              className="group glass-panel rounded-2xl border border-slate-800 overflow-hidden cursor-pointer hover:border-amber-400/50 transition duration-300 relative flex flex-col justify-between"
+              className="group glass-panel rounded-2xl border border-slate-200 bg-white overflow-hidden cursor-pointer hover:border-emerald-400 transition duration-300 relative flex flex-col justify-between shadow-sm"
             >
-              <div className="h-52 overflow-hidden bg-slate-950 relative">
+              <div className="h-52 overflow-hidden bg-slate-100 relative">
                 <img 
                   src={item.url} 
                   alt={item.title} 
@@ -219,14 +219,14 @@ export default function Gallery() {
                   <div className="absolute top-2 right-2 flex items-center space-x-1.5 z-10">
                     <button
                       onClick={(e) => handleOpenEdit(item, e)}
-                      className="p-1.5 rounded-lg bg-amber-500 text-slate-950 hover:bg-amber-400 border border-amber-400/60 shadow transition"
+                      className="p-1.5 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-300 shadow transition"
                       title="Edit Photo Details"
                     >
                       <Edit className="w-4 h-4" />
                     </button>
                     <button
                       onClick={(e) => handleDelete(item.id, e)}
-                      className="p-1.5 rounded-lg bg-red-950/90 text-red-300 hover:bg-red-900 border border-red-500/40 shadow transition"
+                      className="p-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 border border-red-200 shadow transition"
                       title="Delete Image"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -235,9 +235,9 @@ export default function Gallery() {
                 )}
               </div>
 
-              <div className="p-4 bg-slate-900/90">
-                <h4 className="text-sm font-bold text-white group-hover:text-amber-300 transition">{item.title}</h4>
-                {item.caption && <p className="text-xs text-slate-400 mt-1 line-clamp-2">{item.caption}</p>}
+              <div className="p-4 bg-white">
+                <h4 className="text-sm font-bold text-slate-900 group-hover:text-emerald-700 transition">{item.title}</h4>
+                {item.caption && <p className="text-xs text-slate-500 mt-1 line-clamp-2">{item.caption}</p>}
               </div>
             </div>
           ))}
@@ -246,71 +246,71 @@ export default function Gallery() {
 
       {/* Edit Image Modal */}
       {showEditModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-4 overflow-y-auto">
-          <div className="glass-panel w-full max-w-md rounded-2xl border border-amber-400/40 p-6 shadow-2xl bg-[#03241C] text-white my-8 space-y-4">
-            <div className="flex items-center justify-between border-b border-amber-400/30 pb-3">
-              <h3 className="text-base font-bold emerald-gradient-text flex items-center space-x-2">
-                <Edit className="w-5 h-5 text-amber-400" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-md p-4 overflow-y-auto">
+          <div className="glass-panel w-full max-w-md rounded-2xl border border-slate-200 p-6 shadow-2xl bg-white text-slate-900 my-8 space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+              <h3 className="text-base font-extrabold emerald-gradient-text flex items-center space-x-2">
+                <Edit className="w-5 h-5 text-emerald-600" />
                 <span>Edit Photo & Save Changes</span>
               </h3>
-              <button onClick={() => setShowEditModal(false)} className="text-slate-400 hover:text-white">
+              <button onClick={() => setShowEditModal(false)} className="text-slate-400 hover:text-slate-700">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleSaveEdit} className="space-y-4 text-xs">
+            <form onSubmit={handleSaveEdit} className="space-y-4 text-xs font-semibold">
               <div>
-                <label className="block text-slate-300 font-semibold mb-1">Image Title</label>
+                <label className="block text-slate-700 font-bold mb-1">Image Title</label>
                 <input
                   type="text"
                   required
                   value={formData.title}
                   onChange={e => setFormData({ ...formData, title: e.target.value })}
                   placeholder="e.g. Qiraat Competition Stage 1"
-                  className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white font-bold"
+                  className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-slate-900 font-bold focus:border-emerald-500 focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-slate-300 font-semibold mb-1">Caption / Description</label>
+                <label className="block text-slate-700 font-bold mb-1">Caption / Description</label>
                 <textarea
                   rows="2"
                   value={formData.caption}
                   onChange={e => setFormData({ ...formData, caption: e.target.value })}
                   placeholder="Enter image description or caption..."
-                  className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white"
+                  className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-slate-900 focus:border-emerald-500 focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-slate-300 font-semibold mb-1">Replace Image File (Optional)</label>
+                <label className="block text-slate-700 font-bold mb-1">Replace Image File (Optional)</label>
                 <input
                   type="file"
                   accept="image/*"
                   onChange={handleFileChange}
-                  className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-300 text-xs file:mr-3 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-bold file:bg-amber-500 file:text-slate-950 hover:file:bg-amber-600"
+                  className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2 text-slate-700 text-xs file:mr-3 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-bold file:bg-emerald-600 file:text-white hover:file:bg-emerald-700"
                 />
               </div>
 
               {previewUrl && (
                 <div className="mt-2 text-center">
-                  <span className="text-[10px] text-slate-400 block mb-1">Photo Preview:</span>
-                  <img src={previewUrl} alt="Preview" className="h-36 mx-auto object-cover rounded-lg border border-amber-400/40" />
+                  <span className="text-[10px] text-slate-500 block mb-1 font-bold">Photo Preview:</span>
+                  <img src={previewUrl} alt="Preview" className="h-36 mx-auto object-cover rounded-lg border border-slate-200" />
                 </div>
               )}
 
-              <div className="flex items-center justify-end space-x-3 pt-3 border-t border-slate-800">
+              <div className="flex items-center justify-end space-x-3 pt-3 border-t border-slate-200">
                 <button
                   type="button"
                   onClick={() => setShowEditModal(false)}
-                  className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 font-bold"
+                  className="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 font-bold border border-slate-200"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={uploading}
-                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black text-xs shadow-lg flex items-center space-x-2"
+                  className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-md flex items-center space-x-2 transition"
                 >
                   <Save className="w-4 h-4" />
                   <span>{uploading ? 'Saving Changes...' : 'Save Changes'}</span>
@@ -324,72 +324,72 @@ export default function Gallery() {
 
       {/* Admin Upload Modal */}
       {showUploadModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-4 overflow-y-auto">
-          <div className="glass-panel w-full max-w-md rounded-2xl border border-amber-400/40 p-6 shadow-2xl bg-[#03241C] text-white my-8">
-            <div className="flex items-center justify-between border-b border-amber-400/30 pb-3 mb-4">
-              <h3 className="text-base font-bold emerald-gradient-text flex items-center space-x-2">
-                <ImageIcon className="w-5 h-5 text-amber-400" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-md p-4 overflow-y-auto">
+          <div className="glass-panel w-full max-w-md rounded-2xl border border-slate-200 p-6 shadow-2xl bg-white text-slate-900 my-8">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-3 mb-4">
+              <h3 className="text-base font-extrabold emerald-gradient-text flex items-center space-x-2">
+                <ImageIcon className="w-5 h-5 text-emerald-600" />
                 <span>Upload Image to Gallery</span>
               </h3>
-              <button onClick={() => setShowUploadModal(false)} className="text-slate-400 hover:text-white">
+              <button onClick={() => setShowUploadModal(false)} className="text-slate-400 hover:text-slate-700">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleSubmitUpload} className="space-y-4 text-xs">
+            <form onSubmit={handleSubmitUpload} className="space-y-4 text-xs font-semibold">
               <div>
-                <label className="block text-slate-300 font-semibold mb-1">Image Title</label>
+                <label className="block text-slate-700 font-bold mb-1">Image Title</label>
                 <input
                   type="text"
                   required
                   value={formData.title}
                   onChange={e => setFormData({ ...formData, title: e.target.value })}
                   placeholder="e.g. Qiraat Competition Stage 1"
-                  className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white"
+                  className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-slate-900 font-bold focus:border-emerald-500 focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-slate-300 font-semibold mb-1">Caption / Description (Optional)</label>
+                <label className="block text-slate-700 font-bold mb-1">Caption / Description (Optional)</label>
                 <textarea
                   rows="2"
                   value={formData.caption}
                   onChange={e => setFormData({ ...formData, caption: e.target.value })}
                   placeholder="Enter photo description or caption..."
-                  className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white"
+                  className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-slate-900 focus:border-emerald-500 focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-slate-300 font-semibold mb-1">Upload Photo File</label>
+                <label className="block text-slate-700 font-bold mb-1">Upload Photo File</label>
                 <input
                   type="file"
                   accept="image/*"
                   required
                   onChange={handleFileChange}
-                  className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-300 text-xs file:mr-3 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-bold file:bg-amber-500 file:text-slate-950 hover:file:bg-amber-600"
+                  className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2 text-slate-700 text-xs file:mr-3 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-bold file:bg-emerald-600 file:text-white hover:file:bg-emerald-700"
                 />
               </div>
 
               {previewUrl && (
                 <div className="mt-2 text-center">
-                  <span className="text-[10px] text-slate-400 block mb-1">Image Preview:</span>
-                  <img src={previewUrl} alt="Preview" className="h-36 mx-auto object-cover rounded-lg border border-amber-400/40" />
+                  <span className="text-[10px] text-slate-500 block mb-1 font-bold">Image Preview:</span>
+                  <img src={previewUrl} alt="Preview" className="h-36 mx-auto object-cover rounded-lg border border-slate-200" />
                 </div>
               )}
 
-              <div className="flex items-center justify-end space-x-3 pt-3 border-t border-slate-800">
+              <div className="flex items-center justify-end space-x-3 pt-3 border-t border-slate-200">
                 <button
                   type="button"
                   onClick={() => setShowUploadModal(false)}
-                  className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 font-bold"
+                  className="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 font-bold border border-slate-200"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={uploading}
-                  className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs shadow-lg flex items-center space-x-2"
+                  className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-md flex items-center space-x-2 transition"
                 >
                   <Upload className="w-4 h-4" />
                   <span>{uploading ? 'Uploading...' : 'Upload Image'}</span>
@@ -403,7 +403,7 @@ export default function Gallery() {
 
       {/* Lightbox Preview Modal */}
       {lightbox && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 backdrop-blur-md p-4" onClick={() => setLightbox(null)}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-md p-4" onClick={() => setLightbox(null)}>
           <div className="relative max-w-4xl w-full max-h-[90vh] flex flex-col items-center justify-center" onClick={e => e.stopPropagation()}>
             <button 
               onClick={() => setLightbox(null)}
@@ -415,7 +415,7 @@ export default function Gallery() {
             <img 
               src={lightbox.url} 
               alt={lightbox.title}
-              className="max-h-[75vh] w-auto max-w-full rounded-2xl object-contain shadow-2xl border border-amber-400/30" 
+              className="max-h-[75vh] w-auto max-w-full rounded-2xl object-contain shadow-2xl border border-slate-200" 
             />
 
             <div className="mt-4 text-center">

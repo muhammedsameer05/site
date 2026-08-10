@@ -83,37 +83,37 @@ export default function ResultsSystem() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-extrabold emerald-gradient-text flex items-center space-x-2">
-            <Trophy className="w-6 h-6 text-amber-400" />
+            <Trophy className="w-6 h-6 text-emerald-600" />
             <span>Official Results & Prize Allocation System</span>
           </h1>
-          <p className="text-xs text-slate-400 font-mono">Automated 1st/2nd/3rd prize calculation & official student certificate issuance</p>
+          <p className="text-xs text-slate-500 font-mono font-bold">Automated 1st/2nd/3rd prize calculation & official student certificate issuance</p>
         </div>
 
         <button
           onClick={() => window.print()}
-          className="flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-amber-400 font-bold text-xs shadow hover:bg-slate-700 transition"
+          className="flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-800 font-bold text-xs shadow-sm hover:bg-slate-50 transition"
         >
-          <Printer className="w-4 h-4" />
+          <Printer className="w-4 h-4 text-emerald-600" />
           <span>Print Result Sheet</span>
         </button>
       </div>
 
       {msg && (
         <div className={`p-4 rounded-xl text-xs font-bold ${
-          msg.type === 'error' ? 'bg-red-950/80 text-red-300 border border-red-500/40' : 'bg-emerald-950/80 text-emerald-300 border border-emerald-500/40'
+          msg.type === 'error' ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-emerald-50 text-emerald-800 border border-emerald-300'
         }`}>
           {msg.text}
         </div>
       )}
 
       {/* Program Selector Bar */}
-      <div className="glass-panel p-4 rounded-xl border border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div className="glass-panel p-4 rounded-2xl border border-slate-200 bg-white flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
         <div className="flex items-center space-x-3 w-full sm:w-auto">
-          <label className="text-xs font-bold text-slate-300 shrink-0">Select Program:</label>
+          <label className="text-xs font-bold text-slate-700 shrink-0">Select Program:</label>
           <select
             value={selectedProgramId || ''}
             onChange={e => setSelectedProgramId(e.target.value)}
-            className="w-full sm:w-96 bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs font-bold text-white"
+            className="w-full sm:w-96 bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 focus:border-emerald-500"
           >
             {programs.map(p => (
               <option key={p.id} value={p.id}>{p.name} ({p.status})</option>
@@ -123,7 +123,7 @@ export default function ResultsSystem() {
 
         <button
           onClick={handleAutoCalculate}
-          className="flex items-center space-x-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:brightness-110 text-slate-950 font-black text-xs shadow-lg transition"
+          className="flex items-center space-x-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-md transition"
         >
           <RefreshCw className="w-4 h-4" />
           <span>Calculate & Award Prizes</span>
@@ -133,28 +133,28 @@ export default function ResultsSystem() {
       {/* Point Rules Card */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-center">
         {[
-          { prize: '1st Prize', pts: '10 Points', bg: 'border-amber-400/50 bg-amber-500/10 text-amber-300' },
-          { prize: '2nd Prize', pts: '7 Points', bg: 'border-slate-400/50 bg-slate-500/10 text-slate-300' },
-          { prize: '3rd Prize', pts: '5 Points', bg: 'border-amber-700/50 bg-amber-700/10 text-amber-500' },
-          { prize: 'Participation', pts: '3 Points', bg: 'border-emerald-500/50 bg-emerald-500/10 text-emerald-300' }
+          { prize: '1st Prize', pts: '10 Points', bg: 'border-amber-300 bg-amber-50 text-amber-900' },
+          { prize: '2nd Prize', pts: '7 Points', bg: 'border-slate-300 bg-slate-100 text-slate-800' },
+          { prize: '3rd Prize', pts: '5 Points', bg: 'border-amber-400 bg-amber-100 text-amber-950' },
+          { prize: 'Participation', pts: '3 Points', bg: 'border-emerald-300 bg-emerald-50 text-emerald-900' }
         ].map((item, idx) => (
-          <div key={idx} className={`p-3 rounded-xl border ${item.bg} text-xs font-bold`}>
-            <span className="block text-[10px] uppercase opacity-80">{item.prize}</span>
+          <div key={idx} className={`p-3 rounded-xl border ${item.bg} text-xs font-bold shadow-xs`}>
+            <span className="block text-[10px] uppercase font-bold opacity-80">{item.prize}</span>
             <span className="text-base font-mono font-black">{item.pts}</span>
           </div>
         ))}
       </div>
 
       {/* Results Table */}
-      <div className="glass-panel rounded-2xl border border-slate-800 overflow-hidden shadow-2xl bg-slate-900">
-        <div className="p-4 bg-slate-950 border-b border-slate-800 flex items-center justify-between">
-          <h3 className="text-sm font-bold text-amber-400">Official Result Sheet</h3>
-          <span className="text-xs text-slate-400 font-mono">Tie breaking: Presentation → Pronunciation → Admin</span>
+      <div className="glass-panel rounded-2xl border border-slate-200 overflow-hidden shadow-sm bg-white">
+        <div className="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+          <h3 className="text-sm font-bold text-emerald-950">Official Result Sheet</h3>
+          <span className="text-xs text-slate-500 font-mono font-bold">Tie breaking: Presentation → Pronunciation → Admin</span>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-slate-900 text-amber-400 uppercase font-mono border-b border-slate-800">
+          <table className="w-full text-left text-xs text-slate-700">
+            <thead className="bg-emerald-50/80 text-emerald-950 uppercase font-mono border-b border-emerald-100 font-bold">
               <tr>
                 <th className="p-4">Rank / Prize</th>
                 <th className="p-4">Student Name</th>
@@ -164,28 +164,28 @@ export default function ResultsSystem() {
                 <th className="p-4 text-center">Action / Certificate</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800">
+            <tbody className="divide-y divide-slate-100">
               {loading ? (
-                <tr><td colSpan="6" className="p-8 text-center text-amber-400 font-mono">Loading Results...</td></tr>
+                <tr><td colSpan="6" className="p-8 text-center text-emerald-700 font-mono font-bold">Loading Results...</td></tr>
               ) : results.length === 0 ? (
-                <tr><td colSpan="6" className="p-8 text-center text-slate-400">No results calculated yet for this program. Click 'Calculate & Award Prizes' above.</td></tr>
+                <tr><td colSpan="6" className="p-8 text-center text-slate-500 font-medium">No results calculated yet for this program. Click 'Calculate & Award Prizes' above.</td></tr>
               ) : (
                 results.map((r) => (
-                  <tr key={r.id} className="hover:bg-slate-800/40 transition">
+                  <tr key={r.id} className="hover:bg-emerald-50/30 transition">
                     <td className="p-4">
                       <span className={`px-3 py-1 rounded-full text-xs font-extrabold font-mono ${
-                        r.prize === '1st' ? 'bg-amber-500 text-slate-950' :
-                        r.prize === '2nd' ? 'bg-slate-300 text-slate-950' :
-                        r.prize === '3rd' ? 'bg-amber-700 text-white' : 'bg-slate-800 text-slate-400'
+                        r.prize === '1st' ? 'bg-amber-400 text-slate-950' :
+                        r.prize === '2nd' ? 'bg-slate-200 text-slate-950' :
+                        r.prize === '3rd' ? 'bg-amber-700 text-white' : 'bg-slate-100 text-slate-700'
                       }`}>
                         {r.prize === '1st' ? '🥇 1st Prize' : r.prize === '2nd' ? '🥈 2nd Prize' : r.prize === '3rd' ? '🥉 3rd Prize' : 'Participation'}
                       </span>
                     </td>
                     <td className="p-4">
-                      <div className="font-bold text-white text-sm">{r.student_name}</div>
-                      {r.arabic_name && <div className="text-xs font-serif text-amber-300">{r.arabic_name}</div>}
+                      <div className="font-bold text-slate-900 text-sm">{r.student_name}</div>
+                      {r.arabic_name && <div className="text-xs font-serif text-emerald-800">{r.arabic_name}</div>}
                     </td>
-                    <td className="p-4 font-mono">{r.class_name}</td>
+                    <td className="p-4 font-mono font-bold text-slate-700">{r.class_name}</td>
                     <td className="p-4">
                       <span 
                         className="px-2.5 py-0.5 rounded text-[10px] font-bold uppercase"
@@ -194,13 +194,13 @@ export default function ResultsSystem() {
                         {r.house_name}
                       </span>
                     </td>
-                    <td className="p-4 text-right font-black font-mono text-emerald-400 text-base">+{r.points_awarded} Pts</td>
+                    <td className="p-4 text-right font-black font-mono text-emerald-700 text-base">+{r.points_awarded} Pts</td>
                     <td className="p-4 text-center">
                       <button
                         onClick={() => setSelectedCert({ ...r, program_name: selectedProgram?.name || 'Competition' })}
-                        className="px-3 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/40 text-amber-300 font-bold text-xs inline-flex items-center space-x-1.5 transition"
+                        className="px-3 py-1.5 rounded-lg bg-emerald-100 hover:bg-emerald-200 border border-emerald-300 text-emerald-900 font-bold text-xs inline-flex items-center space-x-1.5 transition"
                       >
-                        <Award className="w-3.5 h-3.5 text-amber-400" />
+                        <Award className="w-3.5 h-3.5 text-emerald-600" />
                         <span>Print / Download Certificate</span>
                       </button>
                     </td>
@@ -214,26 +214,26 @@ export default function ResultsSystem() {
 
       {/* Official Certificate Modal */}
       {selectedCert && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 backdrop-blur-md p-4 overflow-y-auto">
-          <div className="relative w-full max-w-3xl glass-panel rounded-2xl border-2 border-amber-400 p-6 bg-[#021B15] text-white shadow-2xl my-8">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-md p-4 overflow-y-auto">
+          <div className="relative w-full max-w-3xl glass-panel rounded-2xl border-2 border-emerald-300 p-6 bg-white text-slate-900 shadow-2xl my-8">
             
             {/* Modal Top Control Bar */}
-            <div className="flex items-center justify-between border-b border-amber-400/30 pb-3 mb-6 no-print">
-              <span className="text-xs font-bold text-amber-400 uppercase tracking-widest flex items-center space-x-2">
-                <Award className="w-4 h-4 text-amber-400" />
+            <div className="flex items-center justify-between border-b border-slate-200 pb-3 mb-6 no-print">
+              <span className="text-xs font-bold text-emerald-900 uppercase tracking-widest flex items-center space-x-2 font-mono">
+                <Award className="w-4 h-4 text-emerald-600" />
                 <span>Official Student Certificate Preview</span>
               </span>
               <div className="flex items-center space-x-2">
                 <button
                   onClick={handlePrintCert}
-                  className="px-4 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs shadow-lg flex items-center space-x-1.5"
+                  className="px-4 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs shadow flex items-center space-x-1.5"
                 >
                   <Printer className="w-3.5 h-3.5" />
                   <span>Print / Save PDF Certificate</span>
                 </button>
                 <button
                   onClick={() => setSelectedCert(null)}
-                  className="p-1.5 rounded-xl bg-slate-800 text-slate-400 hover:text-white"
+                  className="p-1.5 rounded-xl bg-slate-100 text-slate-400 hover:text-slate-700"
                 >
                   <X className="w-4 h-4" />
                 </button>

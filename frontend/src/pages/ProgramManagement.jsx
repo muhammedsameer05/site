@@ -209,10 +209,10 @@ export default function ProgramManagement() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-extrabold emerald-gradient-text flex items-center space-x-2">
-            <Calendar className="w-6 h-6 text-amber-400" />
+            <Calendar className="w-6 h-6 text-emerald-600" />
             <span>Program & Competition Management</span>
           </h1>
-          <p className="text-xs text-slate-400 font-mono">Create, edit programs, assign 1st/2nd/3rd winners, and manage live execution status</p>
+          <p className="text-xs text-slate-500 font-mono font-bold">Create, edit programs, assign 1st/2nd/3rd winners, and manage live execution status</p>
         </div>
 
         <button
@@ -232,7 +232,7 @@ export default function ProgramManagement() {
             });
             setShowModal(true);
           }}
-          className="flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black text-xs shadow-lg transition"
+          className="flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-md transition"
         >
           <Plus className="w-4 h-4" />
           <span>Create New Program</span>
@@ -242,12 +242,12 @@ export default function ProgramManagement() {
       {/* Program Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {programs.map((p) => (
-          <div key={p.id} className="glass-panel p-4 rounded-xl border border-slate-800/90 flex flex-col justify-between hover:border-amber-400/40 transition shadow-md">
+          <div key={p.id} className="glass-panel p-4 rounded-2xl border border-slate-200 bg-white flex flex-col justify-between hover:border-emerald-400 transition shadow-sm">
             
             <div className="space-y-3">
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-900 text-emerald-400 border border-emerald-500/30">
+                  <span className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-100 text-emerald-900 border border-emerald-300">
                     {p.category_name || 'Category'} • {p.type || 'individual'}
                   </span>
 
@@ -269,7 +269,7 @@ export default function ProgramManagement() {
                         });
                         setShowModal(true);
                       }}
-                      className="p-1 rounded bg-slate-800 text-amber-400 hover:bg-slate-700 transition"
+                      className="p-1 rounded bg-slate-100 text-slate-700 hover:bg-slate-200 transition"
                       title="Edit Program"
                     >
                       <Edit className="w-3.5 h-3.5" />
@@ -277,7 +277,7 @@ export default function ProgramManagement() {
 
                     <button
                       onClick={() => handleDelete(p.id)}
-                      className="p-1 rounded bg-red-950/60 text-red-400 hover:bg-red-900 transition"
+                      className="p-1 rounded bg-red-50 text-red-600 hover:bg-red-100 transition"
                       title="Delete Program"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -285,15 +285,15 @@ export default function ProgramManagement() {
                   </div>
                 </div>
 
-                <h3 className="text-base font-bold text-white mb-1">{p.name}</h3>
+                <h3 className="text-base font-bold text-slate-900 mb-1">{p.name}</h3>
 
-                <div className="flex items-center space-x-3 text-xs text-slate-400 font-mono mb-2">
+                <div className="flex items-center space-x-3 text-xs text-slate-500 font-mono mb-2 font-bold">
                   <span className="flex items-center space-x-1">
-                    <Clock className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                    <Clock className="w-3.5 h-3.5 text-amber-600 shrink-0" />
                     <span>{p.start_time || '09:00'} - {p.end_time || '10:30'}</span>
                   </span>
                   <span className="flex items-center space-x-1">
-                    <Users className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+                    <Users className="w-3.5 h-3.5 text-blue-600 shrink-0" />
                     <span>{p.participant_count || 0} / {p.max_participants || 20}</span>
                   </span>
                 </div>
@@ -301,17 +301,17 @@ export default function ProgramManagement() {
                 {/* Add 1st, 2nd, 3rd Winners Button */}
                 <button
                   onClick={() => handleOpenWinnersModal(p)}
-                  className="w-full py-1.5 px-3 rounded-lg bg-gradient-to-r from-amber-500/20 to-amber-600/30 hover:from-amber-500/30 hover:to-amber-600/40 text-amber-300 border border-amber-400/50 text-xs font-bold flex items-center justify-center space-x-2 transition shadow-sm mb-2"
+                  className="w-full py-1.5 px-3 rounded-lg bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 text-xs font-bold flex items-center justify-center space-x-2 transition shadow-sm mb-2"
                 >
-                  <Trophy className="w-3.5 h-3.5 text-amber-400" />
+                  <Trophy className="w-3.5 h-3.5 text-amber-600" />
                   <span>🏆 Add / Edit 1st, 2nd, 3rd Winners</span>
                 </button>
 
                 {/* Compact Winners Podium */}
                 {p.winners && p.winners.length > 0 && (
-                  <div className="p-2.5 rounded-lg bg-slate-950/80 border border-amber-400/30 space-y-1.5">
-                    <div className="flex items-center space-x-1.5 text-[9px] font-black uppercase tracking-widest text-amber-400 border-b border-slate-800/80 pb-1">
-                      <Award className="w-3 h-3 text-amber-400" />
+                  <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200 space-y-1.5">
+                    <div className="flex items-center space-x-1.5 text-[9px] font-black uppercase tracking-widest text-amber-800 border-b border-slate-200 pb-1">
+                      <Award className="w-3 h-3 text-amber-600" />
                       <span>Winners Podium</span>
                     </div>
                     <div className="space-y-1">
@@ -325,7 +325,7 @@ export default function ProgramManagement() {
                             }`}>
                               {w.prize === '1st' ? '🥇 1st' : w.prize === '2nd' ? '🥈 2nd' : '🥉 3rd'}
                             </span>
-                            <span className="text-white font-bold">{w.student_name}</span>
+                            <span className="text-slate-900 font-bold">{w.student_name}</span>
                           </div>
                           <span className="text-[9px] font-bold px-1.5 py-0.2 rounded border" style={{ color: w.house_color || '#10b981', borderColor: `${w.house_color || '#10b981'}50` }}>
                             {w.house_name}
@@ -338,14 +338,14 @@ export default function ProgramManagement() {
               </div>
 
             {/* Status Controls */}
-            <div className="flex items-center justify-between border-t border-slate-800 pt-3">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">Status: {p.status}</span>
+            <div className="flex items-center justify-between border-t border-slate-200 pt-3">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700">Status: {p.status}</span>
 
               <div className="flex items-center space-x-1">
                 {p.status !== 'running' && (
                   <button
                     onClick={() => updateStatus(p.id, 'running')}
-                    className="px-2.5 py-1 rounded bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-400/40 text-[10px] font-bold"
+                    className="px-2.5 py-1 rounded bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 text-[10px] font-bold"
                   >
                     Start Live
                   </button>
@@ -353,7 +353,7 @@ export default function ProgramManagement() {
                 {p.status !== 'completed' && (
                   <button
                     onClick={() => updateStatus(p.id, 'completed')}
-                    className="px-2.5 py-1 rounded bg-emerald-950 hover:bg-emerald-900 text-emerald-300 border border-emerald-500/40 text-[10px] font-bold"
+                    className="px-2.5 py-1 rounded bg-emerald-100 hover:bg-emerald-200 text-emerald-900 border border-emerald-300 text-[10px] font-bold"
                   >
                     Mark Done
                   </button>
@@ -367,23 +367,23 @@ export default function ProgramManagement() {
 
       {/* Assign 1st, 2nd, 3rd Winners Modal with Searchable Autocomplete Inputs */}
       {showWinnersModal && targetProgramForWinners && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4 overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 overflow-y-auto">
           <div 
             onClick={e => e.stopPropagation()}
-            className="glass-panel p-6 rounded-3xl border border-amber-500/50 max-w-lg w-full bg-slate-900 shadow-2xl space-y-5"
+            className="glass-panel p-6 rounded-3xl border border-slate-200 max-w-lg w-full bg-white text-slate-900 shadow-2xl space-y-5"
           >
             
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
               <div>
-                <h3 className="text-lg font-extrabold text-white flex items-center space-x-2">
-                  <Trophy className="w-5 h-5 text-amber-400" />
+                <h3 className="text-lg font-extrabold text-slate-900 flex items-center space-x-2">
+                  <Trophy className="w-5 h-5 text-amber-600" />
                   <span>Assign 1st, 2nd, 3rd Winners</span>
                 </h3>
-                <p className="text-xs text-amber-300 font-bold">{targetProgramForWinners.name}</p>
+                <p className="text-xs text-amber-700 font-bold">{targetProgramForWinners.name}</p>
               </div>
               <button 
                 onClick={() => setShowWinnersModal(false)}
-                className="p-1 rounded-lg bg-slate-800 text-slate-400 hover:text-white"
+                className="p-1 rounded-lg bg-slate-100 text-slate-400 hover:text-slate-700"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -392,8 +392,8 @@ export default function ProgramManagement() {
             <form onSubmit={handleSaveWinners} className="space-y-4">
               
               {/* 🥇 1st Place Searchable Autocomplete Combobox */}
-              <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/40 space-y-1.5 relative">
-                <label className="text-xs font-bold text-amber-300 flex items-center space-x-1.5">
+              <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 space-y-1.5 relative">
+                <label className="text-xs font-bold text-amber-900 flex items-center space-x-1.5">
                   <span className="text-base">🥇</span>
                   <span>1st Place Winner (10 Points)</span>
                 </label>
@@ -411,7 +411,7 @@ export default function ProgramManagement() {
                       setWinnersForm({ ...winnersForm, first_student_id: val });
                       setActiveDropdown('first');
                     }}
-                    className="w-full bg-slate-950 border border-slate-700 rounded-xl pl-9 pr-8 py-2 text-xs font-bold text-white placeholder-slate-500 focus:border-amber-400 focus:outline-none"
+                    className="w-full bg-white border border-slate-300 rounded-xl pl-9 pr-8 py-2 text-xs font-bold text-slate-900 placeholder-slate-400 focus:border-amber-500 focus:outline-none"
                   />
                   {winnerSearchInput.first && (
                     <button
@@ -420,7 +420,7 @@ export default function ProgramManagement() {
                         setWinnerSearchInput({ ...winnerSearchInput, first: '' });
                         setWinnersForm({ ...winnersForm, first_student_id: '' });
                       }}
-                      className="absolute right-2.5 top-2.5 text-slate-400 hover:text-white"
+                      className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-700"
                     >
                       <X className="w-3.5 h-3.5" />
                     </button>
@@ -429,9 +429,9 @@ export default function ProgramManagement() {
 
                 {/* Floating Autocomplete Suggestions Dropdown */}
                 {activeDropdown === 'first' && (
-                  <div className="absolute left-0 right-0 top-full mt-1 z-50 bg-slate-950 border border-amber-400/50 rounded-xl shadow-2xl max-h-48 overflow-y-auto p-1 space-y-0.5">
+                  <div className="absolute left-0 right-0 top-full mt-1 z-50 bg-white border border-slate-200 rounded-xl shadow-2xl max-h-48 overflow-y-auto p-1 space-y-0.5">
                     {getFilteredStudents(winnerSearchInput.first).length === 0 ? (
-                      <div className="p-2.5 text-[11px] text-slate-400 italic text-center">
+                      <div className="p-2.5 text-[11px] text-slate-500 italic text-center">
                         No matching student found. "{winnerSearchInput.first}" will be added.
                       </div>
                     ) : (
@@ -444,10 +444,10 @@ export default function ProgramManagement() {
                             setWinnersForm({ ...winnersForm, first_student_id: st.id || st.student_id || st.name });
                             setActiveDropdown(null);
                           }}
-                          className="w-full text-left p-2 rounded-lg hover:bg-amber-500/20 hover:text-amber-300 text-xs font-bold flex items-center justify-between transition"
+                          className="w-full text-left p-2 rounded-lg hover:bg-amber-50 text-xs font-bold flex items-center justify-between transition"
                         >
                           <div>
-                            <span className="text-white block font-bold">{st.name}</span>
+                            <span className="text-slate-900 block font-bold">{st.name}</span>
                             <span className="text-[10px] text-slate-400 font-mono">{st.class_name} | {st.house_name || 'House'}</span>
                           </div>
                           <span className="text-[10px] font-mono text-amber-400 bg-slate-900 px-1.5 py-0.5 rounded border border-slate-800">
@@ -461,8 +461,8 @@ export default function ProgramManagement() {
               </div>
 
               {/* 🥈 2nd Place Searchable Autocomplete Combobox */}
-              <div className="p-3.5 rounded-2xl bg-slate-800/80 border border-slate-600/40 space-y-1.5 relative">
-                <label className="text-xs font-bold text-slate-200 flex items-center space-x-1.5">
+              <div className="p-3.5 rounded-2xl bg-slate-100 border border-slate-200 space-y-1.5 relative">
+                <label className="text-xs font-bold text-slate-800 flex items-center space-x-1.5">
                   <span className="text-base">🥈</span>
                   <span>2nd Place Winner (7 Points)</span>
                 </label>
@@ -480,7 +480,7 @@ export default function ProgramManagement() {
                       setWinnersForm({ ...winnersForm, second_student_id: val });
                       setActiveDropdown('second');
                     }}
-                    className="w-full bg-slate-950 border border-slate-700 rounded-xl pl-9 pr-8 py-2 text-xs font-bold text-white placeholder-slate-500 focus:border-amber-400 focus:outline-none"
+                    className="w-full bg-white border border-slate-300 rounded-xl pl-9 pr-8 py-2 text-xs font-bold text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:outline-none"
                   />
                   {winnerSearchInput.second && (
                     <button
@@ -489,7 +489,7 @@ export default function ProgramManagement() {
                         setWinnerSearchInput({ ...winnerSearchInput, second: '' });
                         setWinnersForm({ ...winnersForm, second_student_id: '' });
                       }}
-                      className="absolute right-2.5 top-2.5 text-slate-400 hover:text-white"
+                      className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-700"
                     >
                       <X className="w-3.5 h-3.5" />
                     </button>
@@ -498,9 +498,9 @@ export default function ProgramManagement() {
 
                 {/* Floating Autocomplete Suggestions Dropdown */}
                 {activeDropdown === 'second' && (
-                  <div className="absolute left-0 right-0 top-full mt-1 z-50 bg-slate-950 border border-slate-600/50 rounded-xl shadow-2xl max-h-48 overflow-y-auto p-1 space-y-0.5">
+                  <div className="absolute left-0 right-0 top-full mt-1 z-50 bg-white border border-slate-200 rounded-xl shadow-2xl max-h-48 overflow-y-auto p-1 space-y-0.5">
                     {getFilteredStudents(winnerSearchInput.second).length === 0 ? (
-                      <div className="p-2.5 text-[11px] text-slate-400 italic text-center">
+                      <div className="p-2.5 text-[11px] text-slate-500 italic text-center">
                         No matching student found. "{winnerSearchInput.second}" will be added.
                       </div>
                     ) : (
@@ -513,13 +513,13 @@ export default function ProgramManagement() {
                             setWinnersForm({ ...winnersForm, second_student_id: st.id || st.student_id || st.name });
                             setActiveDropdown(null);
                           }}
-                          className="w-full text-left p-2 rounded-lg hover:bg-slate-800 hover:text-slate-200 text-xs font-bold flex items-center justify-between transition"
+                          className="w-full text-left p-2 rounded-lg hover:bg-slate-100 text-xs font-bold flex items-center justify-between transition"
                         >
                           <div>
-                            <span className="text-white block font-bold">{st.name}</span>
-                            <span className="text-[10px] text-slate-400 font-mono">{st.class_name} | {st.house_name || 'House'}</span>
+                            <span className="text-slate-900 block font-bold">{st.name}</span>
+                            <span className="text-[10px] text-slate-500 font-mono">{st.class_name} | {st.house_name || 'House'}</span>
                           </div>
-                          <span className="text-[10px] font-mono text-slate-300 bg-slate-900 px-1.5 py-0.5 rounded border border-slate-800">
+                          <span className="text-[10px] font-mono text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">
                             #{st.chest_no || st.admission_no}
                           </span>
                         </button>
@@ -530,8 +530,8 @@ export default function ProgramManagement() {
               </div>
 
               {/* 🥉 3rd Place Searchable Autocomplete Combobox */}
-              <div className="p-3.5 rounded-2xl bg-amber-900/20 border border-amber-700/40 space-y-1.5 relative">
-                <label className="text-xs font-bold text-amber-400 flex items-center space-x-1.5">
+              <div className="p-3.5 rounded-2xl bg-amber-50/60 border border-amber-200 space-y-1.5 relative">
+                <label className="text-xs font-bold text-amber-900 flex items-center space-x-1.5">
                   <span className="text-base">🥉</span>
                   <span>3rd Place Winner (5 Points)</span>
                 </label>
@@ -549,7 +549,7 @@ export default function ProgramManagement() {
                       setWinnersForm({ ...winnersForm, third_student_id: val });
                       setActiveDropdown('third');
                     }}
-                    className="w-full bg-slate-950 border border-slate-700 rounded-xl pl-9 pr-8 py-2 text-xs font-bold text-white placeholder-slate-500 focus:border-amber-400 focus:outline-none"
+                    className="w-full bg-white border border-slate-300 rounded-xl pl-9 pr-8 py-2 text-xs font-bold text-slate-900 placeholder-slate-400 focus:border-amber-500 focus:outline-none"
                   />
                   {winnerSearchInput.third && (
                     <button
@@ -558,7 +558,7 @@ export default function ProgramManagement() {
                         setWinnerSearchInput({ ...winnerSearchInput, third: '' });
                         setWinnersForm({ ...winnersForm, third_student_id: '' });
                       }}
-                      className="absolute right-2.5 top-2.5 text-slate-400 hover:text-white"
+                      className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-700"
                     >
                       <X className="w-3.5 h-3.5" />
                     </button>
@@ -567,9 +567,9 @@ export default function ProgramManagement() {
 
                 {/* Floating Autocomplete Suggestions Dropdown */}
                 {activeDropdown === 'third' && (
-                  <div className="absolute left-0 right-0 top-full mt-1 z-50 bg-slate-950 border border-amber-700/50 rounded-xl shadow-2xl max-h-48 overflow-y-auto p-1 space-y-0.5">
+                  <div className="absolute left-0 right-0 top-full mt-1 z-50 bg-white border border-slate-200 rounded-xl shadow-2xl max-h-48 overflow-y-auto p-1 space-y-0.5">
                     {getFilteredStudents(winnerSearchInput.third).length === 0 ? (
-                      <div className="p-2.5 text-[11px] text-slate-400 italic text-center">
+                      <div className="p-2.5 text-[11px] text-slate-500 italic text-center">
                         No matching student found. "{winnerSearchInput.third}" will be added.
                       </div>
                     ) : (
@@ -582,13 +582,13 @@ export default function ProgramManagement() {
                             setWinnersForm({ ...winnersForm, third_student_id: st.id || st.student_id || st.name });
                             setActiveDropdown(null);
                           }}
-                          className="w-full text-left p-2 rounded-lg hover:bg-amber-900/40 hover:text-amber-300 text-xs font-bold flex items-center justify-between transition"
+                          className="w-full text-left p-2 rounded-lg hover:bg-amber-50 text-xs font-bold flex items-center justify-between transition"
                         >
                           <div>
-                            <span className="text-white block font-bold">{st.name}</span>
-                            <span className="text-[10px] text-slate-400 font-mono">{st.class_name} | {st.house_name || 'House'}</span>
+                            <span className="text-slate-900 block font-bold">{st.name}</span>
+                            <span className="text-[10px] text-slate-500 font-mono">{st.class_name} | {st.house_name || 'House'}</span>
                           </div>
-                          <span className="text-[10px] font-mono text-amber-400 bg-slate-900 px-1.5 py-0.5 rounded border border-slate-800">
+                          <span className="text-[10px] font-mono text-amber-800 bg-amber-100 px-1.5 py-0.5 rounded border border-amber-300">
                             #{st.chest_no || st.admission_no}
                           </span>
                         </button>
@@ -598,11 +598,11 @@ export default function ProgramManagement() {
                 )}
               </div>
 
-              <div className="flex items-center justify-end space-x-3 pt-4 border-t border-slate-800">
+              <div className="flex items-center justify-end space-x-3 pt-4 border-t border-slate-200">
                 <button
                   type="button"
                   onClick={() => setShowWinnersModal(false)}
-                  className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold"
+                  className="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold border border-slate-200"
                 >
                   Cancel
                 </button>
@@ -610,7 +610,7 @@ export default function ProgramManagement() {
                 <button
                   type="submit"
                   disabled={winnersSaving}
-                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black text-xs shadow-lg flex items-center space-x-2"
+                  className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-md flex items-center space-x-2 transition"
                 >
                   <CheckCircle className="w-4 h-4" />
                   <span>{winnersSaving ? 'Saving Winners...' : 'Save & Publish Winners'}</span>
@@ -624,54 +624,54 @@ export default function ProgramManagement() {
 
       {/* Create / Edit Program Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4 overflow-y-auto">
-          <div className="glass-panel p-6 rounded-3xl border border-emerald-500/40 max-w-lg w-full bg-slate-900 shadow-2xl space-y-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 overflow-y-auto">
+          <div className="glass-panel p-6 rounded-3xl border border-slate-200 max-w-lg w-full bg-white text-slate-900 shadow-2xl space-y-4">
             
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <h3 className="text-lg font-bold text-white">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+              <h3 className="text-lg font-extrabold text-slate-900">
                 {formData.id ? 'Edit Program' : 'Create New Program'}
               </h3>
               <button 
                 onClick={() => setShowModal(false)}
-                className="p-1 rounded-lg bg-slate-800 text-slate-400 hover:text-white"
+                className="p-1 rounded-lg bg-slate-100 text-slate-400 hover:text-slate-700"
               >
                 ✕
               </button>
             </div>
 
-            <form onSubmit={handleSave} className="space-y-4 text-xs font-semibold text-slate-300">
+            <form onSubmit={handleSave} className="space-y-4 text-xs font-semibold text-slate-700">
               
               <div>
-                <label className="block mb-1">Program Code</label>
+                <label className="block mb-1 text-slate-900 font-bold">Program Code</label>
                 <input 
                   type="text"
                   required
                   value={formData.code}
                   onChange={e => setFormData({ ...formData, code: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-mono"
+                  className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-slate-900 font-mono font-bold focus:border-emerald-500 focus:outline-none"
                   placeholder="e.g. PRG-101"
                 />
               </div>
 
               <div>
-                <label className="block mb-1">Program Name / Title</label>
+                <label className="block mb-1 text-slate-900 font-bold">Program Name / Title</label>
                 <input 
                   type="text"
                   required
                   value={formData.name}
                   onChange={e => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-bold"
+                  className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-slate-900 font-bold focus:border-emerald-500 focus:outline-none"
                   placeholder="e.g. Quran Recitation (Tilawat)"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block mb-1">Category</label>
+                  <label className="block mb-1 text-slate-900 font-bold">Category</label>
                   <select
                     value={formData.category_id}
                     onChange={e => setFormData({ ...formData, category_id: parseInt(e.target.value) })}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white"
+                    className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-slate-900 font-bold focus:border-emerald-500 focus:outline-none"
                   >
                     {categories.map(c => (
                       <option key={c.id} value={c.id}>{c.name}</option>
@@ -680,11 +680,11 @@ export default function ProgramManagement() {
                 </div>
 
                 <div>
-                  <label className="block mb-1">Competition Type</label>
+                  <label className="block mb-1 text-slate-900 font-bold">Competition Type</label>
                   <select
                     value={formData.type}
                     onChange={e => setFormData({ ...formData, type: e.target.value })}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white"
+                    className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-slate-900 font-bold focus:border-emerald-500 focus:outline-none"
                   >
                     <option value="individual">Individual</option>
                     <option value="group">Group</option>
@@ -694,38 +694,38 @@ export default function ProgramManagement() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block mb-1">Start Time</label>
+                  <label className="block mb-1 text-slate-900 font-bold">Start Time</label>
                   <input 
                     type="time"
                     value={formData.start_time}
                     onChange={e => setFormData({ ...formData, start_time: e.target.value })}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-mono"
+                    className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-slate-900 font-mono font-bold focus:border-emerald-500 focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block mb-1">End Time</label>
+                  <label className="block mb-1 text-slate-900 font-bold">End Time</label>
                   <input 
                     type="time"
                     value={formData.end_time}
                     onChange={e => setFormData({ ...formData, end_time: e.target.value })}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-mono"
+                    className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-slate-900 font-mono font-bold focus:border-emerald-500 focus:outline-none"
                   />
                 </div>
               </div>
 
-              <div className="flex items-center justify-end space-x-3 pt-4 border-t border-slate-800">
+              <div className="flex items-center justify-end space-x-3 pt-4 border-t border-slate-200">
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 font-bold"
+                  className="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 font-bold border border-slate-200"
                 >
                   Cancel
                 </button>
 
                 <button
                   type="submit"
-                  className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold shadow-lg"
+                  className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold shadow-md transition"
                 >
                   {formData.id ? 'Save Changes' : 'Create Program'}
                 </button>
