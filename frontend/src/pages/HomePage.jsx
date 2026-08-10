@@ -32,14 +32,27 @@ export default function HomePage({ onNavigate }) {
         const filteredLocal = localItems.filter(item => !deletedIds.includes(String(item.id)));
 
         const combined = [...filteredLocal, ...filteredBackend];
-        const unique = Array.from(new Map(combined.map(item => [item.id || item.url, item])).values());
-        setGallery(unique.slice(0, 6));
+        const unique = Array.from(new Map(combined.map(item => [String(item.id || item.url), item])).values());
+        
+        if (unique.length === 0) {
+          setGallery([
+            { id: 1, title: 'വൈബ് ഓഫ് മദീന 2K26 - Festival Emblem', url: '/milad-logo.jpg', caption: 'Jamalulleyli Madrasa Payyanur' }
+          ]);
+        } else {
+          setGallery(unique.slice(0, 6));
+        }
       })
       .catch(() => {
         const localItems = JSON.parse(localStorage.getItem('milad_local_gallery') || '[]');
         const deletedIds = JSON.parse(localStorage.getItem('milad_deleted_gallery_ids') || '[]');
         const filteredLocal = localItems.filter(item => !deletedIds.includes(String(item.id)));
-        setGallery(filteredLocal.slice(0, 6));
+        if (filteredLocal.length === 0) {
+          setGallery([
+            { id: 1, title: 'വൈബ് ഓഫ് മദീന 2K26 - Festival Emblem', url: '/milad-logo.jpg', caption: 'Jamalulleyli Madrasa Payyanur' }
+          ]);
+        } else {
+          setGallery(filteredLocal.slice(0, 6));
+        }
       });
   };
 

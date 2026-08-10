@@ -35,13 +35,26 @@ export default function Gallery() {
         // Combine local and backend items without duplicates
         const combined = [...filteredLocal, ...filteredBackend];
         const unique = Array.from(new Map(combined.map(item => [String(item.id || item.url), item])).values());
-        setItems(unique);
+        
+        if (unique.length === 0) {
+          setItems([
+            { id: 1, title: 'വൈബ് ഓഫ് മദീന 2K26 - Official Festival Emblem', url: '/milad-logo.jpg', caption: 'Jamalulleyli Madrasa Payyanur' }
+          ]);
+        } else {
+          setItems(unique);
+        }
       })
       .catch(() => {
         const localItems = JSON.parse(localStorage.getItem('milad_local_gallery') || '[]');
         const deletedIds = JSON.parse(localStorage.getItem('milad_deleted_gallery_ids') || '[]');
         const filteredLocal = localItems.filter(item => !deletedIds.includes(String(item.id)));
-        setItems(filteredLocal);
+        if (filteredLocal.length === 0) {
+          setItems([
+            { id: 1, title: 'വൈബ് ഓഫ് മദീന 2K26 - Official Festival Emblem', url: '/milad-logo.jpg', caption: 'Jamalulleyli Madrasa Payyanur' }
+          ]);
+        } else {
+          setItems(filteredLocal);
+        }
       });
   };
 
