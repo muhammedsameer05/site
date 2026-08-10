@@ -72,9 +72,9 @@ export default function HomePage({ onNavigate }) {
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
           <button
             onClick={() => onNavigate('students')}
-            className="glass-panel p-4 rounded-2xl border border-emerald-200 bg-white hover:border-emerald-500 hover:shadow-md transition text-center flex flex-col items-center justify-center space-y-2 group"
+            className="glass-panel card-hover-effect btn-interactive p-4 rounded-2xl border border-emerald-200 bg-white text-center flex flex-col items-center justify-center space-y-2 group shadow-xs"
           >
-            <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center group-hover:scale-110 transition">
+            <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center group-hover:scale-110 group-hover:bg-emerald-600 group-hover:text-white transition-all duration-300">
               <Award className="w-6 h-6" />
             </div>
             <span className="text-sm font-black text-slate-900">Students</span>
@@ -83,9 +83,9 @@ export default function HomePage({ onNavigate }) {
 
           <button
             onClick={() => onNavigate('programs')}
-            className="glass-panel p-4 rounded-2xl border border-emerald-200 bg-white hover:border-emerald-500 hover:shadow-md transition text-center flex flex-col items-center justify-center space-y-2 group"
+            className="glass-panel card-hover-effect btn-interactive p-4 rounded-2xl border border-emerald-200 bg-white text-center flex flex-col items-center justify-center space-y-2 group shadow-xs"
           >
-            <div className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-800 flex items-center justify-center group-hover:scale-110 transition">
+            <div className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-800 flex items-center justify-center group-hover:scale-110 group-hover:bg-amber-500 group-hover:text-slate-950 transition-all duration-300">
               <Calendar className="w-6 h-6" />
             </div>
             <span className="text-sm font-black text-slate-900">Programs</span>
@@ -94,9 +94,9 @@ export default function HomePage({ onNavigate }) {
 
           <button
             onClick={() => onNavigate('timetable')}
-            className="glass-panel p-4 rounded-2xl border border-emerald-200 bg-white hover:border-emerald-500 hover:shadow-md transition text-center flex flex-col items-center justify-center space-y-2 group"
+            className="glass-panel card-hover-effect btn-interactive p-4 rounded-2xl border border-emerald-200 bg-white text-center flex flex-col items-center justify-center space-y-2 group shadow-xs"
           >
-            <div className="w-12 h-12 rounded-2xl bg-blue-100 text-blue-800 flex items-center justify-center group-hover:scale-110 transition">
+            <div className="w-12 h-12 rounded-2xl bg-blue-100 text-blue-800 flex items-center justify-center group-hover:scale-110 group-hover:bg-blue-600 group-hover:text-white transition-all duration-300">
               <Clock className="w-6 h-6" />
             </div>
             <span className="text-sm font-black text-slate-900">Schedule</span>
@@ -105,9 +105,9 @@ export default function HomePage({ onNavigate }) {
 
           <button
             onClick={() => onNavigate('results')}
-            className="glass-panel p-4 rounded-2xl border border-emerald-200 bg-white hover:border-emerald-500 hover:shadow-md transition text-center flex flex-col items-center justify-center space-y-2 group"
+            className="glass-panel card-hover-effect btn-interactive p-4 rounded-2xl border border-emerald-200 bg-white text-center flex flex-col items-center justify-center space-y-2 group shadow-xs"
           >
-            <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center group-hover:scale-110 transition">
+            <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center group-hover:scale-110 group-hover:bg-emerald-600 group-hover:text-white transition-all duration-300">
               <Trophy className="w-6 h-6" />
             </div>
             <span className="text-sm font-black text-slate-900">Results</span>
@@ -116,9 +116,9 @@ export default function HomePage({ onNavigate }) {
 
           <button
             onClick={() => onNavigate('gallery')}
-            className="glass-panel p-4 rounded-2xl border border-emerald-200 bg-white hover:border-emerald-500 hover:shadow-md transition text-center flex flex-col items-center justify-center space-y-2 group col-span-2 sm:col-span-1"
+            className="glass-panel card-hover-effect btn-interactive p-4 rounded-2xl border border-emerald-200 bg-white text-center flex flex-col items-center justify-center space-y-2 group col-span-2 sm:col-span-1 shadow-xs"
           >
-            <div className="w-12 h-12 rounded-2xl bg-purple-100 text-purple-800 flex items-center justify-center group-hover:scale-110 transition">
+            <div className="w-12 h-12 rounded-2xl bg-purple-100 text-purple-800 flex items-center justify-center group-hover:scale-110 group-hover:bg-purple-600 group-hover:text-white transition-all duration-300">
               <Sparkles className="w-6 h-6" />
             </div>
             <span className="text-sm font-black text-slate-900">Gallery</span>
@@ -132,14 +132,14 @@ export default function HomePage({ onNavigate }) {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h2 className="text-2xl font-extrabold emerald-gradient-text flex items-center space-x-2">
-              <Trophy className="w-6 h-6 text-emerald-600" />
+              <Trophy className="w-6 h-6 text-emerald-600 animate-float" />
               <span>Live House Standings</span>
             </h2>
             <p className="text-xs text-slate-500 font-bold">Instant score tallies updated live</p>
           </div>
           <button
             onClick={() => onNavigate('results')}
-            className="flex items-center space-x-1 text-xs font-bold text-emerald-700 hover:text-emerald-900"
+            className="flex items-center space-x-1 text-xs font-bold text-emerald-700 hover:text-emerald-900 btn-interactive"
           >
             <span>View Full Leaderboard</span>
             <ArrowRight className="w-4 h-4" />
@@ -150,11 +150,11 @@ export default function HomePage({ onNavigate }) {
           {houses.map((house, idx) => (
             <div 
               key={house.id} 
-              className="glass-panel p-5 rounded-2xl border bg-white transition hover:scale-105 duration-200 shadow-sm"
+              className="glass-panel card-hover-effect p-5 rounded-2xl border bg-white shadow-sm"
               style={{ borderColor: `${house.color_hex}60` }}
             >
               <div className="flex items-center justify-between mb-3">
-                <span className="w-8 h-8 rounded-full flex items-center justify-center text-white font-extrabold text-sm shadow-sm" style={{ backgroundColor: house.color_hex }}>
+                <span className="w-8 h-8 rounded-full flex items-center justify-center text-white font-extrabold text-sm shadow-md transition-transform duration-300 hover:scale-110" style={{ backgroundColor: house.color_hex }}>
                   #{idx + 1}
                 </span>
                 <span className="text-xs font-mono font-bold text-slate-500">{house.code}</span>
@@ -166,7 +166,7 @@ export default function HomePage({ onNavigate }) {
               
               <div className="flex items-baseline justify-between border-t border-slate-200 pt-3">
                 <span className="text-xs font-bold text-slate-600">Total Points</span>
-                <span className="text-2xl font-black emerald-gradient-text font-mono">{house.total_points || 0}</span>
+                <span className="text-2xl font-black emerald-gradient-text font-mono animate-pulse-glow px-2 py-0.5 rounded-lg">{house.total_points || 0}</span>
               </div>
             </div>
           ))}

@@ -246,7 +246,7 @@ export default function ProgramManagement() {
               });
               setShowModal(true);
             }}
-            className="flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-md transition"
+            className="flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-md transition btn-interactive"
           >
             <Plus className="w-4 h-4" />
             <span>Create New Program</span>
@@ -257,7 +257,7 @@ export default function ProgramManagement() {
       {/* Program Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {programs.map((p) => (
-          <div key={p.id} className="glass-panel p-4 rounded-2xl border border-slate-200 bg-white flex flex-col justify-between hover:border-emerald-400 transition shadow-sm">
+          <div key={p.id} className="glass-panel card-hover-effect p-4 rounded-2xl border border-slate-200 bg-white flex flex-col justify-between shadow-sm">
             
             <div className="space-y-3">
               <div>
