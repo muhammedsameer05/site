@@ -449,29 +449,35 @@ router.get('/houses/:id/breakdown', async (req, res) => {
     // Fetch all winning results for students belonging to this house
     const results = await all(`
       SELECT r.*, 
-             s.name as student_name, 
-             s.student_id as student_code, 
+             COALESCE(s.name, r.student_id) as student_name, 
+             COALESCE(s.student_id, r.student_id) as student_code, 
              s.chest_no, 
              s.class_name,
-             p.name as program_name, 
+             COALESCE(p.name, r.program_id) as program_name, 
              p.code as program_code,
              c.name as category_name
       FROM results r
-      JOIN students s ON (
+      LEFT JOIN students s ON (
         CAST(r.student_id AS TEXT) = CAST(s.id AS TEXT) OR 
         r.student_id = s.student_id OR 
         r.student_id = s.admission_no OR
-        LOWER(TRIM(s.name)) = LOWER(TRIM(r.student_id))
+        LOWER(TRIM(s.name)) = LOWER(TRIM(r.student_id)) OR
+        s.name LIKE ('%' || r.student_id || '%')
       )
-      JOIN programs p ON (
+      LEFT JOIN programs p ON (
         CAST(r.program_id AS TEXT) = CAST(p.id AS TEXT) OR 
         r.program_id = p.code
       )
       LEFT JOIN categories c ON p.category_id = c.id
-      WHERE (s.house_id = ? OR CAST(s.house_id AS TEXT) = CAST(? AS TEXT) OR s.house_id = ?)
-        AND r.prize IN ('1st', '2nd', '3rd')
+      WHERE (
+        s.house_id = ? OR 
+        CAST(s.house_id AS TEXT) = CAST(? AS TEXT) OR 
+        s.house_id = ? OR
+        (s.house_id IS NULL AND (? = 1 OR ? = '1'))
+      )
+      AND r.prize IN ('1st', '2nd', '3rd')
       ORDER BY r.id DESC
-    `, [houseId, houseId, house.code]);
+    `, [houseId, houseId, house.code, houseId, houseId]);
 
     // Fetch manual point adjustment audit logs
     const adjustments = await all(`
