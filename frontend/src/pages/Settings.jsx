@@ -226,11 +226,11 @@ export default function Settings() {
         <div className="flex items-center justify-between border-t border-slate-200 pt-4">
           <button
             type="button"
-            onClick={handleBackup}
-            className="flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-slate-100 border border-slate-300 text-slate-700 hover:bg-slate-200 text-xs font-bold transition"
+            onClick={handleExportFullDatabase}
+            className="flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-slate-100 border border-slate-300 text-slate-700 hover:bg-slate-200 text-xs font-bold transition btn-interactive"
           >
             <Database className="w-4 h-4 text-emerald-600" />
-            <span>Download Database Backup</span>
+            <span>Export Database Backup (.JSON)</span>
           </button>
 
           <button
