@@ -1058,4 +1058,74 @@ router.post('/settings/reset-demo-data', authenticate, requireAdmin, async (req,
   res.status(403).json({ error: 'Production data purge is disabled to prevent accidental data loss. Please use Archiving instead.' });
 });
 
+// -------------------------------------------------------------
+// FULL DATABASE BACKUP EXPORT & IMPORT SNAPSHOT ENGINE
+// -------------------------------------------------------------
+router.get('/database/export', async (req, res) => {
+  try {
+    const snapshot = {
+      students: await all('SELECT * FROM students'),
+      programs: await all('SELECT * FROM programs'),
+      program_participants: await all('SELECT * FROM program_participants'),
+      houses: await all('SELECT * FROM houses'),
+      categories: await all('SELECT * FROM categories'),
+      venues: await all('SELECT * FROM venues'),
+      results: await all('SELECT * FROM results'),
+      announcements: await all('SELECT * FROM announcements'),
+      gallery: await all('SELECT * FROM gallery'),
+      marks: await all('SELECT * FROM marks'),
+      exported_at: new Date().toISOString()
+    };
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Content-Disposition', `attachment; filename=vibe_of_madeena_backup_${Date.now()}.json`);
+    res.send(JSON.stringify(snapshot, null, 2));
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.post('/database/import', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const snapshot = req.body;
+    if (!snapshot || typeof snapshot !== 'object') {
+      return res.status(400).json({ error: 'Invalid backup JSON file content.' });
+    }
+
+    // Restore Students
+    if (Array.isArray(snapshot.students)) {
+      for (const s of snapshot.students) {
+        await run(`
+          INSERT OR REPLACE INTO students (id, student_id, admission_no, name, category_name, arabic_name, photo, gender, dob, age, class_name, division, house_id, parent_name, phone, email, address, qr_code, is_archived, archived_at, archived_by, created_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `, [s.id, s.student_id, s.admission_no, s.name, s.category_name, s.arabic_name, s.photo, s.gender, s.dob, s.age, s.class_name, s.division, s.house_id, s.parent_name, s.phone, s.email, s.address, s.qr_code, s.is_archived || 0, s.archived_at, s.archived_by, s.created_at || new Date().toISOString()]);
+      }
+    }
+
+    // Restore Programs
+    if (Array.isArray(snapshot.programs)) {
+      for (const p of snapshot.programs) {
+        await run(`
+          INSERT OR REPLACE INTO programs (id, code, name, category_id, type, venue_id, program_date, start_time, end_time, max_participants, status, first_place_student_id, second_place_student_id, third_place_student_id, is_archived, archived_at, archived_by, created_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `, [p.id, p.code, p.name, p.category_id, p.type, p.venue_id, p.program_date, p.start_time, p.end_time, p.max_participants, p.status, p.first_place_student_id, p.second_place_student_id, p.third_place_student_id, p.is_archived || 0, p.archived_at, p.archived_by, p.created_at || new Date().toISOString()]);
+      }
+    }
+
+    // Restore Participants
+    if (Array.isArray(snapshot.program_participants)) {
+      for (const pp of snapshot.program_participants) {
+        await run(`
+          INSERT OR REPLACE INTO program_participants (id, program_id, student_id, chest_no, attendance, mark_obtained, grade, remarks)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        `, [pp.id, pp.program_id, pp.student_id, pp.chest_no, pp.attendance, pp.mark_obtained, pp.grade, pp.remarks]);
+      }
+    }
+
+    triggerPersistenceSync();
+    res.json({ success: true, message: 'Database backup imported successfully!' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;

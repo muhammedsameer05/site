@@ -40,13 +40,39 @@ export default function Settings() {
     setTimeout(() => setSavedMsg(false), 3000);
   };
 
-  const handleBackup = () => {
-    const backupJson = JSON.stringify(settings, null, 2);
-    const blob = new Blob([backupJson], { type: 'application/json' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = `Madrasa_Milad_Backup_${Date.now()}.json`;
-    link.click();
+  const handleExportFullDatabase = () => {
+    window.open('/api/database/export', '_blank');
+  };
+
+  const handleImportFullDatabase = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      try {
+        const jsonContent = JSON.parse(event.target.result);
+        const res = await fetch('/api/database/import', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('auth_token') || ''}`
+          },
+          body: JSON.stringify(jsonContent)
+        });
+
+        const data = await res.json();
+        if (res.ok) {
+          alert('✅ Database successfully restored! All students, programs, and results have been re-imported.');
+          window.location.reload();
+        } else {
+          alert(`❌ Import Failed: ${data.error || 'Unknown error'}`);
+        }
+      } catch (err) {
+        alert('❌ Invalid JSON backup file format.');
+      }
+    };
+    reader.readAsText(file);
   };
 
   return (
@@ -66,6 +92,38 @@ export default function Settings() {
           ✅ Settings & Festival Cooldown Timer updated successfully!
         </div>
       )}
+
+      {/* Database Backup & Restore Panel */}
+      <div className="glass-panel p-6 rounded-3xl border border-emerald-200 bg-emerald-50/40 space-y-3 shadow-xs">
+        <h3 className="text-sm font-extrabold emerald-gradient-text flex items-center space-x-2">
+          <Database className="w-4 h-4 text-emerald-600" />
+          <span>Full Production Database Backup & Instant Restore</span>
+        </h3>
+        <p className="text-xs text-slate-600 font-medium">
+          Export a complete backup file containing all your real registered students, programs, participants, and marks. You can restore this backup anytime in 1 click.
+        </p>
+
+        <div className="flex flex-wrap items-center gap-3 pt-2">
+          <button
+            type="button"
+            onClick={handleExportFullDatabase}
+            className="flex items-center space-x-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-sm transition btn-interactive"
+          >
+            <Database className="w-4 h-4" />
+            <span>Export Database Backup (.JSON)</span>
+          </button>
+
+          <label className="flex items-center space-x-2 px-4 py-2 rounded-xl bg-white border border-slate-300 hover:border-emerald-500 text-slate-800 text-xs font-bold shadow-xs cursor-pointer transition btn-interactive">
+            <span>📥 Import Database Backup</span>
+            <input 
+              type="file" 
+              accept=".json"
+              onChange={handleImportFullDatabase}
+              className="hidden"
+            />
+          </label>
+        </div>
+      </div>
 
       {/* Main Settings Form */}
       <form onSubmit={handleSave} className="glass-panel p-6 rounded-3xl border border-slate-200 space-y-6 bg-white shadow-sm">
