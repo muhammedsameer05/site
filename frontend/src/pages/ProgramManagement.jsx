@@ -38,27 +38,27 @@ export default function ProgramManagement() {
   const [winnersSaving, setWinnersSaving] = useState(false);
 
   const loadData = () => {
-    fetch('/api/programs')
+    localStorage.removeItem('milad_custom_programs');
+    localStorage.removeItem('milad_deleted_program_ids');
+
+    fetch('/api/programs', { cache: 'no-store' })
       .then(res => res.json())
       .then(data => {
         const backendItems = Array.isArray(data) ? data : [];
-        const customItems = JSON.parse(localStorage.getItem('milad_custom_programs') || '[]');
-        const deletedIds = JSON.parse(localStorage.getItem('milad_deleted_program_ids') || '[]');
-
-        const filteredBackend = backendItems.filter(p => !deletedIds.includes(String(p.id)));
-        const filteredCustom = customItems.filter(p => !deletedIds.includes(String(p.id)));
-
-        const merged = [...filteredCustom, ...filteredBackend];
-        const unique = Array.from(new Map(merged.map(p => [String(p.id || p.code), p])).values());
-        setPrograms(unique);
-        localStorage.setItem('milad_cached_programs', JSON.stringify(unique));
+        const uniqueMap = new Map();
+        backendItems.forEach(p => {
+          const key = (p.code || p.name || String(p.id)).toString().trim().toLowerCase();
+          if (!uniqueMap.has(key)) {
+            uniqueMap.set(key, p);
+          }
+        });
+        setPrograms(Array.from(uniqueMap.values()));
       })
       .catch(() => {
-        const cached = JSON.parse(localStorage.getItem('milad_cached_programs') || '[]');
-        setPrograms(cached);
+        setPrograms([]);
       });
 
-    fetch('/api/categories')
+    fetch('/api/categories', { cache: 'no-store' })
       .then(res => res.json())
       .then(data => setCategories(Array.isArray(data) ? data : []))
       .catch(() => {});
@@ -73,24 +73,8 @@ export default function ProgramManagement() {
     const isEdit = !!formData.id;
     const progObj = {
       ...formData,
-      id: formData.id || Date.now(),
       code: formData.code || `PRG-${Date.now().toString().slice(-4)}`
     };
-
-    // Save to local storage immediately
-    const customItems = JSON.parse(localStorage.getItem('milad_custom_programs') || '[]');
-    let updatedCustom;
-    if (isEdit) {
-      updatedCustom = customItems.map(p => String(p.id) === String(progObj.id) ? progObj : p);
-    } else {
-      updatedCustom = [progObj, ...customItems];
-    }
-    localStorage.setItem('milad_custom_programs', JSON.stringify(updatedCustom));
-
-    setPrograms(prev => {
-      const filtered = prev.filter(p => String(p.id) !== String(progObj.id));
-      return [progObj, ...filtered];
-    });
 
     const method = isEdit ? 'PUT' : 'POST';
     const url = isEdit ? `/api/programs/${formData.id}` : '/api/programs';
@@ -109,26 +93,17 @@ export default function ProgramManagement() {
       .catch(() => {
         setShowModal(false);
         setFormData({ id: null, code: '', name: '', category_id: 1, type: 'individual', venue_id: 1, program_date: '2026-08-15', start_time: '09:00', end_time: '10:30', max_participants: 15, status: 'pending' });
+        loadData();
       });
   };
 
   const handleDelete = (id) => {
     if (window.confirm('Are you sure you want to delete this program?')) {
-      const deletedIds = JSON.parse(localStorage.getItem('milad_deleted_program_ids') || '[]');
-      if (!deletedIds.includes(String(id))) {
-        deletedIds.push(String(id));
-        localStorage.setItem('milad_deleted_program_ids', JSON.stringify(deletedIds));
-      }
-
-      const customItems = JSON.parse(localStorage.getItem('milad_custom_programs') || '[]');
-      const filteredCustom = customItems.filter(p => String(p.id) !== String(id));
-      localStorage.setItem('milad_custom_programs', JSON.stringify(filteredCustom));
-
       setPrograms(prev => prev.filter(p => String(p.id) !== String(id)));
 
       fetch(`/api/programs/${id}`, { method: 'DELETE' })
         .then(() => loadData())
-        .catch(() => {});
+        .catch(() => loadData());
     }
   };
 
