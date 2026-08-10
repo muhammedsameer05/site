@@ -1115,9 +1115,9 @@ router.post('/database/import', authenticate, requireAdmin, async (req, res) => 
     if (Array.isArray(snapshot.program_participants)) {
       for (const pp of snapshot.program_participants) {
         await run(`
-          INSERT OR REPLACE INTO program_participants (id, program_id, student_id, chest_no, attendance, mark_obtained, grade, remarks)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        `, [pp.id, pp.program_id, pp.student_id, pp.chest_no, pp.attendance || 'present', pp.mark_obtained, pp.grade, pp.remarks]);
+          INSERT OR REPLACE INTO program_participants (id, program_id, student_id, chest_no, attendance)
+          VALUES (?, ?, ?, ?, ?)
+        `, [pp.id, pp.program_id, pp.student_id, pp.chest_no || pp.student_id, pp.attendance || 'present']);
       }
     }
 
