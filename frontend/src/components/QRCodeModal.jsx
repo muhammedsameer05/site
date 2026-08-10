@@ -81,7 +81,7 @@ export default function QRCodeModal({ student, onClose }) {
             </div>
             <div>
               <span className="text-[10px] text-slate-500 block font-bold">Category</span>
-              <span className="font-extrabold text-amber-800">{student.category_name || 'Kiddies'}</span>
+              <span className="font-extrabold text-amber-800">{student.category_name || 'Kids'}</span>
             </div>
           </div>
         </div>
