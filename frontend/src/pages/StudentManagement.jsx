@@ -481,35 +481,24 @@ export default function StudentManagement() {
                   <label className="block text-slate-200 font-extrabold text-xs uppercase tracking-wider">
                     Contest Items Participating (Registered Items)
                   </label>
-                  <button
-                    type="button"
-                    onClick={() => setFilterByCategoryOnly(!filterByCategoryOnly)}
-                    className="text-[11px] font-bold text-amber-400 hover:underline flex items-center space-x-1"
-                  >
-                    <span>{filterByCategoryOnly ? `Showing ${formData.category_name || 'Category'} Items (Show All)` : 'Showing All Items (Filter Category)'}</span>
-                  </button>
+                  <span className="text-[11px] font-bold text-amber-400 font-mono">
+                    Category: {formData.category_name || 'Sub Junior'}
+                  </span>
                 </div>
 
                 <div className="bg-slate-950/70 border border-slate-800 rounded-2xl p-3 max-h-56 overflow-y-auto">
                   {(() => {
+                    const studentCat = (formData.category_name || 'Sub Junior').toLowerCase().trim();
                     const displayedPrograms = allPrograms.filter(prog => {
-                      if (!filterByCategoryOnly) return true;
                       const progCat = (prog.category_name || prog.age_group || '').toLowerCase().trim();
-                      const studentCat = (formData.category_name || '').toLowerCase().trim();
-                      return !progCat || !studentCat || progCat === studentCat;
+                      const isChecked = registeredProgramIds.includes(prog.id);
+                      return isChecked || progCat === studentCat;
                     });
 
                     if (displayedPrograms.length === 0) {
                       return (
                         <div className="text-slate-400 text-center py-6 font-mono text-xs">
-                          <p>No contest items match category <span className="text-amber-400 font-bold">"{formData.category_name}"</span></p>
-                          <button 
-                            type="button" 
-                            onClick={() => setFilterByCategoryOnly(false)} 
-                            className="mt-2 inline-block text-emerald-400 underline font-bold"
-                          >
-                            Click to show all contest items
-                          </button>
+                          <p>No programs available for category <span className="text-amber-400 font-bold">"{formData.category_name || 'Sub Junior'}"</span></p>
                         </div>
                       );
                     }
@@ -518,16 +507,13 @@ export default function StudentManagement() {
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                         {displayedPrograms.map(prog => {
                           const isChecked = registeredProgramIds.includes(prog.id);
-                          const isMatchingCat = (prog.category_name || prog.age_group || '').toLowerCase().trim() === (formData.category_name || '').toLowerCase().trim();
                           return (
                             <label 
                               key={prog.id} 
                               className={`flex items-start space-x-3 p-3 rounded-xl border cursor-pointer transition ${
                                 isChecked 
                                   ? 'bg-emerald-950/40 border-emerald-500/60 text-white' 
-                                  : isMatchingCat
-                                    ? 'bg-slate-900/90 border-amber-500/40 text-slate-200 hover:border-amber-400'
-                                    : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:border-slate-700'
+                                  : 'bg-slate-900/90 border-slate-700/60 text-slate-200 hover:border-amber-400'
                               }`}
                             >
                               <input 
@@ -545,14 +531,12 @@ export default function StudentManagement() {
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center justify-between gap-1">
                                   <p className="font-bold text-xs leading-snug truncate text-white">{prog.name}</p>
-                                  {isMatchingCat && (
-                                    <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-amber-400/20 text-amber-300 border border-amber-400/30 whitespace-nowrap">
-                                      {formData.category_name}
-                                    </span>
-                                  )}
+                                  <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-amber-400/20 text-amber-300 border border-amber-400/30 whitespace-nowrap">
+                                    {prog.category_name || prog.age_group || formData.category_name}
+                                  </span>
                                 </div>
                                 <p className="text-[10px] text-slate-400 font-mono mt-0.5">
-                                  {prog.code || `PRG-${prog.id}`} • {prog.category_name || prog.age_group || 'General'}
+                                  {prog.code || `PRG-${prog.id}`}
                                 </p>
                               </div>
                             </label>
