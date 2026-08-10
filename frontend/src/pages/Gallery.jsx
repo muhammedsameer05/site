@@ -22,39 +22,26 @@ export default function Gallery() {
   const [previewUrl, setPreviewUrl] = useState('');
 
   const loadGallery = () => {
+    // Purge stale local storage overrides to ensure 100% server sync across all devices
+    localStorage.removeItem('milad_local_gallery');
+    localStorage.removeItem('milad_deleted_gallery_ids');
+
     fetch('/api/gallery', { cache: 'no-store' })
       .then(res => res.json())
       .then(data => {
         const backendItems = Array.isArray(data) ? data : [];
-        const localItems = JSON.parse(localStorage.getItem('milad_local_gallery') || '[]');
-        const deletedIds = JSON.parse(localStorage.getItem('milad_deleted_gallery_ids') || '[]');
-
-        const filteredBackend = backendItems.filter(item => !deletedIds.includes(String(item.id)));
-        const filteredLocal = localItems.filter(item => !deletedIds.includes(String(item.id)));
-
-        // Combine local and backend items without duplicates
-        const combined = [...filteredLocal, ...filteredBackend];
-        const unique = Array.from(new Map(combined.map(item => [String(item.id || item.url), item])).values());
-        
-        if (unique.length === 0) {
+        if (backendItems.length === 0) {
           setItems([
             { id: 1, title: 'വൈബ് ഓഫ് മദീന 2K26 - Official Festival Emblem', url: '/milad-logo.jpg', caption: 'Jamalulleyli Madrasa Payyanur' }
           ]);
         } else {
-          setItems(unique);
+          setItems(backendItems);
         }
       })
       .catch(() => {
-        const localItems = JSON.parse(localStorage.getItem('milad_local_gallery') || '[]');
-        const deletedIds = JSON.parse(localStorage.getItem('milad_deleted_gallery_ids') || '[]');
-        const filteredLocal = localItems.filter(item => !deletedIds.includes(String(item.id)));
-        if (filteredLocal.length === 0) {
-          setItems([
-            { id: 1, title: 'വൈബ് ഓഫ് മദീന 2K26 - Official Festival Emblem', url: '/milad-logo.jpg', caption: 'Jamalulleyli Madrasa Payyanur' }
-          ]);
-        } else {
-          setItems(filteredLocal);
-        }
+        setItems([
+          { id: 1, title: 'വൈബ് ഓഫ് മദീന 2K26 - Official Festival Emblem', url: '/milad-logo.jpg', caption: 'Jamalulleyli Madrasa Payyanur' }
+        ]);
       });
   };
 
@@ -131,14 +118,6 @@ export default function Gallery() {
       caption: formData.caption
     };
 
-    // Update state immediately
-    setItems(prev => prev.map(item => String(item.id) === String(formData.id) ? updatedObj : item));
-
-    // Update local storage items immediately
-    const localItems = JSON.parse(localStorage.getItem('milad_local_gallery') || '[]');
-    const updatedLocal = localItems.map(item => String(item.id) === String(formData.id) ? updatedObj : item);
-    localStorage.setItem('milad_local_gallery', JSON.stringify(updatedLocal));
-
     fetch(`/api/gallery/${formData.id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
@@ -171,63 +150,27 @@ export default function Gallery() {
         if (!res.ok) throw new Error('Upload HTTP Error');
         return res.json();
       })
-      .then(data => {
+      .then(() => {
         setUploading(false);
         setShowUploadModal(false);
-
-        const newItem = {
-          id: data.id || `uploaded_${Date.now()}`,
-          title: formData.title,
-          album_name: formData.album_name,
-          url: formData.url,
-          caption: formData.caption
-        };
-        const existing = JSON.parse(localStorage.getItem('milad_local_gallery') || '[]');
-        localStorage.setItem('milad_local_gallery', JSON.stringify([newItem, ...existing]));
-
         setFormData({ id: null, title: '', album_name: 'Milad 2026', url: '', caption: '' });
         setPreviewUrl('');
         loadGallery();
       })
-      .catch(() => {
+      .catch((err) => {
         setUploading(false);
-        const newItem = {
-          id: `local_${Date.now()}`,
-          title: formData.title,
-          album_name: formData.album_name,
-          url: formData.url,
-          caption: formData.caption
-        };
-        const existing = JSON.parse(localStorage.getItem('milad_local_gallery') || '[]');
-        localStorage.setItem('milad_local_gallery', JSON.stringify([newItem, ...existing]));
-
-        setShowUploadModal(false);
-        setFormData({ id: null, title: '', album_name: 'Milad 2026', url: '', caption: '' });
-        setPreviewUrl('');
-        loadGallery();
+        alert('Upload failed: ' + err.message);
       });
   };
 
   const handleDelete = (id, e) => {
     e.stopPropagation();
     if (window.confirm('Are you sure you want to delete this photo from the gallery?')) {
-      const targetId = String(id);
-
-      const deletedIds = JSON.parse(localStorage.getItem('milad_deleted_gallery_ids') || '[]');
-      if (!deletedIds.includes(targetId)) {
-        deletedIds.push(targetId);
-        localStorage.setItem('milad_deleted_gallery_ids', JSON.stringify(deletedIds));
-      }
-
-      const localItems = JSON.parse(localStorage.getItem('milad_local_gallery') || '[]');
-      const filteredLocal = localItems.filter(item => String(item.id) !== targetId);
-      localStorage.setItem('milad_local_gallery', JSON.stringify(filteredLocal));
-
-      setItems(prev => prev.filter(item => String(item.id) !== targetId));
+      setItems(prev => prev.filter(item => String(item.id) !== String(id)));
 
       fetch(`/api/gallery/${id}`, { method: 'DELETE' })
         .then(() => loadGallery())
-        .catch(() => {});
+        .catch(() => loadGallery());
     }
   };
 
