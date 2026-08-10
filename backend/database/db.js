@@ -241,18 +241,18 @@ async function initDb() {
       (2, 'H-BLU', 'Blue House', '#3B82F6', 'Knowledge is Light and Guidance', 'Captain 2', 0)`);
   }
 
-  // Update any existing legacy category names
-  await run("UPDATE categories SET name = 'Kids' WHERE name = 'Kiddies'");
-  await run("DELETE FROM categories WHERE name = 'Super Senior'");
+  // Ensure standard 5 categories exist in categories table
+  await run("UPDATE categories SET name = 'Kiddies' WHERE name = 'Kids'");
 
-  // Ensure 4 standard categories exist if empty
   const categoryRows = await all('SELECT * FROM categories');
-  if (categoryRows.length === 0) {
+  if (categoryRows.length < 5) {
+    await run(`DELETE FROM categories`);
     await run(`INSERT INTO categories (id, name, min_age, max_age, description) VALUES
-      (1, 'Kids', 5, 8, 'Class 1 to Class 3'),
-      (2, 'Sub Junior', 9, 11, 'Class 4 to Class 6'),
-      (3, 'Junior', 12, 14, 'Class 7 to Class 9'),
-      (4, 'Senior', 15, 18, 'Class 10 to Higher Secondary')`);
+      (1, 'Kiddies', 5, 7, 'Kiddies Category'),
+      (2, 'Sub Junior', 8, 10, 'Sub Junior Category'),
+      (3, 'Junior', 11, 13, 'Junior Category'),
+      (4, 'Senior', 14, 16, 'Senior Category'),
+      (5, 'Super Senior', 17, 20, 'Super Senior Category')`);
   }
 
   // Ensure venues exist if table is empty

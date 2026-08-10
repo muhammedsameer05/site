@@ -314,31 +314,38 @@
   "categories": [
     {
       "id": 1,
-      "name": "Kids",
+      "name": "Kiddies",
       "min_age": 5,
-      "max_age": 8,
-      "description": "Class 1 to Class 3"
+      "max_age": 7,
+      "description": "Kiddies Category"
     },
     {
       "id": 2,
       "name": "Sub Junior",
-      "min_age": 9,
-      "max_age": 11,
-      "description": "Class 4 to Class 6"
+      "min_age": 8,
+      "max_age": 10,
+      "description": "Sub Junior Category"
     },
     {
       "id": 3,
       "name": "Junior",
-      "min_age": 12,
-      "max_age": 14,
-      "description": "Class 7 to Class 9"
+      "min_age": 11,
+      "max_age": 13,
+      "description": "Junior Category"
     },
     {
       "id": 4,
       "name": "Senior",
-      "min_age": 15,
-      "max_age": 18,
-      "description": "Class 10 to Higher Secondary"
+      "min_age": 14,
+      "max_age": 16,
+      "description": "Senior Category"
+    },
+    {
+      "id": 5,
+      "name": "Super Senior",
+      "min_age": 17,
+      "max_age": 20,
+      "description": "Super Senior Category"
     }
   ],
   "venues": [
