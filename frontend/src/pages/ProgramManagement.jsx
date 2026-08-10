@@ -23,12 +23,18 @@ export default function ProgramManagement() {
   const [showWinnersModal, setShowWinnersModal] = useState(false);
   const [targetProgramForWinners, setTargetProgramForWinners] = useState(null);
   const [allStudentsList, setAllStudentsList] = useState([]);
-  const [winnerSearch, setWinnerSearch] = useState('');
+  
+  const [winnerSearchInput, setWinnerSearchInput] = useState({
+    first: '',
+    second: '',
+    third: ''
+  });
   const [winnersForm, setWinnersForm] = useState({
     first_student_id: '',
     second_student_id: '',
     third_student_id: ''
   });
+  const [activeDropdown, setActiveDropdown] = useState(null); // 'first', 'second', 'third' or null
   const [winnersSaving, setWinnersSaving] = useState(false);
 
   const loadData = () => {
@@ -140,16 +146,26 @@ export default function ProgramManagement() {
   // Open Winners Assignment Modal
   const handleOpenWinnersModal = (program) => {
     setTargetProgramForWinners(program);
-    setWinnerSearch('');
+    setActiveDropdown(null);
 
-    const existing1st = program.winners?.find(w => w.prize === '1st')?.student_name || program.winners?.find(w => w.prize === '1st')?.student_id || '';
-    const existing2nd = program.winners?.find(w => w.prize === '2nd')?.student_name || program.winners?.find(w => w.prize === '2nd')?.student_id || '';
-    const existing3rd = program.winners?.find(w => w.prize === '3rd')?.student_name || program.winners?.find(w => w.prize === '3rd')?.student_id || '';
+    const existing1st = program.winners?.find(w => w.prize === '1st');
+    const existing2nd = program.winners?.find(w => w.prize === '2nd');
+    const existing3rd = program.winners?.find(w => w.prize === '3rd');
+
+    const name1st = existing1st?.student_name || existing1st?.student_id || '';
+    const name2nd = existing2nd?.student_name || existing2nd?.student_id || '';
+    const name3rd = existing3rd?.student_name || existing3rd?.student_id || '';
+
+    setWinnerSearchInput({
+      first: name1st,
+      second: name2nd,
+      third: name3rd
+    });
 
     setWinnersForm({
-      first_student_id: existing1st,
-      second_student_id: existing2nd,
-      third_student_id: existing3rd
+      first_student_id: existing1st?.student_id || name1st,
+      second_student_id: existing2nd?.student_id || name2nd,
+      third_student_id: existing3rd?.student_id || name3rd
     });
 
     fetch('/api/students')
@@ -200,21 +216,21 @@ export default function ProgramManagement() {
       });
   };
 
-  const filteredStudentsForWinners = allStudentsList.filter(st => {
-    const q = winnerSearch.toLowerCase().trim();
-    if (!q) return true;
-    return (
+  const getFilteredStudents = (query) => {
+    const q = (query || '').toLowerCase().trim();
+    if (!q) return allStudentsList;
+    return allStudentsList.filter(st => (
       st.name?.toLowerCase().includes(q) ||
       st.student_id?.toLowerCase().includes(q) ||
       st.admission_no?.toLowerCase().includes(q) ||
       st.class_name?.toLowerCase().includes(q) ||
       st.house_name?.toLowerCase().includes(q) ||
       String(st.chest_no || '').includes(q)
-    );
-  });
+    ));
+  };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" onClick={() => setActiveDropdown(null)}>
       
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -383,10 +399,13 @@ export default function ProgramManagement() {
         ))}
       </div>
 
-      {/* Assign 1st, 2nd, 3rd Winners Modal with Live Search & Custom Name Input */}
+      {/* Assign 1st, 2nd, 3rd Winners Modal with Searchable Autocomplete Inputs */}
       {showWinnersModal && targetProgramForWinners && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4 overflow-y-auto">
-          <div className="glass-panel p-6 rounded-3xl border border-amber-500/50 max-w-lg w-full bg-slate-900 shadow-2xl space-y-5">
+          <div 
+            onClick={e => e.stopPropagation()}
+            className="glass-panel p-6 rounded-3xl border border-amber-500/50 max-w-lg w-full bg-slate-900 shadow-2xl space-y-5"
+          >
             
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
               <div>
@@ -404,105 +423,213 @@ export default function ProgramManagement() {
               </button>
             </div>
 
-            {/* Live Search Input */}
-            <div className="relative">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
-              <input
-                type="text"
-                placeholder="Search student by name, ID, class, or house..."
-                value={winnerSearch}
-                onChange={e => setWinnerSearch(e.target.value)}
-                className="w-full bg-slate-950 border border-amber-400/40 rounded-xl pl-9 pr-3 py-2 text-xs font-bold text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-amber-400"
-              />
-            </div>
-
             <form onSubmit={handleSaveWinners} className="space-y-4">
               
-              {/* 🥇 1st Place Selector & Custom Name */}
-              <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/40 space-y-2">
+              {/* 🥇 1st Place Searchable Autocomplete Combobox */}
+              <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/40 space-y-1.5 relative">
                 <label className="text-xs font-bold text-amber-300 flex items-center space-x-1.5">
                   <span className="text-base">🥇</span>
                   <span>1st Place Winner (10 Points)</span>
                 </label>
-                
-                <select
-                  value={winnersForm.first_student_id}
-                  onChange={e => setWinnersForm({ ...winnersForm, first_student_id: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-white focus:border-amber-400"
-                >
-                  <option value="">-- Select 1st Place Student from List --</option>
-                  {filteredStudentsForWinners.map(st => (
-                    <option key={st.id || st.admission_no} value={st.id || st.student_id}>
-                      {st.name} ({st.class_name} | {st.house_name || 'House'})
-                    </option>
-                  ))}
-                </select>
 
-                <input
-                  type="text"
-                  placeholder="Or type custom student name directly..."
-                  value={winnersForm.first_student_id}
-                  onChange={e => setWinnersForm({ ...winnersForm, first_student_id: e.target.value })}
-                  className="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-amber-200 placeholder-slate-500 font-semibold"
-                />
+                <div className="relative">
+                  <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-3" />
+                  <input
+                    type="text"
+                    placeholder="Search or type 1st place student name..."
+                    value={winnerSearchInput.first}
+                    onFocus={() => setActiveDropdown('first')}
+                    onChange={e => {
+                      const val = e.target.value;
+                      setWinnerSearchInput({ ...winnerSearchInput, first: val });
+                      setWinnersForm({ ...winnersForm, first_student_id: val });
+                      setActiveDropdown('first');
+                    }}
+                    className="w-full bg-slate-950 border border-slate-700 rounded-xl pl-9 pr-8 py-2 text-xs font-bold text-white placeholder-slate-500 focus:border-amber-400 focus:outline-none"
+                  />
+                  {winnerSearchInput.first && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setWinnerSearchInput({ ...winnerSearchInput, first: '' });
+                        setWinnersForm({ ...winnersForm, first_student_id: '' });
+                      }}
+                      className="absolute right-2.5 top-2.5 text-slate-400 hover:text-white"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
+
+                {/* Floating Autocomplete Suggestions Dropdown */}
+                {activeDropdown === 'first' && (
+                  <div className="absolute left-0 right-0 top-full mt-1 z-50 bg-slate-950 border border-amber-400/50 rounded-xl shadow-2xl max-h-48 overflow-y-auto p-1 space-y-0.5">
+                    {getFilteredStudents(winnerSearchInput.first).length === 0 ? (
+                      <div className="p-2.5 text-[11px] text-slate-400 italic text-center">
+                        No matching student found. "{winnerSearchInput.first}" will be added.
+                      </div>
+                    ) : (
+                      getFilteredStudents(winnerSearchInput.first).map(st => (
+                        <button
+                          key={st.id || st.admission_no}
+                          type="button"
+                          onClick={() => {
+                            setWinnerSearchInput({ ...winnerSearchInput, first: st.name });
+                            setWinnersForm({ ...winnersForm, first_student_id: st.id || st.student_id || st.name });
+                            setActiveDropdown(null);
+                          }}
+                          className="w-full text-left p-2 rounded-lg hover:bg-amber-500/20 hover:text-amber-300 text-xs font-bold flex items-center justify-between transition"
+                        >
+                          <div>
+                            <span className="text-white block font-bold">{st.name}</span>
+                            <span className="text-[10px] text-slate-400 font-mono">{st.class_name} | {st.house_name || 'House'}</span>
+                          </div>
+                          <span className="text-[10px] font-mono text-amber-400 bg-slate-900 px-1.5 py-0.5 rounded border border-slate-800">
+                            #{st.chest_no || st.admission_no}
+                          </span>
+                        </button>
+                      ))
+                    )}
+                  </div>
+                )}
               </div>
 
-              {/* 🥈 2nd Place Selector & Custom Name */}
-              <div className="p-3.5 rounded-2xl bg-slate-800/80 border border-slate-600/40 space-y-2">
+              {/* 🥈 2nd Place Searchable Autocomplete Combobox */}
+              <div className="p-3.5 rounded-2xl bg-slate-800/80 border border-slate-600/40 space-y-1.5 relative">
                 <label className="text-xs font-bold text-slate-200 flex items-center space-x-1.5">
                   <span className="text-base">🥈</span>
                   <span>2nd Place Winner (7 Points)</span>
                 </label>
-                
-                <select
-                  value={winnersForm.second_student_id}
-                  onChange={e => setWinnersForm({ ...winnersForm, second_student_id: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-white focus:border-amber-400"
-                >
-                  <option value="">-- Select 2nd Place Student from List --</option>
-                  {filteredStudentsForWinners.map(st => (
-                    <option key={st.id || st.admission_no} value={st.id || st.student_id}>
-                      {st.name} ({st.class_name} | {st.house_name || 'House'})
-                    </option>
-                  ))}
-                </select>
 
-                <input
-                  type="text"
-                  placeholder="Or type custom student name directly..."
-                  value={winnersForm.second_student_id}
-                  onChange={e => setWinnersForm({ ...winnersForm, second_student_id: e.target.value })}
-                  className="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-200 placeholder-slate-500 font-semibold"
-                />
+                <div className="relative">
+                  <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-3" />
+                  <input
+                    type="text"
+                    placeholder="Search or type 2nd place student name..."
+                    value={winnerSearchInput.second}
+                    onFocus={() => setActiveDropdown('second')}
+                    onChange={e => {
+                      const val = e.target.value;
+                      setWinnerSearchInput({ ...winnerSearchInput, second: val });
+                      setWinnersForm({ ...winnersForm, second_student_id: val });
+                      setActiveDropdown('second');
+                    }}
+                    className="w-full bg-slate-950 border border-slate-700 rounded-xl pl-9 pr-8 py-2 text-xs font-bold text-white placeholder-slate-500 focus:border-amber-400 focus:outline-none"
+                  />
+                  {winnerSearchInput.second && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setWinnerSearchInput({ ...winnerSearchInput, second: '' });
+                        setWinnersForm({ ...winnersForm, second_student_id: '' });
+                      }}
+                      className="absolute right-2.5 top-2.5 text-slate-400 hover:text-white"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
+
+                {/* Floating Autocomplete Suggestions Dropdown */}
+                {activeDropdown === 'second' && (
+                  <div className="absolute left-0 right-0 top-full mt-1 z-50 bg-slate-950 border border-slate-600/50 rounded-xl shadow-2xl max-h-48 overflow-y-auto p-1 space-y-0.5">
+                    {getFilteredStudents(winnerSearchInput.second).length === 0 ? (
+                      <div className="p-2.5 text-[11px] text-slate-400 italic text-center">
+                        No matching student found. "{winnerSearchInput.second}" will be added.
+                      </div>
+                    ) : (
+                      getFilteredStudents(winnerSearchInput.second).map(st => (
+                        <button
+                          key={st.id || st.admission_no}
+                          type="button"
+                          onClick={() => {
+                            setWinnerSearchInput({ ...winnerSearchInput, second: st.name });
+                            setWinnersForm({ ...winnersForm, second_student_id: st.id || st.student_id || st.name });
+                            setActiveDropdown(null);
+                          }}
+                          className="w-full text-left p-2 rounded-lg hover:bg-slate-800 hover:text-slate-200 text-xs font-bold flex items-center justify-between transition"
+                        >
+                          <div>
+                            <span className="text-white block font-bold">{st.name}</span>
+                            <span className="text-[10px] text-slate-400 font-mono">{st.class_name} | {st.house_name || 'House'}</span>
+                          </div>
+                          <span className="text-[10px] font-mono text-slate-300 bg-slate-900 px-1.5 py-0.5 rounded border border-slate-800">
+                            #{st.chest_no || st.admission_no}
+                          </span>
+                        </button>
+                      ))
+                    )}
+                  </div>
+                )}
               </div>
 
-              {/* 🥉 3rd Place Selector & Custom Name */}
-              <div className="p-3.5 rounded-2xl bg-amber-900/20 border border-amber-700/40 space-y-2">
+              {/* 🥉 3rd Place Searchable Autocomplete Combobox */}
+              <div className="p-3.5 rounded-2xl bg-amber-900/20 border border-amber-700/40 space-y-1.5 relative">
                 <label className="text-xs font-bold text-amber-400 flex items-center space-x-1.5">
                   <span className="text-base">🥉</span>
                   <span>3rd Place Winner (5 Points)</span>
                 </label>
-                
-                <select
-                  value={winnersForm.third_student_id}
-                  onChange={e => setWinnersForm({ ...winnersForm, third_student_id: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-white focus:border-amber-400"
-                >
-                  <option value="">-- Select 3rd Place Student from List --</option>
-                  {filteredStudentsForWinners.map(st => (
-                    <option key={st.id || st.admission_no} value={st.id || st.student_id}>
-                      {st.name} ({st.class_name} | {st.house_name || 'House'})
-                    </option>
-                  ))}
-                </select>
 
-                <input
-                  type="text"
-                  placeholder="Or type custom student name directly..."
-                  value={winnersForm.third_student_id}
-                  onChange={e => setWinnersForm({ ...winnersForm, third_student_id: e.target.value })}
-                  className="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-amber-200 placeholder-slate-500 font-semibold"
-                />
+                <div className="relative">
+                  <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-3" />
+                  <input
+                    type="text"
+                    placeholder="Search or type 3rd place student name..."
+                    value={winnerSearchInput.third}
+                    onFocus={() => setActiveDropdown('third')}
+                    onChange={e => {
+                      const val = e.target.value;
+                      setWinnerSearchInput({ ...winnerSearchInput, third: val });
+                      setWinnersForm({ ...winnersForm, third_student_id: val });
+                      setActiveDropdown('third');
+                    }}
+                    className="w-full bg-slate-950 border border-slate-700 rounded-xl pl-9 pr-8 py-2 text-xs font-bold text-white placeholder-slate-500 focus:border-amber-400 focus:outline-none"
+                  />
+                  {winnerSearchInput.third && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setWinnerSearchInput({ ...winnerSearchInput, third: '' });
+                        setWinnersForm({ ...winnersForm, third_student_id: '' });
+                      }}
+                      className="absolute right-2.5 top-2.5 text-slate-400 hover:text-white"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
+
+                {/* Floating Autocomplete Suggestions Dropdown */}
+                {activeDropdown === 'third' && (
+                  <div className="absolute left-0 right-0 top-full mt-1 z-50 bg-slate-950 border border-amber-700/50 rounded-xl shadow-2xl max-h-48 overflow-y-auto p-1 space-y-0.5">
+                    {getFilteredStudents(winnerSearchInput.third).length === 0 ? (
+                      <div className="p-2.5 text-[11px] text-slate-400 italic text-center">
+                        No matching student found. "{winnerSearchInput.third}" will be added.
+                      </div>
+                    ) : (
+                      getFilteredStudents(winnerSearchInput.third).map(st => (
+                        <button
+                          key={st.id || st.admission_no}
+                          type="button"
+                          onClick={() => {
+                            setWinnerSearchInput({ ...winnerSearchInput, third: st.name });
+                            setWinnersForm({ ...winnersForm, third_student_id: st.id || st.student_id || st.name });
+                            setActiveDropdown(null);
+                          }}
+                          className="w-full text-left p-2 rounded-lg hover:bg-amber-900/40 hover:text-amber-300 text-xs font-bold flex items-center justify-between transition"
+                        >
+                          <div>
+                            <span className="text-white block font-bold">{st.name}</span>
+                            <span className="text-[10px] text-slate-400 font-mono">{st.class_name} | {st.house_name || 'House'}</span>
+                          </div>
+                          <span className="text-[10px] font-mono text-amber-400 bg-slate-900 px-1.5 py-0.5 rounded border border-slate-800">
+                            #{st.chest_no || st.admission_no}
+                          </span>
+                        </button>
+                      ))
+                    )}
+                  </div>
+                )}
               </div>
 
               <div className="flex items-center justify-end space-x-3 pt-4 border-t border-slate-800">
