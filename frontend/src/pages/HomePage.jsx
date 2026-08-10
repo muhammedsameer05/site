@@ -1,14 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import Hero from '../components/Hero';
 import { 
-  Trophy, Calendar, Clock, ArrowRight, Award, Sparkles, Image as ImageIcon 
+  Trophy, Calendar, Clock, ArrowRight, Award, Sparkles, Image as ImageIcon, Edit3, Check, Plus, Minus
 } from 'lucide-react';
 import { io } from 'socket.io-client';
+import { useAuth } from '../context/AuthContext';
 
 export default function HomePage({ onNavigate }) {
+  const { user } = useAuth();
+  const isAdmin = ['super_admin', 'admin'].includes(user?.role);
+
   const [houses, setHouses] = useState([]);
   const [programs, setPrograms] = useState([]);
   const [gallery, setGallery] = useState([]);
+  const [editingScoreHouseId, setEditingScoreHouseId] = useState(null);
+  const [inputScore, setInputScore] = useState('');
 
   const loadData = () => {
     fetch('/api/houses', { cache: 'no-store' })
@@ -29,6 +35,20 @@ export default function HomePage({ onNavigate }) {
       .catch(() => {
         setGallery([]);
       });
+  };
+
+  const handleUpdateHouseScore = async (houseId, newPoints) => {
+    try {
+      const res = await fetch(`/api/houses/${houseId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ total_points: Number(newPoints) })
+      });
+      if (res.ok) {
+        loadData();
+        setEditingScoreHouseId(null);
+      }
+    } catch (e) {}
   };
 
   useEffect(() => {
@@ -150,24 +170,103 @@ export default function HomePage({ onNavigate }) {
           {houses.map((house, idx) => (
             <div 
               key={house.id} 
-              className="glass-panel card-hover-effect p-5 rounded-2xl border bg-white shadow-sm"
+              className="glass-panel card-hover-effect p-5 rounded-2xl border bg-white shadow-sm flex flex-col justify-between"
               style={{ borderColor: `${house.color_hex}60` }}
             >
-              <div className="flex items-center justify-between mb-3">
-                <span className="w-8 h-8 rounded-full flex items-center justify-center text-white font-extrabold text-sm shadow-md transition-transform duration-300 hover:scale-110" style={{ backgroundColor: house.color_hex }}>
-                  #{idx + 1}
-                </span>
-                <span className="text-xs font-mono font-bold text-slate-500">{house.code}</span>
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <span className="w-8 h-8 rounded-full flex items-center justify-center text-white font-extrabold text-sm shadow-md transition-transform duration-300 hover:scale-110" style={{ backgroundColor: house.color_hex }}>
+                    #{idx + 1}
+                  </span>
+                  <span className="text-xs font-mono font-bold text-slate-500">{house.code}</span>
+                </div>
+                <h3 className="text-lg font-extrabold mb-1" style={{ color: house.color_hex }}>
+                  {house.name}
+                </h3>
+                <p className="text-xs text-slate-500 italic mb-4 line-clamp-1 font-medium">{house.motto || 'Virtue & Faith'}</p>
               </div>
-              <h3 className="text-lg font-extrabold mb-1" style={{ color: house.color_hex }}>
-                {house.name}
-              </h3>
-              <p className="text-xs text-slate-500 italic mb-4 line-clamp-1 font-medium">{house.motto || 'Virtue & Faith'}</p>
               
-              <div className="flex items-baseline justify-between border-t border-slate-200 pt-3">
-                <span className="text-xs font-bold text-slate-600">Total Points</span>
-                <span className="text-2xl font-black emerald-gradient-text font-mono animate-pulse-glow px-2 py-0.5 rounded-lg">{house.total_points || 0}</span>
+              <div>
+                <div className="flex items-center justify-between border-t border-slate-200 pt-3">
+                  <span className="text-xs font-bold text-slate-600">Total Points</span>
+                  
+                  {isAdmin && editingScoreHouseId === house.id ? (
+                    <div className="flex items-center space-x-1">
+                      <input
+                        type="number"
+                        autoFocus
+                        value={inputScore}
+                        onChange={(e) => setInputScore(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') handleUpdateHouseScore(house.id, inputScore);
+                          if (e.key === 'Escape') setEditingScoreHouseId(null);
+                        }}
+                        className="w-16 px-1.5 py-0.5 border-2 border-emerald-500 rounded text-center font-mono font-black text-sm text-emerald-950 bg-white"
+                      />
+                      <button
+                        onClick={() => handleUpdateHouseScore(house.id, inputScore)}
+                        className="p-1 rounded bg-emerald-600 text-white hover:bg-emerald-700"
+                        title="Save Score"
+                      >
+                        <Check className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center space-x-1.5">
+                      <span className="text-2xl font-black emerald-gradient-text font-mono animate-pulse-glow px-2 py-0.5 rounded-lg">
+                        {house.total_points || 0}
+                      </span>
+                      {isAdmin && (
+                        <button
+                          onClick={() => {
+                            setEditingScoreHouseId(house.id);
+                            setInputScore(house.total_points || 0);
+                          }}
+                          className="p-1 rounded text-slate-400 hover:text-emerald-700 hover:bg-emerald-50 transition"
+                          title="Direct Edit Score"
+                        >
+                          <Edit3 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* Admin Quick Live Score Adjustment Controls */}
+                {isAdmin && (
+                  <div className="mt-3 pt-2 border-t border-slate-100 grid grid-cols-4 gap-1">
+                    <button
+                      onClick={() => handleUpdateHouseScore(house.id, (house.total_points || 0) + 10)}
+                      className="py-1 px-1.5 rounded-lg bg-emerald-100 hover:bg-emerald-600 hover:text-white text-emerald-900 font-extrabold text-[11px] transition text-center"
+                      title="Add 10 Points"
+                    >
+                      +10
+                    </button>
+                    <button
+                      onClick={() => handleUpdateHouseScore(house.id, (house.total_points || 0) + 5)}
+                      className="py-1 px-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-500 hover:text-white text-emerald-800 font-extrabold text-[11px] transition text-center"
+                      title="Add 5 Points"
+                    >
+                      +5
+                    </button>
+                    <button
+                      onClick={() => handleUpdateHouseScore(house.id, (house.total_points || 0) + 1)}
+                      className="py-1 px-1.5 rounded-lg bg-teal-50 hover:bg-teal-600 hover:text-white text-teal-800 font-extrabold text-[11px] transition text-center"
+                      title="Add 1 Point"
+                    >
+                      +1
+                    </button>
+                    <button
+                      onClick={() => handleUpdateHouseScore(house.id, Math.max(0, (house.total_points || 0) - 5))}
+                      className="py-1 px-1.5 rounded-lg bg-rose-50 hover:bg-rose-500 hover:text-white text-rose-800 font-extrabold text-[11px] transition text-center"
+                      title="Deduct 5 Points"
+                    >
+                      -5
+                    </button>
+                  </div>
+                )}
               </div>
+
             </div>
           ))}
         </div>

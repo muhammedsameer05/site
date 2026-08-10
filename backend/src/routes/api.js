@@ -424,7 +424,6 @@ async function recalculateAllHousePoints() {
 // -------------------------------------------------------------
 router.get('/houses', async (req, res) => {
   try {
-    await recalculateAllHousePoints();
     const houses = await all('SELECT * FROM houses ORDER BY total_points DESC');
     res.json(houses);
   } catch (err) {
