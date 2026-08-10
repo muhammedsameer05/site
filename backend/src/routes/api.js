@@ -619,10 +619,24 @@ router.post('/results/manual/:programId', async (req, res) => {
     for (let w of winnersInput) {
       if (!w.studentId) continue;
 
-      const studentObj = await get(`
+      let studentObj = await get(`
         SELECT id FROM students 
-        WHERE id = ? OR student_id = ? OR admission_no = ? OR CAST(id AS TEXT) = CAST(? AS TEXT)
-      `, [w.studentId, w.studentId, w.studentId, w.studentId]);
+        WHERE id = ? OR student_id = ? OR admission_no = ? OR name LIKE ? OR CAST(id AS TEXT) = CAST(? AS TEXT)
+      `, [w.studentId, w.studentId, w.studentId, w.studentId, w.studentId]);
+
+      if (!studentObj && typeof w.studentId === 'string' && w.studentId.trim().length > 0 && isNaN(Number(w.studentId))) {
+        const cleanName = w.studentId.trim();
+        const existingByName = await get('SELECT id FROM students WHERE name LIKE ?', [cleanName]);
+        if (existingByName) {
+          studentObj = existingByName;
+        } else {
+          const newStu = await run(`
+            INSERT INTO students (student_id, admission_no, name, class_name, house_id)
+            VALUES (?, ?, ?, 'Class 1', 1)
+          `, [`STU-${Date.now().toString().slice(-4)}`, `ADM-${Date.now().toString().slice(-4)}`, cleanName]);
+          studentObj = { id: newStu.id };
+        }
+      }
 
       const targetDbId = studentObj ? studentObj.id : w.studentId;
 

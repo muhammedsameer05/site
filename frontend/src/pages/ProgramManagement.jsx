@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Plus, Users, Clock, Edit, Trash2, Award, Trophy, CheckCircle, X, Sparkles } from 'lucide-react';
+import { Calendar, Plus, Users, Clock, Edit, Trash2, Award, Trophy, CheckCircle, X, Sparkles, Search } from 'lucide-react';
 
 export default function ProgramManagement() {
   const [programs, setPrograms] = useState([]);
@@ -23,6 +23,7 @@ export default function ProgramManagement() {
   const [showWinnersModal, setShowWinnersModal] = useState(false);
   const [targetProgramForWinners, setTargetProgramForWinners] = useState(null);
   const [allStudentsList, setAllStudentsList] = useState([]);
+  const [winnerSearch, setWinnerSearch] = useState('');
   const [winnersForm, setWinnersForm] = useState({
     first_student_id: '',
     second_student_id: '',
@@ -139,10 +140,11 @@ export default function ProgramManagement() {
   // Open Winners Assignment Modal
   const handleOpenWinnersModal = (program) => {
     setTargetProgramForWinners(program);
+    setWinnerSearch('');
 
-    const existing1st = program.winners?.find(w => w.prize === '1st')?.student_id || '';
-    const existing2nd = program.winners?.find(w => w.prize === '2nd')?.student_id || '';
-    const existing3rd = program.winners?.find(w => w.prize === '3rd')?.student_id || '';
+    const existing1st = program.winners?.find(w => w.prize === '1st')?.student_name || program.winners?.find(w => w.prize === '1st')?.student_id || '';
+    const existing2nd = program.winners?.find(w => w.prize === '2nd')?.student_name || program.winners?.find(w => w.prize === '2nd')?.student_id || '';
+    const existing3rd = program.winners?.find(w => w.prize === '3rd')?.student_name || program.winners?.find(w => w.prize === '3rd')?.student_id || '';
 
     setWinnersForm({
       first_student_id: existing1st,
@@ -197,6 +199,19 @@ export default function ProgramManagement() {
         loadData();
       });
   };
+
+  const filteredStudentsForWinners = allStudentsList.filter(st => {
+    const q = winnerSearch.toLowerCase().trim();
+    if (!q) return true;
+    return (
+      st.name?.toLowerCase().includes(q) ||
+      st.student_id?.toLowerCase().includes(q) ||
+      st.admission_no?.toLowerCase().includes(q) ||
+      st.class_name?.toLowerCase().includes(q) ||
+      st.house_name?.toLowerCase().includes(q) ||
+      String(st.chest_no || '').includes(q)
+    );
+  });
 
   return (
     <div className="space-y-6">
@@ -368,10 +383,10 @@ export default function ProgramManagement() {
         ))}
       </div>
 
-      {/* Assign 1st, 2nd, 3rd Winners Modal */}
+      {/* Assign 1st, 2nd, 3rd Winners Modal with Live Search & Custom Name Input */}
       {showWinnersModal && targetProgramForWinners && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4 overflow-y-auto">
-          <div className="glass-panel p-6 rounded-3xl border border-amber-500/50 max-w-lg w-full bg-slate-900 shadow-2xl space-y-6">
+          <div className="glass-panel p-6 rounded-3xl border border-amber-500/50 max-w-lg w-full bg-slate-900 shadow-2xl space-y-5">
             
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
               <div>
@@ -389,66 +404,105 @@ export default function ProgramManagement() {
               </button>
             </div>
 
+            {/* Live Search Input */}
+            <div className="relative">
+              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+              <input
+                type="text"
+                placeholder="Search student by name, ID, class, or house..."
+                value={winnerSearch}
+                onChange={e => setWinnerSearch(e.target.value)}
+                className="w-full bg-slate-950 border border-amber-400/40 rounded-xl pl-9 pr-3 py-2 text-xs font-bold text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-amber-400"
+              />
+            </div>
+
             <form onSubmit={handleSaveWinners} className="space-y-4">
               
-              {/* 🥇 1st Place Selector */}
-              <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/40 space-y-1.5">
+              {/* 🥇 1st Place Selector & Custom Name */}
+              <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/40 space-y-2">
                 <label className="text-xs font-bold text-amber-300 flex items-center space-x-1.5">
                   <span className="text-base">🥇</span>
                   <span>1st Place Winner (10 Points)</span>
                 </label>
+                
                 <select
                   value={winnersForm.first_student_id}
                   onChange={e => setWinnersForm({ ...winnersForm, first_student_id: e.target.value })}
                   className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-white focus:border-amber-400"
                 >
-                  <option value="">-- Select 1st Place Student --</option>
-                  {allStudentsList.map(st => (
+                  <option value="">-- Select 1st Place Student from List --</option>
+                  {filteredStudentsForWinners.map(st => (
                     <option key={st.id || st.admission_no} value={st.id || st.student_id}>
                       {st.name} ({st.class_name} | {st.house_name || 'House'})
                     </option>
                   ))}
                 </select>
+
+                <input
+                  type="text"
+                  placeholder="Or type custom student name directly..."
+                  value={winnersForm.first_student_id}
+                  onChange={e => setWinnersForm({ ...winnersForm, first_student_id: e.target.value })}
+                  className="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-amber-200 placeholder-slate-500 font-semibold"
+                />
               </div>
 
-              {/* 🥈 2nd Place Selector */}
-              <div className="p-3.5 rounded-2xl bg-slate-800/80 border border-slate-600/40 space-y-1.5">
+              {/* 🥈 2nd Place Selector & Custom Name */}
+              <div className="p-3.5 rounded-2xl bg-slate-800/80 border border-slate-600/40 space-y-2">
                 <label className="text-xs font-bold text-slate-200 flex items-center space-x-1.5">
                   <span className="text-base">🥈</span>
                   <span>2nd Place Winner (7 Points)</span>
                 </label>
+                
                 <select
                   value={winnersForm.second_student_id}
                   onChange={e => setWinnersForm({ ...winnersForm, second_student_id: e.target.value })}
                   className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-white focus:border-amber-400"
                 >
-                  <option value="">-- Select 2nd Place Student --</option>
-                  {allStudentsList.map(st => (
+                  <option value="">-- Select 2nd Place Student from List --</option>
+                  {filteredStudentsForWinners.map(st => (
                     <option key={st.id || st.admission_no} value={st.id || st.student_id}>
                       {st.name} ({st.class_name} | {st.house_name || 'House'})
                     </option>
                   ))}
                 </select>
+
+                <input
+                  type="text"
+                  placeholder="Or type custom student name directly..."
+                  value={winnersForm.second_student_id}
+                  onChange={e => setWinnersForm({ ...winnersForm, second_student_id: e.target.value })}
+                  className="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-200 placeholder-slate-500 font-semibold"
+                />
               </div>
 
-              {/* 🥉 3rd Place Selector */}
-              <div className="p-3.5 rounded-2xl bg-amber-900/20 border border-amber-700/40 space-y-1.5">
+              {/* 🥉 3rd Place Selector & Custom Name */}
+              <div className="p-3.5 rounded-2xl bg-amber-900/20 border border-amber-700/40 space-y-2">
                 <label className="text-xs font-bold text-amber-400 flex items-center space-x-1.5">
                   <span className="text-base">🥉</span>
                   <span>3rd Place Winner (5 Points)</span>
                 </label>
+                
                 <select
                   value={winnersForm.third_student_id}
                   onChange={e => setWinnersForm({ ...winnersForm, third_student_id: e.target.value })}
                   className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-white focus:border-amber-400"
                 >
-                  <option value="">-- Select 3rd Place Student --</option>
-                  {allStudentsList.map(st => (
+                  <option value="">-- Select 3rd Place Student from List --</option>
+                  {filteredStudentsForWinners.map(st => (
                     <option key={st.id || st.admission_no} value={st.id || st.student_id}>
                       {st.name} ({st.class_name} | {st.house_name || 'House'})
                     </option>
                   ))}
                 </select>
+
+                <input
+                  type="text"
+                  placeholder="Or type custom student name directly..."
+                  value={winnersForm.third_student_id}
+                  onChange={e => setWinnersForm({ ...winnersForm, third_student_id: e.target.value })}
+                  className="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-amber-200 placeholder-slate-500 font-semibold"
+                />
               </div>
 
               <div className="flex items-center justify-end space-x-3 pt-4 border-t border-slate-800">
