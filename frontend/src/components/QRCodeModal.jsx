@@ -84,19 +84,6 @@ export default function QRCodeModal({ student, onClose }) {
               <span className="font-extrabold text-amber-800">{student.category_name || 'Kiddies'}</span>
             </div>
           </div>
-
-          {/* QR Code Canvas */}
-          <div className="flex justify-center py-2">
-            <div className="p-3 bg-white rounded-xl shadow border border-emerald-200">
-              <QRCodeCanvas 
-                value={JSON.stringify({ id: student.id, student_id: student.student_id, name: student.name, class: student.class_name })}
-                size={120}
-                level="H"
-              />
-            </div>
-          </div>
-
-          <p className="text-[10px] text-slate-500 font-mono font-bold">Scan for Instant Check-in & Result Verification</p>
         </div>
 
         {/* Action Buttons */}
