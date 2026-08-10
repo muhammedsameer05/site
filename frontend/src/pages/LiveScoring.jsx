@@ -10,7 +10,7 @@ export default function LiveScoring() {
   const [results, setResults] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedHouseBreakdownId, setSelectedHouseBreakdownId] = useState(null);
+  const [selectedHouseObj, setSelectedHouseObj] = useState(null);
   const [liveLog, setLiveLog] = useState([
     { id: 1, time: 'System Ready', text: 'Live scoring websocket stream active. Real-time updates enabled.' }
   ]);
@@ -121,7 +121,7 @@ export default function LiveScoring() {
           {houses.map((house, idx) => (
             <div
               key={house.id}
-              onClick={() => setSelectedHouseBreakdownId(house.id)}
+              onClick={() => setSelectedHouseObj(house)}
               className="glass-panel p-6 rounded-3xl border-2 bg-white shadow-md relative overflow-hidden flex flex-col justify-between cursor-pointer hover:shadow-xl transition-all duration-300 group"
               style={{ borderColor: `${house.color_hex}80` }}
               title="Click to view full house score breakdown & winner results"
@@ -162,10 +162,10 @@ export default function LiveScoring() {
       </div>
 
       {/* House Breakdown Modal */}
-      {selectedHouseBreakdownId && (
+      {selectedHouseObj && (
         <HouseBreakdownModal 
-          houseId={selectedHouseBreakdownId} 
-          onClose={() => setSelectedHouseBreakdownId(null)} 
+          house={selectedHouseObj} 
+          onClose={() => setSelectedHouseObj(null)} 
         />
       )}
 

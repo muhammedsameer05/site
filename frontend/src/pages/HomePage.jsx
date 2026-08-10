@@ -16,7 +16,7 @@ export default function HomePage({ onNavigate }) {
   const [gallery, setGallery] = useState([]);
   const [editingScoreHouseId, setEditingScoreHouseId] = useState(null);
   const [inputScore, setInputScore] = useState('');
-  const [selectedHouseBreakdownId, setSelectedHouseBreakdownId] = useState(null);
+  const [selectedHouseObj, setSelectedHouseObj] = useState(null);
 
   const loadData = () => {
     fetch('/api/houses', { cache: 'no-store' })
@@ -172,7 +172,7 @@ export default function HomePage({ onNavigate }) {
           {houses.map((house, idx) => (
             <div 
               key={house.id} 
-              onClick={() => setSelectedHouseBreakdownId(house.id)}
+              onClick={() => setSelectedHouseObj(house)}
               className="glass-panel card-hover-effect btn-interactive p-5 rounded-2xl border bg-white shadow-sm flex flex-col justify-between cursor-pointer group"
               style={{ borderColor: `${house.color_hex}60` }}
               title="Click to view full house score breakdown & winner results"
@@ -216,10 +216,10 @@ export default function HomePage({ onNavigate }) {
       </section>
 
       {/* House Breakdown Modal */}
-      {selectedHouseBreakdownId && (
+      {selectedHouseObj && (
         <HouseBreakdownModal 
-          houseId={selectedHouseBreakdownId} 
-          onClose={() => setSelectedHouseBreakdownId(null)} 
+          house={selectedHouseObj} 
+          onClose={() => setSelectedHouseObj(null)} 
         />
       )}
 
