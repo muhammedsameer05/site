@@ -1161,6 +1161,9 @@ router.post('/settings/reset-demo-data', authenticate, requireAdmin, async (req,
 // -------------------------------------------------------------
 // FULL DATABASE BACKUP EXPORT & IMPORT SNAPSHOT ENGINE
 // -------------------------------------------------------------
+// -------------------------------------------------------------
+// FULL DATABASE BACKUP EXPORT & IMPORT SNAPSHOT ENGINE
+// -------------------------------------------------------------
 router.get('/database/export', async (req, res) => {
   try {
     const snapshot = {
@@ -1174,10 +1177,13 @@ router.get('/database/export', async (req, res) => {
       announcements: await all('SELECT * FROM announcements'),
       gallery: await all('SELECT * FROM gallery'),
       marks: await all('SELECT * FROM marks'),
+      certificates: await all('SELECT * FROM certificates'),
+      audit_logs: await all('SELECT * FROM audit_logs'),
+      users: await all('SELECT id, username, email, name, role FROM users'),
       exported_at: new Date().toISOString()
     };
     res.setHeader('Content-Type', 'application/json');
-    res.setHeader('Content-Disposition', `attachment; filename=vibe_of_madeena_backup_${Date.now()}.json`);
+    res.setHeader('Content-Disposition', `attachment; filename=vibe_of_madeena_complete_backup_${Date.now()}.json`);
     res.send(JSON.stringify(snapshot, null, 2));
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -1189,6 +1195,36 @@ router.post('/database/import', authenticate, requireAdmin, async (req, res) => 
     const snapshot = req.body;
     if (!snapshot || typeof snapshot !== 'object') {
       return res.status(400).json({ error: 'Invalid backup JSON file content.' });
+    }
+
+    // Restore Houses
+    if (Array.isArray(snapshot.houses)) {
+      for (const h of snapshot.houses) {
+        await run(`
+          INSERT OR REPLACE INTO houses (id, code, name, color_hex, motto, captain_name, total_points, created_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        `, [h.id, h.code, h.name, h.color_hex, h.motto, h.captain_name, h.total_points || 0, h.created_at || new Date().toISOString()]);
+      }
+    }
+
+    // Restore Categories
+    if (Array.isArray(snapshot.categories)) {
+      for (const c of snapshot.categories) {
+        await run(`
+          INSERT OR REPLACE INTO categories (id, name, min_age, max_age, description)
+          VALUES (?, ?, ?, ?, ?)
+        `, [c.id, c.name, c.min_age, c.max_age, c.description]);
+      }
+    }
+
+    // Restore Venues
+    if (Array.isArray(snapshot.venues)) {
+      for (const v of snapshot.venues) {
+        await run(`
+          INSERT OR REPLACE INTO venues (id, name, stage_number, capacity, location)
+          VALUES (?, ?, ?, ?, ?)
+        `, [v.id, v.name, v.stage_number, v.capacity, v.location]);
+      }
     }
 
     // Restore Students
@@ -1205,9 +1241,9 @@ router.post('/database/import', authenticate, requireAdmin, async (req, res) => 
     if (Array.isArray(snapshot.programs)) {
       for (const p of snapshot.programs) {
         await run(`
-          INSERT OR REPLACE INTO programs (id, code, name, category_id, type, venue_id, program_date, start_time, end_time, max_participants, status, is_archived, archived_at, archived_by, created_at)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `, [p.id, p.code, p.name, p.category_id, p.type || 'individual', p.venue_id || 1, p.program_date, p.start_time, p.end_time, p.max_participants || 20, p.status || 'pending', p.is_archived || 0, p.archived_at, p.archived_by, p.created_at || new Date().toISOString()]);
+          INSERT OR REPLACE INTO programs (id, code, name, category_id, type, venue_id, program_date, start_time, end_time, max_participants, status, duration_minutes, is_archived, archived_at, archived_by, created_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `, [p.id, p.code, p.name, p.category_id, p.type || 'individual', p.venue_id || 1, p.program_date, p.start_time, p.end_time, p.max_participants || 20, p.status || 'pending', p.duration_minutes || 10, p.is_archived || 0, p.archived_at, p.archived_by, p.created_at || new Date().toISOString()]);
       }
     }
 
@@ -1231,6 +1267,26 @@ router.post('/database/import', authenticate, requireAdmin, async (req, res) => 
       }
     }
 
+    // Restore Marks
+    if (Array.isArray(snapshot.marks)) {
+      for (const m of snapshot.marks) {
+        await run(`
+          INSERT OR REPLACE INTO marks (id, program_id, student_id, judge_id, criteria_scores, total_score, remarks, updated_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        `, [m.id, m.program_id, m.student_id, m.judge_id || 1, typeof m.criteria_scores === 'object' ? JSON.stringify(m.criteria_scores) : m.criteria_scores, m.total_score || 0, m.remarks || '', m.updated_at || new Date().toISOString()]);
+      }
+    }
+
+    // Restore Certificates
+    if (Array.isArray(snapshot.certificates)) {
+      for (const cert of snapshot.certificates) {
+        await run(`
+          INSERT OR REPLACE INTO certificates (id, student_id, program_id, certificate_code, type, issue_date, download_url)
+          VALUES (?, ?, ?, ?, ?, ?, ?)
+        `, [cert.id, cert.student_id, cert.program_id, cert.certificate_code, cert.type, cert.issue_date, cert.download_url]);
+      }
+    }
+
     // Restore Gallery Photos
     if (Array.isArray(snapshot.gallery)) {
       for (const g of snapshot.gallery) {
@@ -1251,8 +1307,10 @@ router.post('/database/import', authenticate, requireAdmin, async (req, res) => 
       }
     }
 
+    await recalculateAllHousePoints();
+
     triggerPersistenceSync();
-    res.json({ success: true, message: 'Database backup imported successfully!' });
+    res.json({ success: true, message: 'Complete database backup imported successfully!' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
