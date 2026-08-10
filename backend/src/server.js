@@ -31,6 +31,34 @@ app.use('/api', (req, res, next) => {
 // API Routes
 app.use('/api', apiRoutes);
 
+// Root URL API Welcome & Health Status page
+app.get('/', (req, res) => {
+  res.send(`
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <title>Vibe of Madeena 2K26 - API Server</title>
+        <style>
+          body { background-color: #021B15; color: #10B981; font-family: system-ui, sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+          .card { background-color: #04261E; padding: 40px; border-radius: 24px; border: 1px solid rgba(245, 158, 11, 0.4); text-align: center; max-width: 480px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5); }
+          h1 { color: #F59E0B; margin-top: 0; font-size: 22px; }
+          p { color: #94A3B8; font-size: 13px; line-height: 1.6; }
+          .btn { display: inline-block; margin-top: 16px; padding: 12px 24px; background: linear-gradient(to right, #F59E0B, #D97706); color: #021B15; text-decoration: none; font-weight: bold; border-radius: 12px; font-size: 13px; }
+          .badge { display: inline-block; padding: 4px 12px; background-color: rgba(16, 185, 129, 0.2); color: #34D399; border-radius: 9999px; font-size: 11px; font-weight: bold; margin-bottom: 12px; }
+        </style>
+      </head>
+      <body>
+        <div class="card">
+          <span class="badge">● Backend API Server Online</span>
+          <h1>വൈബ് ഓഫ് മദീന 2K26 API</h1>
+          <p>Jamalulleyli Madrasa Milad Festival Realtime Management System Backend Database Server.</p>
+          <a href="https://vibe-of-madeena.vercel.app" class="btn">Open Main Web Application →</a>
+        </div>
+      </body>
+    </html>
+  `);
+});
+
 // Socket.io Realtime connection
 io.on('connection', (socket) => {
   console.log(`[Socket.io] Client connected: ${socket.id}`);
