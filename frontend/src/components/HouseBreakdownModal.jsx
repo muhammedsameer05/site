@@ -41,8 +41,10 @@ export default function HouseBreakdownModal({ houseId, onClose }) {
               <Trophy className="w-6 h-6 text-amber-300" />
             </div>
             <div>
-              <h2 className="text-2xl font-black">{house.name || 'House Details'}</h2>
-              <p className="text-xs font-mono font-bold text-white/80">Code: {house.code || 'H-01'} | Captain: {house.captain_name || 'N/A'}</p>
+              <h2 className="text-2xl font-black">{loading ? 'Loading House Data...' : (house.name || 'House Points Audit')}</h2>
+              <p className="text-xs font-mono font-bold text-white/80">
+                {loading ? 'Fetching scores...' : `Code: ${house.code || 'N/A'} | Captain: ${house.captain_name || 'N/A'}`}
+              </p>
             </div>
           </div>
 

@@ -436,9 +436,15 @@ router.get('/houses', async (req, res) => {
 
 router.get('/houses/:id/breakdown', async (req, res) => {
   try {
-    const houseId = req.params.id;
-    const house = await get('SELECT * FROM houses WHERE id = ? OR CAST(id AS TEXT) = CAST(? AS TEXT)', [houseId, houseId]);
+    const houseParam = req.params.id;
+    const house = await get(`
+      SELECT * FROM houses 
+      WHERE id = ? OR CAST(id AS TEXT) = CAST(? AS TEXT) OR code LIKE ? OR name LIKE ?
+    `, [houseParam, houseParam, houseParam, `%${houseParam}%`]);
+
     if (!house) return res.status(404).json({ error: 'House not found' });
+
+    const houseId = house.id;
 
     // Fetch all winning results for students belonging to this house
     const results = await all(`
@@ -455,24 +461,24 @@ router.get('/houses/:id/breakdown', async (req, res) => {
         CAST(r.student_id AS TEXT) = CAST(s.id AS TEXT) OR 
         r.student_id = s.student_id OR 
         r.student_id = s.admission_no OR
-        s.name LIKE r.student_id
+        LOWER(TRIM(s.name)) = LOWER(TRIM(r.student_id))
       )
       JOIN programs p ON (
         CAST(r.program_id AS TEXT) = CAST(p.id AS TEXT) OR 
         r.program_id = p.code
       )
       LEFT JOIN categories c ON p.category_id = c.id
-      WHERE (s.house_id = ? OR CAST(s.house_id AS TEXT) = CAST(? AS TEXT))
+      WHERE (s.house_id = ? OR CAST(s.house_id AS TEXT) = CAST(? AS TEXT) OR s.house_id = ?)
         AND r.prize IN ('1st', '2nd', '3rd')
       ORDER BY r.id DESC
-    `, [houseId, houseId]);
+    `, [houseId, houseId, house.code]);
 
     // Fetch manual point adjustment audit logs
     const adjustments = await all(`
       SELECT * FROM audit_logs 
-      WHERE (details LIKE ? OR action LIKE ?)
+      WHERE (details LIKE ? OR details LIKE ? OR action LIKE ?)
       ORDER BY id DESC
-    `, [`%House ID ${houseId}%`, `%House Live Point Adjustment%`]);
+    `, [`%House ID ${houseId}%`, `%${house.name}%`, `%House Live Point Adjustment%`]);
 
     res.json({
       house,
