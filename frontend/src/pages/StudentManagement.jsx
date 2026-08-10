@@ -22,7 +22,7 @@ export default function StudentManagement() {
 
   const [formData, setFormData] = useState({
     id: null,
-    admission_no: `CODE-${Date.now().toString().slice(-4)}`,
+    admission_no: '',
     name: '',
     category_name: 'Kiddies',
     class_name: 'Class 6',
@@ -272,7 +272,7 @@ export default function StudentManagement() {
         {isAdmin && (
           <button
             onClick={() => {
-              setFormData({ id: null, admission_no: `CODE-${Date.now().toString().slice(-4)}`, name: '', category_name: 'Kiddies', class_name: 'Class 6', house_id: 1 });
+              setFormData({ id: null, admission_no: '', name: '', category_name: 'Kiddies', class_name: 'Class 6', house_id: 1 });
               setShowForm(true);
             }}
             className="flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs shadow-lg transition"
@@ -393,6 +393,7 @@ export default function StudentManagement() {
                   required
                   value={formData.admission_no}
                   onChange={e => setFormData({ ...formData, admission_no: e.target.value })}
+                  placeholder="Enter Code No (e.g. 101 or CODE-101)"
                   className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white font-mono"
                 />
               </div>
