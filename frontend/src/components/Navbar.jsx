@@ -15,6 +15,7 @@ export default function Navbar({ activeTab, setActiveTab, onOpenSearch }) {
 
   const navItems = [
     { id: 'home', label: t('home'), icon: BookOpen, roles: ['all'] },
+    { id: 'houses', label: 'Houses', icon: Shield, roles: ['all'] },
     { id: 'students', label: t('students'), icon: User, roles: ['all'] },
     { id: 'programs', label: t('programs'), icon: Calendar, roles: ['all'] },
     { id: 'timetable', label: t('timetable'), icon: Calendar, roles: ['all'] },
@@ -28,7 +29,7 @@ export default function Navbar({ activeTab, setActiveTab, onOpenSearch }) {
 
   const visibleNav = navItems.filter(item => {
     if (role === 'public') {
-      return ['home', 'students', 'programs', 'timetable', 'results', 'gallery'].includes(item.id);
+      return ['home', 'houses', 'students', 'programs', 'timetable', 'results', 'gallery'].includes(item.id);
     }
     return item.roles.includes('all') || item.roles.includes(role);
   });

@@ -43,7 +43,7 @@ function MainContent() {
 
     // Public / Unauthenticated User Restriction Guard for Admin Only modules
     if (role === 'public') {
-      const protectedAdminTabs = ['dashboard', 'houses', 'reports', 'settings', 'archive', 'audit-logs'];
+      const protectedAdminTabs = ['dashboard', 'reports', 'settings', 'archive', 'audit-logs'];
       if (protectedAdminTabs.includes(activeTab)) {
         return (
           <div className="glass-panel p-8 text-center rounded-3xl border border-amber-500/40 max-w-lg mx-auto my-12 bg-white shadow-2xl">
