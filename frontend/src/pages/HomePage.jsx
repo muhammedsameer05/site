@@ -213,7 +213,7 @@ export default function HomePage({ onNavigate }) {
                     </div>
                   ) : (
                     <div className="flex items-center">
-                      <div className="px-4 py-1.5 bg-emerald-50/80 border-2 border-emerald-300 rounded-none shadow-xs text-center">
+                      <div className="px-5 py-1.5 bg-emerald-50/60 border border-slate-200 rounded-xl shadow-xs text-center min-w-16 flex items-center justify-center">
                         <span className="text-2xl font-black emerald-gradient-text font-mono">
                           {house.total_points || 0}
                         </span>

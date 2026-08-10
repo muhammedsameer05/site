@@ -140,7 +140,7 @@ export default function LiveScoring() {
 
                 <div className="text-right">
                   <span className="text-[10px] text-slate-500 font-extrabold block uppercase tracking-wider mb-1">Total Points</span>
-                  <div className="px-4 py-1.5 bg-emerald-50/80 border-2 border-emerald-300 rounded-none shadow-xs inline-block">
+                  <div className="px-5 py-1.5 bg-emerald-50/60 border border-slate-200 rounded-xl shadow-xs inline-block text-center min-w-16">
                     <span className="text-3xl font-black emerald-gradient-text font-mono">
                       {house.total_points || 0}
                     </span>
