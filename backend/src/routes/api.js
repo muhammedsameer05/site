@@ -837,6 +837,21 @@ router.post('/gallery', async (req, res) => {
   }
 });
 
+router.put('/gallery/:id', async (req, res) => {
+  try {
+    const { title, album_name, url, caption } = req.body;
+    await run(`
+      UPDATE gallery 
+      SET title = ?, album_name = ?, url = ?, caption = ?
+      WHERE id = ? OR CAST(id AS TEXT) = CAST(? AS TEXT)
+    `, [title || 'Milad Festival Photo', album_name || 'Milad 2026', url, caption || '', req.params.id, req.params.id]);
+
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 router.delete('/gallery/:id', async (req, res) => {
   try {
     await run('DELETE FROM gallery WHERE id = ?', [req.params.id]);
