@@ -394,11 +394,37 @@ router.delete('/students/:id', authenticate, requireAdmin, async (req, res) => {
   }
 });
 
+async function recalculateAllHousePoints() {
+  try {
+    await run('UPDATE houses SET total_points = 0');
+    const resultsWithHouse = await all(`
+      SELECT r.points_awarded, r.prize, s.house_id 
+      FROM results r 
+      JOIN students s ON (
+        CAST(r.student_id AS TEXT) = CAST(s.id AS TEXT) OR 
+        r.student_id = s.student_id OR 
+        r.student_id = s.admission_no OR
+        s.name LIKE r.student_id
+      )
+    `);
+
+    for (const r of resultsWithHouse) {
+      if (r.house_id) {
+        const pts = Number(r.points_awarded) || (r.prize === '1st' ? 10 : r.prize === '2nd' ? 7 : r.prize === '3rd' ? 5 : 0);
+        await run('UPDATE houses SET total_points = total_points + ? WHERE id = ? OR CAST(id AS TEXT) = CAST(? AS TEXT)', [pts, r.house_id, r.house_id]);
+      }
+    }
+  } catch (err) {
+    console.error('[HOUSE RECALC ERROR]', err.message);
+  }
+}
+
 // -------------------------------------------------------------
 // HOUSES MANAGEMENT
 // -------------------------------------------------------------
 router.get('/houses', async (req, res) => {
   try {
+    await recalculateAllHousePoints();
     const houses = await all('SELECT * FROM houses ORDER BY total_points DESC');
     res.json(houses);
   } catch (err) {
@@ -806,13 +832,7 @@ router.post('/results/manual/:programId', async (req, res) => {
     }
 
     // Reset and recalculate house total points across all results
-    await run('UPDATE houses SET total_points = 0');
-    const allResults = await all('SELECT r.points_awarded, s.house_id FROM results r JOIN students s ON (r.student_id = s.id OR r.student_id = s.student_id OR CAST(r.student_id AS TEXT) = CAST(s.id AS TEXT))');
-    for (let r of allResults) {
-      if (r.house_id) {
-        await run('UPDATE houses SET total_points = total_points + ? WHERE id = ?', [r.points_awarded, r.house_id]);
-      }
-    }
+    await recalculateAllHousePoints();
 
     await run("UPDATE programs SET status = 'completed' WHERE (id = ? OR CAST(id AS TEXT) = CAST(? AS TEXT))", [programId, programId]);
 
