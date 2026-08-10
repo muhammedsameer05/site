@@ -2,9 +2,15 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const { run, get, all } = require('../../database/db');
+const { run, get, all, syncSnapshot } = require('../../database/db');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'madrasa_milad_secret_key_2026';
+
+function triggerPersistenceSync() {
+  if (typeof syncSnapshot === 'function') {
+    syncSnapshot().catch(err => console.error('[SYNC ERROR]', err));
+  }
+}
 
 // Helper to calculate results and update house totals automatically
 async function calculateProgramResults(programId, io) {
@@ -301,7 +307,7 @@ router.post('/students', authenticate, requireAdmin, async (req, res) => {
     }
 
     await logAuditAction(req.user?.name || 'Admin', 'Create Student', `Created student ${name} (${student_id})`);
-
+    triggerPersistenceSync();
     res.json({ success: true, id: newStudentId, student_id });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -330,7 +336,7 @@ router.put('/students/:id', authenticate, requireAdmin, async (req, res) => {
     }
 
     await logAuditAction(req.user?.name || 'Admin', 'Update Student', `Updated student details ID: ${targetId}`);
-
+    triggerPersistenceSync();
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -347,6 +353,7 @@ router.put('/students/:id/archive', authenticate, requireAdmin, async (req, res)
     `, [req.user?.name || 'Admin', targetId, targetId]);
 
     await logAuditAction(req.user?.name || 'Admin', 'Archive Student', `Archived student ID: ${targetId}`);
+    triggerPersistenceSync();
     res.json({ success: true, message: 'Student archived successfully' });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -363,6 +370,7 @@ router.put('/students/:id/restore', authenticate, requireAdmin, async (req, res)
     `, [targetId, targetId]);
 
     await logAuditAction(req.user?.name || 'Admin', 'Restore Student', `Restored student ID: ${targetId}`);
+    triggerPersistenceSync();
     res.json({ success: true, message: 'Student restored successfully' });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -536,7 +544,7 @@ router.post('/programs', authenticate, requireAdmin, async (req, res) => {
     `, [code, name, category_id, age_group || 'Sub Junior', type || 'individual', venue_id, program_date, start_time, end_time, max_participants || 20, status || 'pending']);
 
     await logAuditAction(req.user?.name || 'Admin', 'Create Program', `Created program ${name} (${code})`);
-
+    triggerPersistenceSync();
     res.json({ success: true, id: result.id });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -553,7 +561,7 @@ router.put('/programs/:id/status', authenticate, requireAdmin, async (req, res) 
     }
 
     await logAuditAction(req.user?.name || 'Admin', 'Update Program Status', `Changed program ID ${req.params.id} status to ${status}`);
-
+    triggerPersistenceSync();
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -575,7 +583,7 @@ router.put('/programs/:id', authenticate, requireAdmin, async (req, res) => {
     }
 
     await logAuditAction(req.user?.name || 'Admin', 'Update Program', `Updated program ID: ${req.params.id}`);
-
+    triggerPersistenceSync();
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -592,6 +600,7 @@ router.put('/programs/:id/archive', authenticate, requireAdmin, async (req, res)
     `, [req.user?.name || 'Admin', targetId, targetId]);
 
     await logAuditAction(req.user?.name || 'Admin', 'Archive Program', `Archived program ID: ${targetId}`);
+    triggerPersistenceSync();
     res.json({ success: true, message: 'Program archived successfully' });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -608,6 +617,7 @@ router.put('/programs/:id/restore', authenticate, requireAdmin, async (req, res)
     `, [targetId, targetId]);
 
     await logAuditAction(req.user?.name || 'Admin', 'Restore Program', `Restored program ID: ${targetId}`);
+    triggerPersistenceSync();
     res.json({ success: true, message: 'Program restored successfully' });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -812,6 +822,7 @@ router.post('/results/manual/:programId', async (req, res) => {
       io.emit('score_updated', { programId });
     }
 
+    triggerPersistenceSync();
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -875,6 +886,7 @@ router.post('/announcements', async (req, res) => {
       INSERT INTO announcements (title, content, priority, posted_by)
       VALUES (?, ?, ?, ?)
     `, [title, content, priority || 'normal', posted_by || 'Admin']);
+    triggerPersistenceSync();
     res.json({ success: true, id: result.id });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -900,6 +912,7 @@ router.post('/gallery', async (req, res) => {
       INSERT INTO gallery (album_name, title, media_type, url, caption)
       VALUES (?, ?, ?, ?, ?)
     `, [album_name || 'Milad 2026', title, media_type || 'photo', url, caption || '']);
+    triggerPersistenceSync();
     res.json({ success: true, id: result.id });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -909,6 +922,7 @@ router.post('/gallery', async (req, res) => {
 router.delete('/gallery/:id', async (req, res) => {
   try {
     await run('DELETE FROM gallery WHERE id = ?', [req.params.id]);
+    triggerPersistenceSync();
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });

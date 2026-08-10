@@ -271,13 +271,20 @@ async function initDb() {
       (3, 'judge1', 'judge1@madrasa.org', '${passHash}', 'Qari Zakariya Al-Hafiz', 'judge')`);
   }
 
+  // Restore from production snapshot if tables are empty (e.g. fresh Vercel deployment instance)
+  const persistence = require('./persistence');
+  await persistence.restoreFromDatabaseSnapshot({ run, get, all });
+
   console.log('[DB] Database initialized safely without data loss! Archiving & Audit Logs ready.');
 }
+
+const persistence = require('./persistence');
 
 module.exports = {
   db,
   run,
   get,
   all,
-  initDb
+  initDb,
+  syncSnapshot: () => persistence.syncDatabaseSnapshot({ run, get, all })
 };
