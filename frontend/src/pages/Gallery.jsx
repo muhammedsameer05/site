@@ -29,19 +29,10 @@ export default function Gallery() {
     fetch('/api/gallery', { cache: 'no-store' })
       .then(res => res.json())
       .then(data => {
-        const backendItems = Array.isArray(data) ? data : [];
-        if (backendItems.length === 0) {
-          setItems([
-            { id: 1, title: 'വൈബ് ഓഫ് മദീന 2K26 - Official Festival Emblem', url: '/milad-logo.jpg', caption: 'Jamalulleyli Madrasa Payyanur' }
-          ]);
-        } else {
-          setItems(backendItems);
-        }
+        setItems(Array.isArray(data) ? data : []);
       })
       .catch(() => {
-        setItems([
-          { id: 1, title: 'വൈബ് ഓഫ് മദീന 2K26 - Official Festival Emblem', url: '/milad-logo.jpg', caption: 'Jamalulleyli Madrasa Payyanur' }
-        ]);
+        setItems([]);
       });
   };
 
