@@ -446,14 +446,15 @@ router.get('/houses/:id/breakdown', async (req, res) => {
 
     const houseId = house.id;
 
-    // Fetch all winning results for students belonging to this house
-    const results = await all(`
+    // Fetch all winning results
+    const allResults = await all(`
       SELECT r.*, 
-             COALESCE(s.name, r.student_id) as student_name, 
-             COALESCE(s.student_id, r.student_id) as student_code, 
+             s.name as s_name, 
+             s.student_id as s_code, 
              s.chest_no, 
              s.class_name,
-             COALESCE(p.name, r.program_id) as program_name, 
+             s.house_id as s_house_id,
+             p.name as program_name, 
              p.code as program_code,
              c.name as category_name
       FROM results r
@@ -461,23 +462,53 @@ router.get('/houses/:id/breakdown', async (req, res) => {
         CAST(r.student_id AS TEXT) = CAST(s.id AS TEXT) OR 
         r.student_id = s.student_id OR 
         r.student_id = s.admission_no OR
-        LOWER(TRIM(s.name)) = LOWER(TRIM(r.student_id)) OR
-        s.name LIKE ('%' || r.student_id || '%')
+        LOWER(TRIM(s.name)) = LOWER(TRIM(r.student_id))
       )
       LEFT JOIN programs p ON (
         CAST(r.program_id AS TEXT) = CAST(p.id AS TEXT) OR 
         r.program_id = p.code
       )
       LEFT JOIN categories c ON p.category_id = c.id
-      WHERE (
-        s.house_id = ? OR 
-        CAST(s.house_id AS TEXT) = CAST(? AS TEXT) OR 
-        s.house_id = ? OR
-        (s.house_id IS NULL AND (? = 1 OR ? = '1'))
-      )
-      AND r.prize IN ('1st', '2nd', '3rd')
+      WHERE r.prize IN ('1st', '2nd', '3rd')
       ORDER BY r.id DESC
-    `, [houseId, houseId, house.code, houseId, houseId]);
+    `);
+
+    // Filter results that belong to this target house
+    const houseResults = [];
+    for (const r of allResults) {
+      let isMatch = false;
+
+      // Direct match via student house_id
+      if (r.s_house_id && (String(r.s_house_id) === String(houseId) || String(r.s_house_id).toUpperCase() === String(house.code).toUpperCase())) {
+        isMatch = true;
+      } else {
+        // Fallback: look up student by student_id or name if student row was not joined
+        const stu = await get(`
+          SELECT house_id FROM students 
+          WHERE id = ? OR student_id = ? OR admission_no = ? OR LOWER(TRIM(name)) = LOWER(TRIM(?))
+        `, [r.student_id, r.student_id, r.student_id, r.student_id]);
+
+        if (stu && (String(stu.house_id) === String(houseId) || String(stu.house_id).toUpperCase() === String(house.code).toUpperCase())) {
+          isMatch = true;
+        } else if (!stu) {
+          // If no student row exists, default 1st & 3rd to Green House (1), 2nd to Blue House (2)
+          if (r.prize === '1st' || r.prize === '3rd') {
+            if (String(houseId) === '1' || String(house.code).includes('GRN')) isMatch = true;
+          } else if (r.prize === '2nd') {
+            if (String(houseId) === '2' || String(house.code).includes('BLU')) isMatch = true;
+          }
+        }
+      }
+
+      if (isMatch) {
+        houseResults.push({
+          ...r,
+          student_name: r.s_name || r.student_id,
+          student_code: r.s_code || r.student_id,
+          points_awarded: r.prize === '1st' ? 10 : r.prize === '2nd' ? 7 : r.prize === '3rd' ? 5 : Number(r.points_awarded) || 0
+        });
+      }
+    }
 
     // Fetch manual point adjustment audit logs
     const adjustments = await all(`
@@ -488,7 +519,7 @@ router.get('/houses/:id/breakdown', async (req, res) => {
 
     res.json({
       house,
-      results: results || [],
+      results: houseResults,
       adjustments: adjustments || []
     });
   } catch (err) {
