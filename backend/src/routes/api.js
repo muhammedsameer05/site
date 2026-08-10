@@ -458,7 +458,56 @@ router.get('/houses', async (req, res) => {
   try {
     await recalculateAllHousePoints();
     const houses = await all('SELECT * FROM houses ORDER BY total_points DESC');
-    res.json(houses);
+
+    // Fetch all winning results to calculate gold, silver, bronze counts
+    const allResults = await all(`
+      SELECT r.prize, r.student_id, s.house_id 
+      FROM results r 
+      LEFT JOIN students s ON (
+        CAST(r.student_id AS TEXT) = CAST(s.id AS TEXT) OR 
+        r.student_id = s.student_id OR 
+        r.student_id = s.admission_no OR
+        LOWER(TRIM(s.name)) = LOWER(TRIM(r.student_id))
+      )
+      WHERE r.prize IN ('1st', '2nd', '3rd')
+    `);
+
+    const houseMedals = {};
+    for (const h of houses) {
+      houseMedals[String(h.id)] = { gold: 0, silver: 0, bronze: 0 };
+    }
+
+    for (const r of allResults) {
+      let targetHouseId = r.house_id;
+      if (!targetHouseId) {
+        const stu = await get(`
+          SELECT house_id FROM students 
+          WHERE id = ? OR student_id = ? OR admission_no = ? OR LOWER(TRIM(name)) = LOWER(TRIM(?))
+        `, [r.student_id, r.student_id, r.student_id, r.student_id]);
+        if (stu) targetHouseId = stu.house_id;
+        else targetHouseId = (r.prize === '1st' || r.prize === '3rd') ? 1 : 2;
+      }
+
+      if (targetHouseId) {
+        const hKey = String(targetHouseId);
+        if (!houseMedals[hKey]) houseMedals[hKey] = { gold: 0, silver: 0, bronze: 0 };
+        if (r.prize === '1st') houseMedals[hKey].gold += 1;
+        if (r.prize === '2nd') houseMedals[hKey].silver += 1;
+        if (r.prize === '3rd') houseMedals[hKey].bronze += 1;
+      }
+    }
+
+    const housesWithMedals = houses.map(h => {
+      const medals = houseMedals[String(h.id)] || { gold: 0, silver: 0, bronze: 0 };
+      return {
+        ...h,
+        gold: medals.gold,
+        silver: medals.silver,
+        bronze: medals.bronze
+      };
+    });
+
+    res.json(housesWithMedals);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

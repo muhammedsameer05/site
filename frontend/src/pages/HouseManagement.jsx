@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Shield, Plus, Edit, Award, Trophy, Users, CheckCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import HouseBreakdownModal from '../components/HouseBreakdownModal';
 
 export default function HouseManagement() {
   const { user } = useAuth();
@@ -9,6 +10,7 @@ export default function HouseManagement() {
   const [houses, setHouses] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [editingHouseId, setEditingHouseId] = useState(null);
+  const [selectedHouseObj, setSelectedHouseObj] = useState(null);
   
   const [formData, setFormData] = useState({
     code: '',
@@ -119,8 +121,10 @@ export default function HouseManagement() {
         {houses.map((house, idx) => (
           <div 
             key={house.id}
-            className="glass-panel p-6 sm:p-8 rounded-3xl border-2 bg-white shadow-sm relative overflow-hidden flex flex-col justify-between"
+            onClick={() => setSelectedHouseObj(house)}
+            className="glass-panel p-6 sm:p-8 rounded-3xl border-2 bg-white shadow-sm relative overflow-hidden flex flex-col justify-between cursor-pointer hover:shadow-xl transition-all duration-300 group"
             style={{ borderColor: `${house.color_hex}90` }}
+            title="Click to view full house score breakdown & winner results"
           >
             <div className="absolute top-0 right-0 w-48 h-48 rounded-full blur-3xl pointer-events-none opacity-10" style={{ backgroundColor: house.color_hex }} />
 
@@ -128,7 +132,7 @@ export default function HouseManagement() {
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center space-x-3">
                   <span 
-                    className="w-12 h-12 rounded-2xl flex items-center justify-center font-black text-white text-xl shadow-md"
+                    className="w-12 h-12 rounded-2xl flex items-center justify-center font-black text-white text-xl shadow-md transition-transform duration-300 group-hover:scale-110"
                     style={{ backgroundColor: house.color_hex }}
                   >
                     #{idx + 1}
@@ -142,7 +146,10 @@ export default function HouseManagement() {
 
                 {isAdmin && (
                   <button
-                    onClick={() => openEditModal(house)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openEditModal(house);
+                    }}
                     className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-900 hover:bg-emerald-100 text-xs font-bold transition shadow-xs"
                   >
                     <Edit className="w-3.5 h-3.5 text-emerald-600" />
@@ -151,7 +158,7 @@ export default function HouseManagement() {
                 )}
               </div>
 
-              <h3 className="text-3xl font-black mb-1 tracking-tight" style={{ color: house.color_hex }}>
+              <h3 className="text-3xl font-black mb-1 tracking-tight group-hover:underline" style={{ color: house.color_hex }}>
                 {house.name}
               </h3>
               <p className="text-xs text-slate-500 italic mb-6 font-medium">"{house.motto || 'Faith & Dedication'}"</p>
@@ -185,9 +192,15 @@ export default function HouseManagement() {
                 </div>
               </div>
 
-              <div className="flex items-center justify-between border-t border-slate-200 pt-3 mb-4">
+              <div className="flex items-center justify-between border-t border-slate-200 pt-3 mb-2">
                 <span className="text-xs font-bold text-slate-600">Total Championship Points</span>
                 <span className="text-4xl font-black emerald-gradient-text font-mono">{house.total_points || 0}</span>
+              </div>
+
+              <div className="text-right mb-4">
+                <span className="text-[10px] font-black text-emerald-700 underline group-hover:text-emerald-900 transition">
+                  View Full Score Breakdown →
+                </span>
               </div>
 
               {/* Admin Live House Scoring Desk */}
@@ -367,6 +380,14 @@ export default function HouseManagement() {
             </form>
           </div>
         </div>
+      )}
+
+      {/* House Breakdown Modal */}
+      {selectedHouseObj && (
+        <HouseBreakdownModal 
+          house={selectedHouseObj} 
+          onClose={() => setSelectedHouseObj(null)} 
+        />
       )}
 
     </div>
