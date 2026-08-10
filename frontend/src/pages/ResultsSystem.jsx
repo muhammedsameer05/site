@@ -131,12 +131,11 @@ export default function ResultsSystem() {
       </div>
 
       {/* Point Rules Card */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-center">
+      <div className="grid grid-cols-3 gap-3 text-center">
         {[
           { prize: '1st Prize', pts: '10 Points', bg: 'border-amber-300 bg-amber-50 text-amber-900' },
           { prize: '2nd Prize', pts: '7 Points', bg: 'border-slate-300 bg-slate-100 text-slate-800' },
-          { prize: '3rd Prize', pts: '5 Points', bg: 'border-amber-400 bg-amber-100 text-amber-950' },
-          { prize: 'Participation', pts: '3 Points', bg: 'border-emerald-300 bg-emerald-50 text-emerald-900' }
+          { prize: '3rd Prize', pts: '5 Points', bg: 'border-amber-400 bg-amber-100 text-amber-950' }
         ].map((item, idx) => (
           <div key={idx} className={`p-3 rounded-xl border ${item.bg} text-xs font-bold shadow-xs`}>
             <span className="block text-[10px] uppercase font-bold opacity-80">{item.prize}</span>

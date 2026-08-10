@@ -182,7 +182,7 @@ export default function Settings() {
           <h3 className="text-sm font-extrabold emerald-gradient-text uppercase tracking-wider mb-4 border-b border-slate-200 pb-2">
             House Point Allocation Rules
           </h3>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs font-semibold">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="block text-slate-700 font-bold mb-1">1st Prize Points</label>
               <input
@@ -207,15 +207,6 @@ export default function Settings() {
                 type="number"
                 value={settings.point_3rd}
                 onChange={e => setSettings({ ...settings, point_3rd: e.target.value })}
-                className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-slate-900 font-bold focus:border-emerald-500"
-              />
-            </div>
-            <div>
-              <label className="block text-slate-700 font-bold mb-1">Participation</label>
-              <input
-                type="number"
-                value={settings.point_participation}
-                onChange={e => setSettings({ ...settings, point_participation: e.target.value })}
                 className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-slate-900 font-bold focus:border-emerald-500"
               />
             </div>
