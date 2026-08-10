@@ -1125,9 +1125,9 @@ router.post('/database/import', authenticate, requireAdmin, async (req, res) => 
     if (Array.isArray(snapshot.results)) {
       for (const r of snapshot.results) {
         await run(`
-          INSERT OR REPLACE INTO results (id, program_id, student_id, prize, position, points, grade, remarks, is_published, published_at, is_archived, archived_at, archived_by, created_at)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `, [r.id, r.program_id, r.student_id, r.prize, r.position, r.points, r.grade, r.remarks, r.is_published || 1, r.published_at, r.is_archived || 0, r.archived_at, r.archived_by, r.created_at || new Date().toISOString()]);
+          INSERT OR REPLACE INTO results (id, program_id, student_id, total_score, prize, points_awarded, tie_breaker_note, published_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        `, [r.id, r.program_id, r.student_id, r.total_score || 0, r.prize, r.points_awarded || r.points || 0, r.tie_breaker_note || '', r.published_at || new Date().toISOString()]);
       }
     }
 
@@ -1135,9 +1135,9 @@ router.post('/database/import', authenticate, requireAdmin, async (req, res) => 
     if (Array.isArray(snapshot.gallery)) {
       for (const g of snapshot.gallery) {
         await run(`
-          INSERT OR REPLACE INTO gallery (id, title, album_name, url, caption, created_at)
-          VALUES (?, ?, ?, ?, ?, ?)
-        `, [g.id, g.title, g.album_name, g.url, g.caption, g.created_at || new Date().toISOString()]);
+          INSERT OR REPLACE INTO gallery (id, album_name, title, media_type, url, caption, uploaded_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?)
+        `, [g.id, g.album_name || 'Milad 2026', g.title, g.media_type || 'photo', g.url, g.caption || '', g.uploaded_at || g.created_at || new Date().toISOString()]);
       }
     }
 
@@ -1145,9 +1145,9 @@ router.post('/database/import', authenticate, requireAdmin, async (req, res) => 
     if (Array.isArray(snapshot.announcements)) {
       for (const a of snapshot.announcements) {
         await run(`
-          INSERT OR REPLACE INTO announcements (id, title, content, type, is_active, is_archived, archived_at, archived_by, created_at)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `, [a.id, a.title, a.content, a.type || 'info', a.is_active || 1, a.is_archived || 0, a.archived_at, a.archived_by, a.created_at || new Date().toISOString()]);
+          INSERT OR REPLACE INTO announcements (id, title, content, priority, posted_by, created_at)
+          VALUES (?, ?, ?, ?, ?, ?)
+        `, [a.id, a.title, a.content, a.priority || 'normal', a.posted_by || 'Admin', a.created_at || new Date().toISOString()]);
       }
     }
 
