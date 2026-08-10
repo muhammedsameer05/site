@@ -205,7 +205,10 @@ export default function LiveScoring() {
           ) : (
             filteredPrograms.map(prog => {
               // Find winners for this program
-              const progWinners = results.filter(r => String(r.program_id) === String(prog.id));
+              const progWinners = results.filter(r => 
+                String(r.program_id) === String(prog.id) || 
+                (r.program_code && prog.code && String(r.program_code).toLowerCase() === String(prog.code).toLowerCase())
+              );
 
               return (
                 <div 

@@ -894,6 +894,39 @@ router.post('/results/manual/:programId', async (req, res) => {
   }
 });
 
+router.get('/results', async (req, res) => {
+  try {
+    const results = await all(`
+      SELECT r.*, 
+             s.name as student_name, 
+             s.student_id as student_code, 
+             s.arabic_name, 
+             s.class_name, 
+             s.house_id,
+             h.name as house_name, 
+             h.color_hex as house_color,
+             p.name as program_name,
+             p.code as program_code
+      FROM results r
+      LEFT JOIN students s ON (
+        CAST(r.student_id AS TEXT) = CAST(s.id AS TEXT) OR 
+        r.student_id = s.student_id OR 
+        r.student_id = s.admission_no OR
+        s.name LIKE r.student_id
+      )
+      LEFT JOIN houses h ON s.house_id = h.id
+      LEFT JOIN programs p ON (
+        CAST(r.program_id AS TEXT) = CAST(p.id AS TEXT) OR 
+        r.program_id = p.code
+      )
+      ORDER BY r.id DESC
+    `);
+    res.json(results || []);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 router.get('/results/program/:programId', async (req, res) => {
   try {
     let results = await all(`
