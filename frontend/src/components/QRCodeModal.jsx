@@ -63,7 +63,7 @@ export default function QRCodeModal({ student, onClose }) {
               <p className="text-lg font-serif text-amber-300">{student.arabic_name}</p>
             )}
             <p className="text-xs text-slate-300 font-mono">
-              ID: {student.student_id} | Admission: {student.admission_no}
+              Code No: {student.admission_no || student.student_id}
             </p>
           </div>
 

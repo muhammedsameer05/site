@@ -22,7 +22,7 @@ export default function StudentManagement() {
 
   const [formData, setFormData] = useState({
     id: null,
-    admission_no: `ADM-${Date.now().toString().slice(-4)}`,
+    admission_no: `CODE-${Date.now().toString().slice(-4)}`,
     name: '',
     category_name: 'Kiddies',
     class_name: 'Class 6',
@@ -178,7 +178,7 @@ export default function StudentManagement() {
 
           <form onSubmit={handleSave} className="space-y-4 text-xs">
             <div>
-              <label className="block text-slate-300 font-bold mb-1">Admission No</label>
+              <label className="block text-slate-300 font-bold mb-1">Code No</label>
               <input
                 type="text"
                 required
@@ -272,7 +272,7 @@ export default function StudentManagement() {
         {isAdmin && (
           <button
             onClick={() => {
-              setFormData({ id: null, admission_no: `ADM-${Date.now().toString().slice(-4)}`, name: '', category_name: 'Kiddies', class_name: 'Class 6', house_id: 1 });
+              setFormData({ id: null, admission_no: `CODE-${Date.now().toString().slice(-4)}`, name: '', category_name: 'Kiddies', class_name: 'Class 6', house_id: 1 });
               setShowForm(true);
             }}
             className="flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs shadow-lg transition"
@@ -291,7 +291,7 @@ export default function StudentManagement() {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by student name, category, or admission ID..."
+            placeholder="Search by student name, category, or code no..."
             className="w-full bg-slate-900 border border-slate-700 rounded-xl pl-10 pr-4 py-2 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-amber-400"
           />
         </div>
@@ -304,7 +304,7 @@ export default function StudentManagement() {
           <table className="w-full text-left text-xs text-slate-300">
             <thead className="bg-slate-900/90 text-amber-400 uppercase font-mono border-b border-slate-800">
               <tr>
-                <th className="p-4">Admission No</th>
+                <th className="p-4">Code No</th>
                 <th className="p-4">Student Name</th>
                 <th className="p-4">Category</th>
                 <th className="p-4">Class</th>
@@ -387,7 +387,7 @@ export default function StudentManagement() {
 
             <form onSubmit={handleSave} className="space-y-4 text-xs">
               <div>
-                <label className="block text-slate-300 font-bold mb-1">Admission No</label>
+                <label className="block text-slate-300 font-bold mb-1">Code No</label>
                 <input
                   type="text"
                   required
