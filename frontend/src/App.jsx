@@ -110,7 +110,7 @@ function MainContent() {
   };
 
   return (
-    <div className="min-h-screen bg-[#021B15] text-slate-100 flex flex-col justify-between selection:bg-emerald-500 selection:text-white">
+    <div className="min-h-screen bg-[#F8FAFC] text-slate-800 flex flex-col justify-between selection:bg-emerald-600 selection:text-white bg-islamic-pattern">
       
       <div>
         <Navbar 
