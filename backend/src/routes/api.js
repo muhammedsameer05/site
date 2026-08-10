@@ -1105,19 +1105,49 @@ router.post('/database/import', authenticate, requireAdmin, async (req, res) => 
     if (Array.isArray(snapshot.programs)) {
       for (const p of snapshot.programs) {
         await run(`
-          INSERT OR REPLACE INTO programs (id, code, name, category_id, type, venue_id, program_date, start_time, end_time, max_participants, status, first_place_student_id, second_place_student_id, third_place_student_id, is_archived, archived_at, archived_by, created_at)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `, [p.id, p.code, p.name, p.category_id, p.type, p.venue_id, p.program_date, p.start_time, p.end_time, p.max_participants, p.status, p.first_place_student_id, p.second_place_student_id, p.third_place_student_id, p.is_archived || 0, p.archived_at, p.archived_by, p.created_at || new Date().toISOString()]);
+          INSERT OR REPLACE INTO programs (id, code, name, category_id, type, venue_id, program_date, start_time, end_time, max_participants, status, is_archived, archived_at, archived_by, created_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `, [p.id, p.code, p.name, p.category_id, p.type || 'individual', p.venue_id || 1, p.program_date, p.start_time, p.end_time, p.max_participants || 20, p.status || 'pending', p.is_archived || 0, p.archived_at, p.archived_by, p.created_at || new Date().toISOString()]);
       }
     }
 
-    // Restore Participants
+    // Restore Program Participants
     if (Array.isArray(snapshot.program_participants)) {
       for (const pp of snapshot.program_participants) {
         await run(`
           INSERT OR REPLACE INTO program_participants (id, program_id, student_id, chest_no, attendance, mark_obtained, grade, remarks)
           VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        `, [pp.id, pp.program_id, pp.student_id, pp.chest_no, pp.attendance, pp.mark_obtained, pp.grade, pp.remarks]);
+        `, [pp.id, pp.program_id, pp.student_id, pp.chest_no, pp.attendance || 'present', pp.mark_obtained, pp.grade, pp.remarks]);
+      }
+    }
+
+    // Restore Results (Winners)
+    if (Array.isArray(snapshot.results)) {
+      for (const r of snapshot.results) {
+        await run(`
+          INSERT OR REPLACE INTO results (id, program_id, student_id, prize, position, points, grade, remarks, is_published, published_at, is_archived, archived_at, archived_by, created_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `, [r.id, r.program_id, r.student_id, r.prize, r.position, r.points, r.grade, r.remarks, r.is_published || 1, r.published_at, r.is_archived || 0, r.archived_at, r.archived_by, r.created_at || new Date().toISOString()]);
+      }
+    }
+
+    // Restore Gallery Photos
+    if (Array.isArray(snapshot.gallery)) {
+      for (const g of snapshot.gallery) {
+        await run(`
+          INSERT OR REPLACE INTO gallery (id, title, album_name, url, caption, created_at)
+          VALUES (?, ?, ?, ?, ?, ?)
+        `, [g.id, g.title, g.album_name, g.url, g.caption, g.created_at || new Date().toISOString()]);
+      }
+    }
+
+    // Restore Announcements
+    if (Array.isArray(snapshot.announcements)) {
+      for (const a of snapshot.announcements) {
+        await run(`
+          INSERT OR REPLACE INTO announcements (id, title, content, type, is_active, is_archived, archived_at, archived_by, created_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `, [a.id, a.title, a.content, a.type || 'info', a.is_active || 1, a.is_archived || 0, a.archived_at, a.archived_by, a.created_at || new Date().toISOString()]);
       }
     }
 
