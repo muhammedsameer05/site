@@ -44,6 +44,11 @@ export default function Gallery() {
     const file = e.target.files[0];
     if (!file) return;
 
+    if (!formData.title) {
+      const cleanName = file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " ");
+      setFormData(prev => ({ ...prev, title: cleanName }));
+    }
+
     const img = new Image();
     const reader = new FileReader();
 
@@ -246,8 +251,8 @@ export default function Gallery() {
 
       {/* Edit Image Modal */}
       {showEditModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-md p-4 overflow-y-auto">
-          <div className="glass-panel w-full max-w-md rounded-2xl border border-slate-200 p-6 shadow-2xl bg-white text-slate-900 my-8 space-y-4">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-md p-4 overflow-y-auto">
+          <div className="glass-panel w-full max-w-lg rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-2xl bg-white text-slate-900 my-8 space-y-4 animate-fade-in-up">
             <div className="flex items-center justify-between border-b border-slate-200 pb-3">
               <h3 className="text-base font-extrabold emerald-gradient-text flex items-center space-x-2">
                 <Edit className="w-5 h-5 text-emerald-600" />
@@ -324,8 +329,8 @@ export default function Gallery() {
 
       {/* Admin Upload Modal */}
       {showUploadModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-md p-4 overflow-y-auto">
-          <div className="glass-panel w-full max-w-md rounded-2xl border border-slate-200 p-6 shadow-2xl bg-white text-slate-900 my-8">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-md p-4 overflow-y-auto">
+          <div className="glass-panel w-full max-w-lg rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-2xl bg-white text-slate-900 my-8 animate-fade-in-up">
             <div className="flex items-center justify-between border-b border-slate-200 pb-3 mb-4">
               <h3 className="text-base font-extrabold emerald-gradient-text flex items-center space-x-2">
                 <ImageIcon className="w-5 h-5 text-emerald-600" />

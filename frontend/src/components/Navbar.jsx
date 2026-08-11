@@ -54,7 +54,7 @@ export default function Navbar({ activeTab, setActiveTab, onOpenSearch }) {
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center space-x-1 overflow-x-auto py-2">
+          <nav className="hidden xl:flex items-center space-x-1.5 py-2">
             {visibleNav.map((item) => {
               const Icon = item.icon;
               const isActive = activeTab === item.id;
@@ -127,7 +127,7 @@ export default function Navbar({ activeTab, setActiveTab, onOpenSearch }) {
             {/* Mobile Menu Button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-1.5 text-slate-700 hover:text-emerald-700"
+              className="xl:hidden p-1.5 text-slate-700 hover:text-emerald-700"
             >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
@@ -136,7 +136,7 @@ export default function Navbar({ activeTab, setActiveTab, onOpenSearch }) {
       </div>
 
       {/* Mobile Horizontal Scrollable Quick Tabs */}
-      <div className="lg:hidden bg-white border-t border-slate-200 px-3 py-2 overflow-x-auto whitespace-nowrap scrollbar-none flex items-center space-x-2">
+      <div className="xl:hidden bg-white border-t border-slate-200 px-3 py-2 overflow-x-auto whitespace-nowrap scrollbar-none flex items-center space-x-2">
         {visibleNav.map((item) => {
           const Icon = item.icon;
           const isActive = activeTab === item.id;
@@ -159,7 +159,7 @@ export default function Navbar({ activeTab, setActiveTab, onOpenSearch }) {
 
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
-        <div className="lg:hidden border-t border-slate-200 glass-panel bg-white/98 px-4 pt-3 pb-6 space-y-2">
+        <div className="xl:hidden border-t border-slate-200 glass-panel bg-white/98 px-4 pt-3 pb-6 space-y-2">
           {visibleNav.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;

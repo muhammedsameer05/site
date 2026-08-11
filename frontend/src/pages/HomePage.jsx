@@ -108,7 +108,6 @@ export default function HomePage({ onNavigate }) {
               onClick={() => setSelectedHouseObj(house)}
               className="glass-panel card-hover-effect btn-interactive p-5 rounded-2xl border bg-white shadow-sm flex flex-col justify-between cursor-pointer group"
               style={{ borderColor: `${house.color_hex}60` }}
-              title="Click to view full house score breakdown & winner results"
             >
               <div>
                 <div className="flex items-center justify-between mb-3">
