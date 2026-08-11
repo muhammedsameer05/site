@@ -86,14 +86,7 @@ export default function Navbar({ activeTab, setActiveTab, onOpenSearch }) {
               <Search className="w-4 h-4" />
             </button>
 
-            {/* Language Switcher */}
-            <button
-              onClick={() => setLang(lang === 'en' ? 'ml' : lang === 'ml' ? 'ar' : 'en')}
-              className="flex items-center space-x-1 px-2 py-1.5 sm:px-2.5 sm:py-1.5 rounded-lg bg-slate-100 border border-slate-200 text-xs font-bold text-emerald-800 hover:border-emerald-400 transition"
-            >
-              <Globe className="w-3.5 h-3.5" />
-              <span className="uppercase">{lang}</span>
-            </button>
+
 
             {/* Active User Badge / Portal Switch */}
             {user ? (
