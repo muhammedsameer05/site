@@ -1,5 +1,5 @@
 import React from 'react';
-import { Heart, Sparkles } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 
 export default function Footer() {
   return (
@@ -32,13 +32,9 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Bottom Credits Row */}
-        <div className="flex flex-col sm:flex-row items-center justify-between text-xs text-slate-400 font-medium pt-2">
-          <p>© 2026 Jamalullaili Secondary Madrasa, MKMJC - Payyanur • Vibe of Madeena 2K26.</p>
-          <div className="flex items-center space-x-1.5 mt-2 sm:mt-0 text-slate-400">
-            <span>Crafted with devotion by <strong className="text-amber-400 font-extrabold">SM VEXOR</strong> (6282330381)</span>
-            <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500 inline" />
-          </div>
+        {/* Bottom Copyright Row */}
+        <div className="text-center text-xs text-slate-400 font-medium pt-2">
+          <p>© 2026 Jamalullaili Secondary Madrasa, MKMJC - Payyanur • Vibe of Madeena 2K26. All rights reserved.</p>
         </div>
 
       </div>
