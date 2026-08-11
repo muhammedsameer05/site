@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { LanguageProvider } from './context/LanguageContext';
 import Navbar from './components/Navbar';
-import Footer from './components/Footer';
 import SearchModal from './components/SearchModal';
 import ErrorBoundary from './components/ErrorBoundary';
 
@@ -114,8 +113,6 @@ function MainContent() {
           </ErrorBoundary>
         </main>
       </div>
-
-      <Footer onNavigate={setActiveTab} />
 
       <SearchModal 
         isOpen={isSearchOpen} 
