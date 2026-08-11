@@ -43,6 +43,63 @@ export default function ProgramManagement() {
   const [activeDropdown, setActiveDropdown] = useState(null); // 'first', 'second', 'third' or null
   const [winnersSaving, setWinnersSaving] = useState(false);
 
+  // Modal & state for viewing participating student names
+  const [showParticipantsModal, setShowParticipantsModal] = useState(false);
+  const [selectedProgramForParticipants, setSelectedProgramForParticipants] = useState(null);
+  const [studentSearchForParticipant, setStudentSearchForParticipant] = useState('');
+  const [showAddParticipantDropdown, setShowAddParticipantDropdown] = useState(false);
+
+  const handleOpenParticipantsModal = (program) => {
+    setSelectedProgramForParticipants(program);
+    setStudentSearchForParticipant('');
+    setShowAddParticipantDropdown(false);
+    setShowParticipantsModal(true);
+    if (allStudentsList.length === 0) {
+      fetch('/api/students')
+        .then(res => res.json())
+        .then(data => setAllStudentsList(Array.isArray(data) ? data : []))
+        .catch(() => {});
+    }
+  };
+
+  const handleAddParticipant = (studentId) => {
+    if (!selectedProgramForParticipants) return;
+    fetch(`/api/programs/${selectedProgramForParticipants.id}/participants`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ student_id: studentId })
+    })
+      .then(res => res.json())
+      .then(() => {
+        loadData();
+        fetch(`/api/programs/${selectedProgramForParticipants.id}`)
+          .then(res => res.json())
+          .then(data => {
+            if (data && data.participants) {
+              setSelectedProgramForParticipants(prev => ({
+                ...prev,
+                participants: data.participants
+              }));
+            }
+          });
+      });
+  };
+
+  const handleRemoveParticipant = (studentId) => {
+    if (!selectedProgramForParticipants) return;
+    fetch(`/api/programs/${selectedProgramForParticipants.id}/participants/${studentId}`, {
+      method: 'DELETE'
+    })
+      .then(res => res.json())
+      .then(() => {
+        loadData();
+        setSelectedProgramForParticipants(prev => ({
+          ...prev,
+          participants: (prev.participants || []).filter(p => String(p.student_id) !== String(studentId))
+        }));
+      });
+  };
+
   const loadData = () => {
     fetch('/api/programs', { cache: 'no-store' })
       .then(res => res.json())
@@ -304,14 +361,17 @@ export default function ProgramManagement() {
 
                 <h3 className="text-base font-bold text-slate-900 mb-1">{p.name}</h3>
 
-                {isAdmin && (
-                  <div className="flex items-center space-x-3 text-xs text-slate-500 font-mono mb-2 font-bold">
-                    <span className="flex items-center space-x-1">
-                      <Users className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-                      <span>{p.participant_count || 0} / {p.max_participants || 20} Enrolled</span>
-                    </span>
-                  </div>
-                )}
+                <button
+                  onClick={() => handleOpenParticipantsModal(p)}
+                  className="w-full py-1.5 px-3 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-900 border border-blue-200 text-xs font-bold flex items-center justify-between transition shadow-xs mb-2 cursor-pointer"
+                  title="Click to view full list of participating student names"
+                >
+                  <span className="flex items-center space-x-1.5">
+                    <Users className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                    <span>Participants: {p.participants ? p.participants.length : (p.participant_count || 0)} Enrolled</span>
+                  </span>
+                  <span className="text-[10px] text-blue-700 underline font-black">View Names →</span>
+                </button>
 
                 {/* Add 1st, 2nd, 3rd Winners Button (Admin only) */}
                 {isAdmin && (
@@ -706,6 +766,123 @@ export default function ProgramManagement() {
 
             </form>
 
+          </div>
+        </div>
+      )}
+
+      {/* Participating Students Modal */}
+      {showParticipantsModal && selectedProgramForParticipants && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-md p-4 overflow-y-auto">
+          <div className="glass-panel w-full max-w-lg rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-2xl bg-white text-slate-900 my-8 space-y-4 animate-fade-in-up">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+              <h3 className="text-base font-extrabold emerald-gradient-text flex items-center space-x-2">
+                <Users className="w-5 h-5 text-blue-600" />
+                <span>Participating Students: {selectedProgramForParticipants.name}</span>
+              </h3>
+              <button onClick={() => setShowParticipantsModal(false)} className="text-slate-400 hover:text-slate-700">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Admin Add Participant Control */}
+            {isAdmin && (
+              <div className="relative">
+                <label className="block text-slate-700 font-bold mb-1 text-xs">Enroll Student into Program</label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="Search student by name or ID to enroll..."
+                    value={studentSearchForParticipant}
+                    onChange={e => {
+                      setStudentSearchForParticipant(e.target.value);
+                      setShowAddParticipantDropdown(true);
+                    }}
+                    onFocus={() => setShowAddParticipantDropdown(true)}
+                    className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 focus:border-emerald-500 outline-none"
+                  />
+                  <Search className="w-4 h-4 text-slate-400 absolute right-3 top-2.5" />
+                </div>
+
+                {showAddParticipantDropdown && studentSearchForParticipant && (
+                  <div className="absolute left-0 right-0 top-full mt-1 z-50 bg-white border border-slate-200 rounded-xl shadow-2xl max-h-48 overflow-y-auto p-1 space-y-0.5">
+                    {allStudentsList
+                      .filter(s => 
+                        s.name.toLowerCase().includes(studentSearchForParticipant.toLowerCase()) || 
+                        (s.admission_no && String(s.admission_no).includes(studentSearchForParticipant))
+                      )
+                      .slice(0, 10)
+                      .map(s => (
+                        <div
+                          key={s.id}
+                          onClick={() => {
+                            handleAddParticipant(s.id);
+                            setStudentSearchForParticipant('');
+                            setShowAddParticipantDropdown(false);
+                          }}
+                          className="p-2 hover:bg-emerald-50 rounded-lg cursor-pointer flex items-center justify-between text-xs font-bold"
+                        >
+                          <div>
+                            <span className="text-slate-900">{s.name}</span>
+                            <span className="text-[10px] text-slate-400 block font-mono">ID: {s.admission_no || s.student_id}</span>
+                          </div>
+                          <span className="text-[10px] font-black text-emerald-700 px-2 py-0.5 bg-emerald-100 rounded-md">+ Add</span>
+                        </div>
+                      ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* List of Enrolled Participating Student Names */}
+            <div className="space-y-2 max-h-80 overflow-y-auto pr-1">
+              {(!selectedProgramForParticipants.participants || selectedProgramForParticipants.participants.length === 0) ? (
+                <div className="p-6 text-center text-slate-400 text-xs font-medium bg-slate-50 rounded-xl border border-slate-200">
+                  No registered participants for this program yet.
+                </div>
+              ) : (
+                selectedProgramForParticipants.participants.map((p, idx) => (
+                  <div key={p.participant_id || idx} className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between text-xs">
+                    <div className="flex items-center space-x-3">
+                      <span className="w-6 h-6 rounded-full bg-slate-200 text-slate-700 font-extrabold flex items-center justify-center text-[10px]">
+                        {p.chest_no ? `#${p.chest_no}` : `#${idx + 1}`}
+                      </span>
+                      <div>
+                        <span className="font-bold text-slate-900 block text-sm">{p.student_name}</span>
+                        {p.admission_no && <span className="text-[10px] text-slate-400 font-mono">Reg No: {p.admission_no}</span>}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center space-x-2">
+                      <span 
+                        className="text-[10px] font-bold px-2 py-0.5 rounded border" 
+                        style={{ color: p.house_color || '#10b981', borderColor: `${p.house_color || '#10b981'}50`, backgroundColor: `${p.house_color || '#10b981'}15` }}
+                      >
+                        {p.house_name || 'No House'}
+                      </span>
+
+                      {isAdmin && (
+                        <button
+                          onClick={() => handleRemoveParticipant(p.student_id)}
+                          className="p-1 text-slate-400 hover:text-red-600 transition"
+                          title="Remove Student from Program"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            <div className="flex justify-end pt-3 border-t border-slate-200">
+              <button
+                onClick={() => setShowParticipantsModal(false)}
+                className="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 font-bold border border-slate-200 text-xs"
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
       )}

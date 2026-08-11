@@ -726,12 +726,70 @@ router.get('/programs', async (req, res) => {
         `, [p.id, p.id]);
       }
 
+      const participants = await all(`
+        SELECT pp.id as participant_id, pp.chest_no, s.id as student_id, s.name as student_name, s.admission_no, s.class_name, h.name as house_name, h.color_hex as house_color
+        FROM program_participants pp
+        JOIN students s ON (pp.student_id = s.id OR pp.student_id = s.student_id OR CAST(pp.student_id AS TEXT) = CAST(s.id AS TEXT))
+        LEFT JOIN houses h ON s.house_id = h.id
+        WHERE (pp.program_id = ? OR CAST(pp.program_id AS TEXT) = CAST(? AS TEXT))
+        ORDER BY pp.chest_no ASC, s.name ASC
+      `, [p.id, p.id]);
+
       p.assigned_judges = judges;
-      p.participant_count = participantCount.count;
+      p.participant_count = (participants && participants.length > 0) ? participants.length : participantCount.count;
+      p.participants = participants || [];
       p.winners = winners;
     }
 
     res.json(programs);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Add participant to program
+router.post('/programs/:id/participants', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const programId = req.params.id;
+    const { student_id, chest_no } = req.body;
+    if (!student_id) return res.status(400).json({ error: 'student_id is required' });
+
+    // Check existing
+    const existing = await get(`
+      SELECT id FROM program_participants 
+      WHERE (program_id = ? OR CAST(program_id AS TEXT) = CAST(? AS TEXT)) 
+      AND (student_id = ? OR CAST(student_id AS TEXT) = CAST(? AS TEXT))
+    `, [programId, programId, student_id, student_id]);
+
+    if (existing) {
+      return res.json({ success: true, message: 'Student is already enrolled' });
+    }
+
+    const cNo = Number(chest_no) || Math.floor(100 + Math.random() * 899);
+    await run(`
+      INSERT INTO program_participants (program_id, student_id, chest_no, attendance)
+      VALUES (?, ?, ?, 'present')
+    `, [programId, student_id, cNo]);
+
+    triggerPersistenceSync();
+    res.json({ success: true, message: 'Participant added successfully' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Remove participant from program
+router.delete('/programs/:id/participants/:studentId', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const { id: programId, studentId } = req.params;
+    await run(`
+      DELETE FROM program_participants 
+      WHERE (program_id = ? OR CAST(program_id AS TEXT) = CAST(? AS TEXT)) 
+      AND (student_id = ? OR CAST(student_id AS TEXT) = CAST(? AS TEXT))
+    `, [programId, programId, studentId, studentId]);
+
+    triggerPersistenceSync();
+    res.json({ success: true, message: 'Participant removed successfully' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
