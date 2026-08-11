@@ -20,13 +20,13 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Presented By SM VEXOR Badge */}
-          <div className="flex flex-col sm:flex-row items-center space-y-1.5 sm:space-y-0 sm:space-x-4 bg-slate-800/90 border border-amber-500/30 px-5 py-3 rounded-2xl shadow-lg backdrop-blur-md">
+          {/* Presented By SM VEXOR */}
+          <div className="flex flex-col items-center md:items-end text-center md:text-right">
             <div className="flex items-center space-x-2 text-xs font-extrabold text-amber-400 uppercase tracking-wider">
               <Sparkles className="w-4 h-4 text-amber-400 animate-pulse" />
-              <span>Presented by <strong className="text-white text-sm font-black tracking-widest underline decoration-amber-400">SM VEXOR</strong></span>
+              <span>Presented by <strong className="text-white text-sm sm:text-base font-black tracking-widest underline decoration-amber-400">SM VEXOR</strong></span>
             </div>
-            <div className="text-xs font-bold text-slate-300 font-mono px-3 py-1 rounded-lg bg-slate-900/60 border border-slate-700">
+            <div className="text-xs font-bold text-slate-300 font-mono mt-1">
               Contact: <span className="text-emerald-400 font-extrabold">6282330381</span>
             </div>
           </div>
