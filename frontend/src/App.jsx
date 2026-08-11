@@ -21,7 +21,6 @@ import NoticeBoard from './pages/NoticeBoard';
 import Settings from './pages/Settings';
 import LoginPage from './pages/LoginPage';
 import ArchiveManagement from './pages/ArchiveManagement';
-import AuditLog from './pages/AuditLog';
 
 function MainContent() {
   const { user } = useAuth();
@@ -87,8 +86,6 @@ function MainContent() {
         return <NoticeBoard />;
       case 'archive':
         return <ArchiveManagement />;
-      case 'audit-logs':
-        return <AuditLog />;
       case 'settings':
         return <Settings />;
       default:

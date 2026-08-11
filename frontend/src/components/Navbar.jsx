@@ -22,7 +22,6 @@ export default function Navbar({ activeTab, setActiveTab, onOpenSearch }) {
     { id: 'gallery', label: t('gallery'), icon: Sparkles, roles: ['all'] },
     { id: 'dashboard', label: 'Overview', icon: Layers, roles: ['super_admin', 'admin', 'stage_coordinator'] },
     { id: 'archive', label: 'Archive', icon: Archive, roles: ['super_admin', 'admin', 'stage_coordinator'] },
-    { id: 'audit-logs', label: 'Audit Logs', icon: ShieldCheck, roles: ['super_admin', 'admin'] },
     { id: 'settings', label: t('settings'), icon: Shield, roles: ['super_admin', 'admin'] }
   ];
 
