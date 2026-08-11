@@ -82,11 +82,11 @@ export default function Hero({ onNavigate }) {
           </button>
 
           <button
-            onClick={() => onNavigate('timetable')}
+            onClick={() => onNavigate('programs')}
             className="flex items-center space-x-2 px-6 py-3.5 rounded-xl bg-white text-slate-800 border border-slate-300 hover:bg-slate-50 text-sm font-extrabold shadow-sm transition transform hover:-translate-y-0.5"
           >
             <Calendar className="w-4 h-4 text-emerald-600" />
-            <span>View Program Timetable</span>
+            <span>View All Programs</span>
           </button>
         </div>
 

@@ -115,14 +115,14 @@ export default function HomePage({ onNavigate }) {
           </button>
 
           <button
-            onClick={() => onNavigate('timetable')}
+            onClick={() => onNavigate('programs')}
             className="glass-panel card-hover-effect btn-interactive p-4 rounded-2xl border border-emerald-200 bg-white text-center flex flex-col items-center justify-center space-y-2 group shadow-xs"
           >
             <div className="w-12 h-12 rounded-2xl bg-blue-100 text-blue-800 flex items-center justify-center group-hover:scale-110 group-hover:bg-blue-600 group-hover:text-white transition-all duration-300">
               <Clock className="w-6 h-6" />
             </div>
             <span className="text-sm font-black text-slate-900">Schedule</span>
-            <span className="text-[10px] text-slate-500 font-bold">Stage Timetable</span>
+            <span className="text-[10px] text-slate-500 font-bold">Event Programs</span>
           </button>
 
           <button
@@ -233,7 +233,7 @@ export default function HomePage({ onNavigate }) {
             <p className="text-xs text-slate-500 font-bold">Featured competitions scheduled & official winners</p>
           </div>
           <button
-            onClick={() => onNavigate('timetable')}
+            onClick={() => onNavigate('programs')}
             className="flex items-center space-x-1 text-xs font-bold text-emerald-700 hover:text-emerald-900"
           >
             <span>Full Schedule</span>

@@ -174,15 +174,15 @@ export default function HouseManagement() {
             <div>
               <div className="grid grid-cols-3 gap-2 py-3 bg-slate-50 rounded-2xl border border-slate-200 text-center mb-4">
                 <div>
-                  <span className="text-[10px] text-amber-700 font-extrabold block">🥇 GOLD</span>
+                  <span className="text-[10px] text-amber-700 font-extrabold block">🥇 1ST</span>
                   <span className="text-lg font-black text-slate-900 font-mono">{house.gold || 0}</span>
                 </div>
                 <div>
-                  <span className="text-[10px] text-slate-600 font-extrabold block">🥈 SILVER</span>
+                  <span className="text-[10px] text-slate-600 font-extrabold block">🥈 2ND</span>
                   <span className="text-lg font-black text-slate-900 font-mono">{house.silver || 0}</span>
                 </div>
                 <div>
-                  <span className="text-[10px] text-amber-800 font-extrabold block">🥉 BRONZE</span>
+                  <span className="text-[10px] text-amber-800 font-extrabold block">🥉 3RD</span>
                   <span className="text-lg font-black text-slate-900 font-mono">{house.bronze || 0}</span>
                 </div>
               </div>

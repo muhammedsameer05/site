@@ -29,7 +29,7 @@ export default function Footer({ onNavigate }) {
             <ul className="space-y-2 text-xs font-medium">
               <li><button onClick={() => onNavigate('home')} className="hover:text-emerald-600 transition">Home Page</button></li>
               <li><button onClick={() => onNavigate('live-scoring')} className="hover:text-emerald-600 transition">Live Leaderboard</button></li>
-              <li><button onClick={() => onNavigate('timetable')} className="hover:text-emerald-600 transition">Program Schedule</button></li>
+              <li><button onClick={() => onNavigate('programs')} className="hover:text-emerald-600 transition">Program Schedule</button></li>
               <li><button onClick={() => onNavigate('results')} className="hover:text-emerald-600 transition">Official Results</button></li>
               <li><button onClick={() => onNavigate('gallery')} className="hover:text-emerald-600 transition">Photo & Video Gallery</button></li>
             </ul>
