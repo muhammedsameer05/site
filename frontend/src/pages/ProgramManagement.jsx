@@ -319,9 +319,16 @@ export default function ProgramManagement() {
             <div className="space-y-3">
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-100 text-emerald-900 border border-emerald-300">
-                    {p.category_name || 'Category'} • {p.type || 'individual'}
-                  </span>
+                  <div className="flex items-center space-x-1.5 flex-wrap gap-y-1">
+                    {p.code && (
+                      <span className="text-[10px] font-black font-mono tracking-wider px-2 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-300 shadow-xs">
+                        {p.code}
+                      </span>
+                    )}
+                    <span className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-100 text-emerald-900 border border-emerald-300">
+                      {p.category_name || 'Category'} • {p.type || 'individual'}
+                    </span>
+                  </div>
 
                   {isAdmin && (
                     <div className="flex items-center space-x-1.5">

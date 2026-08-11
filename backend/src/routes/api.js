@@ -842,11 +842,14 @@ router.get('/programs/:id', async (req, res) => {
 
 router.post('/programs', authenticate, requireAdmin, async (req, res) => {
   try {
-    const { code, name, category_id, age_group, type, venue_id, program_date, start_time, end_time, max_participants, status } = req.body;
+    let { code, name, category_id, age_group, type, venue_id, program_date, start_time, end_time, max_participants, status } = req.body;
+    if (!code || !code.trim()) {
+      code = `PRG-${Math.floor(100 + Math.random() * 900)}`;
+    }
     const result = await run(`
       INSERT INTO programs (code, name, category_id, age_group, type, venue_id, program_date, start_time, end_time, max_participants, status, is_archived)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
-    `, [code, name, category_id, age_group || 'Sub Junior', type || 'individual', venue_id, program_date, start_time, end_time, max_participants || 20, status || 'pending']);
+    `, [code, name, category_id || 1, age_group || 'Sub Junior', type || 'individual', venue_id || 1, program_date || '2026-08-15', start_time || '09:00', end_time || '10:30', max_participants || 20, status || 'pending']);
 
     await logAuditAction(req.user?.name || 'Admin', 'Create Program', `Created program ${name} (${code})`);
     triggerPersistenceSync();
