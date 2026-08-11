@@ -3,7 +3,7 @@ import { Shield, Save, Database, Clock } from 'lucide-react';
 
 export default function Settings() {
   const [settings, setSettings] = useState({
-    school_name: 'Jamalulleyli Madrasa, MKMJC - Payyanur',
+    school_name: 'Jamalullaili Secondary Madrasa, MKMJC - Payyanur',
     milad_title: 'വൈബ് ഓഫ് മദീന 2K26',
     academic_year: '2026-2027',
     point_1st: '10',

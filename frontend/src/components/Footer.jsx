@@ -15,11 +15,11 @@ export default function Footer({ onNavigate }) {
                 <span className="text-base font-black emerald-gradient-text block leading-tight">
                   വൈബ് ഓഫ് മദീന 2K26
                 </span>
-                <span className="text-[10px] text-amber-600 font-bold font-mono">JAMALULLEYLI MADRASA, MKMJC</span>
+                <span className="text-[10px] text-amber-600 font-bold font-mono">JAMALULLAILI SECONDARY MADRASA, MKMJC - PAYYANUR</span>
               </div>
             </div>
             <p className="text-xs text-slate-500 leading-relaxed font-medium">
-              Jamalulleyli Madrasa, MKMJC. Dedicated to nurturing Tajweed, Islamic eloquence, nasheeds, and character through annual Milad-un-Nabi celebrations.
+              Jamalullaili Secondary Madrasa, MKMJC - Payyanur. Dedicated to nurturing Tajweed, Islamic eloquence, nasheeds, and character through annual Milad-un-Nabi celebrations.
             </p>
           </div>
 
@@ -47,15 +47,15 @@ export default function Footer({ onNavigate }) {
           {/* Col 4: Contact */}
           <div className="space-y-2 text-xs font-medium">
             <h4 className="text-xs font-extrabold text-emerald-900 uppercase tracking-wider mb-4 font-mono">Madrasa Contact</h4>
-            <div className="flex items-center space-x-2"><MapPin className="w-4 h-4 text-emerald-600 shrink-0" /><span>Red Gate, Payyannur</span></div>
+            <div className="flex items-center space-x-2"><MapPin className="w-4 h-4 text-emerald-600 shrink-0" /><span>Payyanur, Kannur</span></div>
             <div className="flex items-center space-x-2"><Phone className="w-4 h-4 text-emerald-600 shrink-0" /><span>+91 98765 43210</span></div>
-            <div className="flex items-center space-x-2"><Mail className="w-4 h-4 text-emerald-600 shrink-0" /><span>info@jamalulleyli-madrasa.org</span></div>
+            <div className="flex items-center space-x-2"><Mail className="w-4 h-4 text-emerald-600 shrink-0" /><span>info@jamalullaili-madrasa.org</span></div>
           </div>
 
         </div>
 
         <div className="mt-12 pt-6 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 font-medium">
-          <p>© 2026 Jamalulleyli Madrasa, MKMJC - Vibe of Madeena 2K26. All rights reserved.</p>
+          <p>© 2026 Jamalullaili Secondary Madrasa, MKMJC - Payyanur - Vibe of Madeena 2K26. All rights reserved.</p>
           <div className="flex items-center space-x-1 mt-2 sm:mt-0">
             <span>Crafted with devotion for Islamic Education</span>
             <Heart className="w-3.5 h-3.5 text-red-500 inline fill-red-500" />

@@ -54,7 +54,7 @@ app.get('/', (req, res) => {
         <div class="card">
           <span class="badge">● Backend API Server Online</span>
           <h1>വൈബ് ഓഫ് മദീന 2K26 API</h1>
-          <p>Jamalulleyli Madrasa Milad Festival Realtime Management System Backend Database Server.</p>
+          <p>Jamalullaili Secondary Madrasa, MKMJC - Payyanur Milad Festival Realtime Management System Backend Database Server.</p>
           <a href="https://vibe-of-madeena.vercel.app" class="btn">Open Main Web Application →</a>
         </div>
       </body>

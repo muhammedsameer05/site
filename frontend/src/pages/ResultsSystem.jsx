@@ -260,7 +260,7 @@ export default function ResultsSystem() {
                   بِسْمِ ٱللَّٰهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ
                 </span>
                 <span className="text-[10px] text-amber-900 tracking-widest uppercase font-sans font-bold">
-                  Jamalulleyli Madrasa • Payyannur
+                  Jamalullaili Secondary Madrasa, MKMJC • Payyanur
                 </span>
               </div>
 
@@ -302,7 +302,7 @@ export default function ResultsSystem() {
               </div>
 
               <p className="text-xs text-slate-500 font-sans mt-2">
-                held on August 15, 2026 at Jamalulleyli Madrasa Campus, Payyannur.
+                held on August 15, 2026 at Jamalullaili Secondary Madrasa Campus, MKMJC - Payyanur.
               </p>
 
               {/* Signatures Row */}

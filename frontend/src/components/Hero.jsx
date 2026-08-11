@@ -37,12 +37,12 @@ export default function Hero({ onNavigate }) {
             <div className="bg-white rounded-[22px] p-4 flex flex-col items-center border border-emerald-100">
               <img 
                 src="/milad-logo.jpg" 
-                alt="വൈബ് ഓഫ് മദീന 2K26 - Jamalulleyli Madrasa" 
+                alt="വൈബ് ഓഫ് മദീന 2K26 - Jamalullaili Secondary Madrasa, MKMJC - Payyanur" 
                 className="w-full max-h-72 object-contain rounded-2xl drop-shadow-md"
               />
               <div className="mt-3 text-center">
                 <span className="text-xs font-extrabold text-amber-600 block font-serif">
-                  ജമലുല്ലൈലി മദ്റസ, MKMJC - റെ. ഗേറ്റ്, പയ്യന്നൂർ
+                  ജമലുല്ലൈലി സെക്കൻഡറി മദ്റസ, MKMJC - പയ്യന്നൂർ
                 </span>
                 <span className="text-lg font-black text-slate-900 block tracking-tight">
                   വൈബ് ഓഫ് മദീന <span className="emerald-gradient-text">2K26</span>
@@ -55,7 +55,7 @@ export default function Hero({ onNavigate }) {
         {/* Badge */}
         <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-emerald-100/90 border border-emerald-300 text-emerald-900 text-xs sm:text-sm font-extrabold mb-4 shadow-sm">
           <Sparkles className="w-4 h-4 text-emerald-600 animate-pulse" />
-          <span>Jamalulleyli Madrasa Annual Milad Fest 2026</span>
+          <span>Jamalullaili Secondary Madrasa, MKMJC - Payyanur • Annual Milad Fest 2026</span>
         </div>
 
         <p className="mt-2 text-base sm:text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed font-medium">
