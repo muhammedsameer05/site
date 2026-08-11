@@ -408,25 +408,42 @@ export default function Gallery() {
 
       {/* Lightbox Preview Modal */}
       {lightbox && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/85 backdrop-blur-lg p-4 sm:p-6 animate-fade-in" onClick={() => setLightbox(null)}>
-          <div className="relative max-w-4xl w-full max-h-[85vh] flex flex-col items-center justify-center" onClick={e => e.stopPropagation()}>
-            <button 
-              onClick={() => setLightbox(null)}
-              className="absolute -top-10 right-0 p-2 text-white/80 hover:text-white bg-black/40 rounded-full hover:bg-black/60 transition"
-              title="Close Preview"
-            >
-              <X className="w-6 h-6" />
-            </button>
+        <div 
+          className="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-slate-950/90 backdrop-blur-xl p-4 sm:p-8 animate-fade-in" 
+          onClick={() => setLightbox(null)}
+        >
+          {/* Top Fixed Screen Close Button */}
+          <button 
+            onClick={() => setLightbox(null)}
+            className="fixed top-4 right-4 sm:top-6 sm:right-6 z-[220] flex items-center space-x-2 px-4 py-2.5 rounded-full bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs sm:text-sm shadow-2xl border border-white/30 transition-transform duration-200 hover:scale-105 cursor-pointer"
+            title="Close Preview (or press Esc / click anywhere)"
+          >
+            <X className="w-5 h-5" />
+            <span>Close Preview</span>
+          </button>
 
-            <img 
-              src={lightbox.url} 
-              alt={lightbox.title}
-              className="max-h-[65vh] sm:max-h-[70vh] w-auto max-w-full rounded-2xl object-contain shadow-2xl border border-white/20" 
-            />
+          <div className="relative max-w-4xl w-full max-h-[80vh] flex flex-col items-center justify-center" onClick={e => e.stopPropagation()}>
+            <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-white/20 bg-slate-900/50">
+              {/* Inner Card Close Icon */}
+              <button 
+                onClick={() => setLightbox(null)}
+                className="absolute top-3 right-3 z-30 p-2 rounded-full bg-black/60 hover:bg-rose-600 text-white shadow-lg backdrop-blur-md transition border border-white/20"
+                title="Close"
+              >
+                <X className="w-5 h-5" />
+              </button>
 
-            <div className="mt-4 text-center max-w-2xl px-4 py-2 rounded-2xl bg-black/50 backdrop-blur-sm border border-white/10">
-              <h3 className="text-base sm:text-lg font-bold text-white">{lightbox.title}</h3>
+              <img 
+                src={lightbox.url} 
+                alt={lightbox.title}
+                className="max-h-[60vh] sm:max-h-[68vh] w-auto max-w-full object-contain block mx-auto" 
+              />
+            </div>
+
+            <div className="mt-4 text-center max-w-2xl px-5 py-3 rounded-2xl bg-slate-900/90 backdrop-blur-md border border-white/10 shadow-xl">
+              <h3 className="text-base sm:text-lg font-extrabold text-white">{lightbox.title}</h3>
               {lightbox.caption && <p className="text-xs text-slate-300 mt-1">{lightbox.caption}</p>}
+              <p className="text-[10px] text-slate-400 mt-2 font-mono uppercase tracking-wider">Click anywhere outside to close</p>
             </div>
           </div>
         </div>
