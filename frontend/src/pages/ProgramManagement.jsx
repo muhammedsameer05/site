@@ -304,12 +304,14 @@ export default function ProgramManagement() {
 
                 <h3 className="text-base font-bold text-slate-900 mb-1">{p.name}</h3>
 
-                <div className="flex items-center space-x-3 text-xs text-slate-500 font-mono mb-2 font-bold">
-                  <span className="flex items-center space-x-1">
-                    <Users className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-                    <span>{p.participant_count || 0} / {p.max_participants || 20}</span>
-                  </span>
-                </div>
+                {isAdmin && (
+                  <div className="flex items-center space-x-3 text-xs text-slate-500 font-mono mb-2 font-bold">
+                    <span className="flex items-center space-x-1">
+                      <Users className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                      <span>{p.participant_count || 0} / {p.max_participants || 20} Enrolled</span>
+                    </span>
+                  </div>
+                )}
 
                 {/* Add 1st, 2nd, 3rd Winners Button (Admin only) */}
                 {isAdmin && (
