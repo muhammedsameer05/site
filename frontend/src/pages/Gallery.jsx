@@ -408,11 +408,12 @@ export default function Gallery() {
 
       {/* Lightbox Preview Modal */}
       {lightbox && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-md p-4" onClick={() => setLightbox(null)}>
-          <div className="relative max-w-4xl w-full max-h-[90vh] flex flex-col items-center justify-center" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/85 backdrop-blur-lg p-4 sm:p-6 animate-fade-in" onClick={() => setLightbox(null)}>
+          <div className="relative max-w-4xl w-full max-h-[85vh] flex flex-col items-center justify-center" onClick={e => e.stopPropagation()}>
             <button 
               onClick={() => setLightbox(null)}
-              className="absolute -top-10 right-0 p-2 text-slate-300 hover:text-white"
+              className="absolute -top-10 right-0 p-2 text-white/80 hover:text-white bg-black/40 rounded-full hover:bg-black/60 transition"
+              title="Close Preview"
             >
               <X className="w-6 h-6" />
             </button>
@@ -420,11 +421,11 @@ export default function Gallery() {
             <img 
               src={lightbox.url} 
               alt={lightbox.title}
-              className="max-h-[75vh] w-auto max-w-full rounded-2xl object-contain shadow-2xl border border-slate-200" 
+              className="max-h-[65vh] sm:max-h-[70vh] w-auto max-w-full rounded-2xl object-contain shadow-2xl border border-white/20" 
             />
 
-            <div className="mt-4 text-center">
-              <h3 className="text-lg font-bold text-white">{lightbox.title}</h3>
+            <div className="mt-4 text-center max-w-2xl px-4 py-2 rounded-2xl bg-black/50 backdrop-blur-sm border border-white/10">
+              <h3 className="text-base sm:text-lg font-bold text-white">{lightbox.title}</h3>
               {lightbox.caption && <p className="text-xs text-slate-300 mt-1">{lightbox.caption}</p>}
             </div>
           </div>
