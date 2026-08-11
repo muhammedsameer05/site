@@ -1,17 +1,13 @@
 import React, { useState, useEffect } from 'react';
 
-export default function CountdownTimer({ targetDate }) {
-  const [timeLeft, setTimeLeft] = useState({
-    days: 0,
-    hours: 0,
-    minutes: 0,
-    seconds: 0
-  });
+export default function CountdownTimer({ targetDate, onFinish }) {
+  const [timeLeft, setTimeLeft] = useState(null);
+  const [isFinished, setIsFinished] = useState(false);
 
   useEffect(() => {
     const target = new Date(targetDate || '2026-08-15T09:00:00').getTime();
 
-    const interval = setInterval(() => {
+    const calculate = () => {
       const now = new Date().getTime();
       const difference = target - now;
 
@@ -22,13 +18,24 @@ export default function CountdownTimer({ targetDate }) {
           minutes: Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60)),
           seconds: Math.floor((difference % (1000 * 60)) / 1000)
         });
+        setIsFinished(false);
       } else {
-        clearInterval(interval);
+        setIsFinished(true);
+        if (typeof onFinish === 'function') {
+          onFinish();
+        }
       }
-    }, 1000);
+    };
+
+    calculate();
+    const interval = setInterval(calculate, 1000);
 
     return () => clearInterval(interval);
-  }, [targetDate]);
+  }, [targetDate, onFinish]);
+
+  if (isFinished || !timeLeft) {
+    return null;
+  }
 
   return (
     <div className="grid grid-cols-4 gap-1.5 sm:gap-4 max-w-lg mx-auto px-1">

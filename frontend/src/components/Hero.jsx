@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Sparkles, Trophy, Calendar, ArrowRight } from 'lucide-react';
 import CountdownTimer from './CountdownTimer';
 import { useLanguage } from '../context/LanguageContext';
 
 export default function Hero({ onNavigate }) {
   const { t } = useLanguage();
+  const [timerFinished, setTimerFinished] = useState(false);
 
   return (
     <div className="relative overflow-hidden bg-gradient-to-b from-white via-emerald-50/60 to-slate-50 py-12 sm:py-16 border-b border-emerald-100 rounded-3xl my-4 shadow-sm">
@@ -61,12 +62,17 @@ export default function Hero({ onNavigate }) {
 
 
         {/* Countdown Component */}
-        <div className="mt-8">
-          <div className="text-xs font-extrabold text-amber-700 uppercase tracking-widest mb-3">
-            Grand Festival Countdown
+        {!timerFinished && (
+          <div className="mt-8">
+            <div className="text-xs font-extrabold text-amber-700 uppercase tracking-widest mb-3">
+              Grand Festival Countdown
+            </div>
+            <CountdownTimer 
+              targetDate={localStorage.getItem('milad_cooldown_target_date') || '2026-08-15T09:00:00'} 
+              onFinish={() => setTimerFinished(true)}
+            />
           </div>
-          <CountdownTimer targetDate={localStorage.getItem('milad_cooldown_target_date') || '2026-08-15T09:00:00'} />
-        </div>
+        )}
 
         {/* Action Buttons */}
         <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
