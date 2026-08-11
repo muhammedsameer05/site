@@ -124,7 +124,6 @@ export default function HouseManagement() {
             onClick={() => setSelectedHouseObj(house)}
             className="glass-panel p-6 sm:p-8 rounded-3xl border-2 bg-white shadow-sm relative overflow-hidden flex flex-col justify-between cursor-pointer hover:shadow-xl transition-all duration-300 group"
             style={{ borderColor: `${house.color_hex}90` }}
-            title="Click to view full house score breakdown & winner results"
           >
             <div className="absolute top-0 right-0 w-48 h-48 rounded-full blur-3xl pointer-events-none opacity-10" style={{ backgroundColor: house.color_hex }} />
 
@@ -192,99 +191,11 @@ export default function HouseManagement() {
                 <span className="text-4xl font-black emerald-gradient-text font-mono">{house.total_points || 0}</span>
               </div>
 
-              <div className="text-right mb-4">
+              <div className="text-right mb-2">
                 <span className="text-[10px] font-black text-emerald-700 underline group-hover:text-emerald-900 transition">
                   View Full Score Breakdown →
                 </span>
               </div>
-
-              {/* Admin Live House Scoring Desk */}
-              {isAdmin && (
-                <div className="bg-emerald-50/80 border border-emerald-200 p-4 rounded-2xl space-y-3 pt-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-black text-emerald-950 uppercase tracking-wider flex items-center space-x-1">
-                      <Trophy className="w-3.5 h-3.5 text-amber-500" />
-                      <span>Live House Scoring Desk</span>
-                    </span>
-                    <span className="text-[10px] font-mono text-emerald-700 font-bold">1-Click Live Adjustment</span>
-                  </div>
-
-                  {/* Quick Preset Buttons */}
-                  <div className="grid grid-cols-4 gap-2">
-                    <button
-                      onClick={() => handleAdjustPoints(house.id, 10, '1st Prize / Major Award (+10 Pts)')}
-                      className="py-1.5 px-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs shadow-xs transition"
-                    >
-                      +10 Pts
-                    </button>
-                    <button
-                      onClick={() => handleAdjustPoints(house.id, 5, '2nd Prize / Performance Bonus (+5 Pts)')}
-                      className="py-1.5 px-2 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white font-black text-xs shadow-xs transition"
-                    >
-                      +5 Pts
-                    </button>
-                    <button
-                      onClick={() => handleAdjustPoints(house.id, 1, 'Discipline / Participation Bonus (+1 Pt)')}
-                      className="py-1.5 px-2 rounded-lg bg-teal-600 hover:bg-teal-700 text-white font-black text-xs shadow-xs transition"
-                    >
-                      +1 Pt
-                    </button>
-                    <button
-                      onClick={() => handleAdjustPoints(house.id, -5, 'Penalty / Violation Deduction (-5 Pts)')}
-                      className="py-1.5 px-2 rounded-lg bg-rose-500 hover:bg-rose-600 text-white font-black text-xs shadow-xs transition"
-                    >
-                      -5 Pts
-                    </button>
-                  </div>
-
-                  {/* Custom Point Adjustment Trigger */}
-                  {adjustingHouseId === house.id ? (
-                    <div className="space-y-2 pt-2 border-t border-emerald-200">
-                      <input
-                        type="number"
-                        placeholder="Points amount (e.g. 15 or -5)"
-                        value={adjustPoints}
-                        onChange={e => setAdjustPoints(e.target.value)}
-                        className="w-full px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-bold outline-none"
-                      />
-                      <input
-                        type="text"
-                        placeholder="Reason (e.g. March Past Award / Special Bonus)"
-                        value={adjustReason}
-                        onChange={e => setAdjustReason(e.target.value)}
-                        className="w-full px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-bold outline-none"
-                      />
-                      <div className="flex space-x-2">
-                        <button
-                          onClick={() => handleAdjustPoints(house.id, adjustPoints, adjustReason)}
-                          className="flex-1 py-1.5 rounded-lg bg-emerald-700 text-white font-black text-xs shadow hover:bg-emerald-800"
-                        >
-                          Apply Score
-                        </button>
-                        <button
-                          onClick={() => setAdjustingHouseId(null)}
-                          className="px-3 py-1.5 rounded-lg bg-slate-200 text-slate-700 font-bold text-xs"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <button
-                      onClick={() => {
-                        setAdjustingHouseId(house.id);
-                        setAdjustPoints('');
-                        setAdjustReason('');
-                      }}
-                      className="w-full py-1.5 rounded-xl border border-emerald-300 bg-white text-emerald-800 font-bold text-xs hover:bg-emerald-100/60 transition"
-                    >
-                      + Custom Points / Deductions
-                    </button>
-                  )}
-
-                </div>
-              )}
-
             </div>
 
           </div>
