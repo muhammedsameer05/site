@@ -58,9 +58,7 @@ export default function Hero({ onNavigate }) {
           <span>Jamalullaili Secondary Madrasa, MKMJC - Payyanur • Annual Milad Fest 2026</span>
         </div>
 
-        <p className="mt-2 text-base sm:text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed font-medium">
-          Streamlined event coordination, real-time live scoring, automated house point calculation, digital certificates, and participant analytics.
-        </p>
+
 
         {/* Countdown Component */}
         <div className="mt-8">
