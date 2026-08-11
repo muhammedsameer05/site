@@ -15,7 +15,12 @@ export default function Footer({ onNavigate }) {
                 <span className="text-base font-black emerald-gradient-text block leading-tight">
                   വൈബ് ഓഫ് മദീന 2K26
                 </span>
-                <span className="text-[10px] text-amber-600 font-bold font-mono">JAMALULLAILI SECONDARY MADRASA, MKMJC - PAYYANUR</span>
+                <span className="text-[10px] text-amber-600 font-extrabold font-mono tracking-tight block uppercase leading-tight mt-0.5">
+                  Jamalullaili Secondary Madrasa
+                </span>
+                <span className="text-[9px] text-emerald-800 font-black font-mono tracking-widest block uppercase">
+                  MKMJC - Payyanur
+                </span>
               </div>
             </div>
             <p className="text-xs text-slate-500 leading-relaxed font-medium">

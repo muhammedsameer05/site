@@ -47,8 +47,8 @@ export default function Navbar({ activeTab, setActiveTab, onOpenSearch }) {
               <span className="text-sm sm:text-lg font-black emerald-gradient-text tracking-wide block leading-tight">
                 വൈബ് ഓഫ് മദീന 2K26
               </span>
-              <span className="text-[9px] sm:text-[10px] text-amber-600 font-bold tracking-widest font-mono uppercase block">
-                JAMALULLAILI SECONDARY MADRASA, MKMJC - PAYYANUR
+              <span className="text-[9px] sm:text-[10px] text-amber-600 font-bold tracking-wider font-mono uppercase block leading-tight mt-0.5">
+                Jamalullaili Secondary Madrasa • MKMJC - Payyanur
               </span>
             </div>
           </div>
