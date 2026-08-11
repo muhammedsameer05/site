@@ -1,5 +1,5 @@
 import React from 'react';
-import { Heart, Phone, Sparkles } from 'lucide-react';
+import { Heart, Sparkles } from 'lucide-react';
 
 export default function Footer() {
   return (
@@ -21,18 +21,14 @@ export default function Footer() {
           </div>
 
           {/* Presented By SM VEXOR Badge */}
-          <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4 bg-slate-800/90 border border-amber-500/30 px-5 py-3 rounded-2xl shadow-lg backdrop-blur-md">
+          <div className="flex flex-col sm:flex-row items-center space-y-1.5 sm:space-y-0 sm:space-x-4 bg-slate-800/90 border border-amber-500/30 px-5 py-3 rounded-2xl shadow-lg backdrop-blur-md">
             <div className="flex items-center space-x-2 text-xs font-extrabold text-amber-400 uppercase tracking-wider">
               <Sparkles className="w-4 h-4 text-amber-400 animate-pulse" />
               <span>Presented by <strong className="text-white text-sm font-black tracking-widest underline decoration-amber-400">SM VEXOR</strong></span>
             </div>
-            <a 
-              href="tel:6282330381"
-              className="flex items-center space-x-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs shadow-md transition transform hover:scale-105"
-            >
-              <Phone className="w-3.5 h-3.5" />
-              <span>Contact: 6282330381</span>
-            </a>
+            <div className="text-xs font-bold text-slate-300 font-mono px-3 py-1 rounded-lg bg-slate-900/60 border border-slate-700">
+              Contact: <span className="text-emerald-400 font-extrabold">6282330381</span>
+            </div>
           </div>
         </div>
 
