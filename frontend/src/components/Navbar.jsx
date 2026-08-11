@@ -36,25 +36,19 @@ export default function Navbar({ activeTab, setActiveTab, onOpenSearch }) {
   return (
     <header className="sticky top-0 z-50 glass-panel border-b border-emerald-100 bg-white/95 backdrop-blur-md shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 sm:h-20">
+        <div className="flex items-center justify-between h-16 sm:h-20 gap-4">
           
           {/* Brand Logo */}
-          <div className="flex items-center space-x-2.5 cursor-pointer" onClick={() => setActiveTab('home')}>
+          <div className="flex items-center space-x-2.5 cursor-pointer shrink-0 pr-2" onClick={() => setActiveTab('home')}>
             <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden border-2 border-amber-500/80 shadow-md bg-white p-0.5 flex items-center justify-center shrink-0">
               <img src="/milad-logo.jpg" alt="Vibe of Madeena Logo" className="w-full h-full object-cover rounded-full" />
             </div>
-            <div className="flex flex-col justify-center shrink-0 leading-none py-0.5">
-              <span className="text-xs sm:text-sm font-black emerald-gradient-text block leading-tight">
+            <div className="flex flex-col justify-center shrink-0">
+              <span className="text-xs sm:text-sm md:text-base font-black emerald-gradient-text tracking-wide leading-tight whitespace-nowrap block">
                 വൈബ് ഓഫ് മദീന 2K26
               </span>
-              <span className="text-[9px] sm:text-[10px] text-amber-600 font-black tracking-wider font-mono uppercase block leading-tight">
-                JAMALULLAILI
-              </span>
-              <span className="text-[8px] sm:text-[9px] text-amber-600 font-extrabold tracking-wide font-mono uppercase block leading-tight">
-                SECONDARY MADRASA
-              </span>
-              <span className="text-[7.5px] sm:text-[8.5px] text-emerald-800 font-black tracking-widest font-mono uppercase block leading-tight">
-                MKMJC - PAYYANUR
+              <span className="text-[8px] sm:text-[9.5px] text-amber-600 font-extrabold tracking-tight font-mono uppercase whitespace-nowrap block leading-tight mt-0.5">
+                Jamalullaili Secondary Madrasa, MKMJC - Payyanur
               </span>
             </div>
           </div>
