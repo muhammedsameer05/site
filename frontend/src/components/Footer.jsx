@@ -22,12 +22,23 @@ export default function Footer() {
 
           {/* Presented By SM VEXOR */}
           <div className="flex flex-col items-center md:items-end text-center md:text-right">
-            <div className="flex items-center space-x-2 text-xs font-extrabold text-amber-400 uppercase tracking-wider">
-              <Sparkles className="w-4 h-4 text-amber-400 animate-pulse" />
-              <span>Presented by <strong className="text-white text-sm sm:text-base font-black tracking-widest underline decoration-amber-400">SM VEXOR</strong></span>
-            </div>
-            <div className="text-xs font-bold text-slate-300 font-mono mt-1">
-              Contact: <span className="text-emerald-400 font-extrabold">6282330381</span>
+            <div className="flex items-center space-x-3 text-xs font-extrabold text-amber-400 uppercase tracking-wider">
+              <div className="w-12 h-12 rounded-xl bg-white p-1 shadow-md border border-amber-400/50 flex items-center justify-center shrink-0">
+                <img 
+                  src="/sm-vexor-logo.png" 
+                  alt="SM VEXOR Logo" 
+                  className="w-full h-full object-contain" 
+                />
+              </div>
+              <div className="flex flex-col items-start md:items-end">
+                <div className="flex items-center space-x-1.5">
+                  <span className="text-amber-400 font-extrabold text-xs uppercase tracking-wider">Presented by</span>
+                  <span className="text-white text-sm sm:text-base font-black tracking-wider underline decoration-amber-400">SM VEXOR</span>
+                </div>
+                <div className="text-xs font-bold text-slate-300 font-mono mt-0.5">
+                  Contact: <span className="text-emerald-400 font-extrabold">6282330381</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
