@@ -43,12 +43,12 @@ export default function Navbar({ activeTab, setActiveTab, onOpenSearch }) {
             <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden border-2 border-amber-500/80 shadow-md bg-white p-0.5 flex items-center justify-center shrink-0">
               <img src="/milad-logo.jpg" alt="Vibe of Madeena Logo" className="w-full h-full object-cover rounded-full" />
             </div>
-            <div>
-              <span className="text-sm sm:text-lg font-black emerald-gradient-text tracking-wide block leading-tight">
+            <div className="flex flex-col justify-center shrink-0">
+              <span className="text-sm sm:text-base md:text-lg font-black emerald-gradient-text tracking-wide leading-tight whitespace-nowrap block">
                 വൈബ് ഓഫ് മദീന 2K26
               </span>
-              <span className="text-[9px] sm:text-[10px] text-amber-600 font-bold tracking-wider font-mono uppercase block leading-tight mt-0.5">
-                Jamalullaili Secondary Madrasa • MKMJC - Payyanur
+              <span className="text-[9px] sm:text-[10px] text-amber-600 font-extrabold tracking-tight font-mono uppercase whitespace-nowrap block leading-tight mt-0.5">
+                Jamalullaili Secondary Madrasa, MKMJC - Payyanur
               </span>
             </div>
           </div>
