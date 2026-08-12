@@ -21,7 +21,6 @@ export default function Navbar({ activeTab, setActiveTab, onOpenSearch }) {
     { id: 'results', label: t('results'), icon: Trophy, roles: ['all'] },
     { id: 'gallery', label: t('gallery'), icon: Sparkles, roles: ['all'] },
     { id: 'dashboard', label: 'Overview', icon: Layers, roles: ['super_admin', 'admin', 'stage_coordinator'] },
-    { id: 'archive', label: 'Archive', icon: Archive, roles: ['super_admin', 'admin', 'stage_coordinator'] },
     { id: 'settings', label: t('settings'), icon: Shield, roles: ['super_admin', 'admin'] }
   ];
 
