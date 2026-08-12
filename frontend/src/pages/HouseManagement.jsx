@@ -204,8 +204,8 @@ export default function HouseManagement() {
 
       {/* Edit / Create House Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-md p-4">
-          <div className="glass-panel w-full max-w-md rounded-3xl border border-slate-200 p-6 shadow-2xl bg-white text-slate-900">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-md p-4 sm:p-6 overflow-y-auto">
+          <div className="glass-panel w-full max-w-3xl rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-2xl bg-white text-slate-900 my-auto max-h-[92vh] overflow-y-auto">
             <h3 className="text-lg font-extrabold emerald-gradient-text mb-4">
               {editingHouseId ? 'Edit House Details' : 'Create New House'}
             </h3>

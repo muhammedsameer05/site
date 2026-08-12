@@ -427,10 +427,10 @@ export default function ProgramManagement() {
 
       {/* Assign 1st, 2nd, 3rd Winners Modal with Searchable Autocomplete Inputs */}
       {showWinnersModal && targetProgramForWinners && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-md p-4 sm:p-6 overflow-y-auto">
           <div 
             onClick={e => e.stopPropagation()}
-            className="glass-panel p-6 rounded-3xl border border-slate-200 max-w-lg w-full bg-white text-slate-900 shadow-2xl space-y-5"
+            className="glass-panel p-6 sm:p-8 rounded-3xl border border-slate-200 max-w-4xl w-full bg-white text-slate-900 shadow-2xl space-y-6 my-auto max-h-[92vh] overflow-y-auto"
           >
             
             <div className="flex items-center justify-between border-b border-slate-200 pb-3">
@@ -684,8 +684,8 @@ export default function ProgramManagement() {
 
       {/* Create / Edit Program Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 overflow-y-auto">
-          <div className="glass-panel p-6 rounded-3xl border border-slate-200 max-w-lg w-full bg-white text-slate-900 shadow-2xl space-y-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-md p-4 sm:p-6 overflow-y-auto">
+          <div className="glass-panel p-6 sm:p-8 rounded-3xl border border-slate-200 max-w-4xl w-full bg-white text-slate-900 shadow-2xl space-y-5 my-auto max-h-[92vh] overflow-y-auto">
             
             <div className="flex items-center justify-between border-b border-slate-200 pb-3">
               <h3 className="text-lg font-extrabold text-slate-900">
@@ -779,8 +779,8 @@ export default function ProgramManagement() {
 
       {/* Participating Students Modal */}
       {showParticipantsModal && selectedProgramForParticipants && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-md p-4 overflow-y-auto">
-          <div className="glass-panel w-full max-w-lg rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-2xl bg-white text-slate-900 my-8 space-y-4 animate-fade-in-up">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-md p-4 sm:p-6 overflow-y-auto">
+          <div className="glass-panel w-full max-w-3xl rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-2xl bg-white text-slate-900 my-auto max-h-[92vh] overflow-y-auto space-y-4 animate-fade-in-up">
             <div className="flex items-center justify-between border-b border-slate-200 pb-3">
               <h3 className="text-base font-extrabold emerald-gradient-text flex items-center space-x-2">
                 <Users className="w-5 h-5 text-blue-600" />
