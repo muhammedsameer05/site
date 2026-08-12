@@ -136,7 +136,7 @@ export default function ProgramManagement() {
     fetch('/api/categories', { cache: 'no-store' })
       .then(res => res.json())
       .then(data => {
-        const raw = Array.isArray(data) && data.length > 0 ? data : DEFAULT_CATEGORIES;
+        const raw = Array.isArray(data) && data.length >= 5 ? data : DEFAULT_CATEGORIES;
         const cleaned = raw.map(c => (c.name === 'Kids' || c.name === 'kids') ? { ...c, name: 'Kiddies' } : c);
         setCategories(cleaned);
       })

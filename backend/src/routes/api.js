@@ -983,7 +983,16 @@ router.delete('/programs/:id', authenticate, requireAdmin, async (req, res) => {
 // -------------------------------------------------------------
 router.get('/categories', async (req, res) => {
   try {
-    const categories = await all('SELECT * FROM categories');
+    let categories = await all('SELECT * FROM categories ORDER BY id ASC');
+    if (!categories || categories.length < 5) {
+      categories = [
+        { id: 1, name: 'Kiddies' },
+        { id: 2, name: 'Sub Junior' },
+        { id: 3, name: 'Junior' },
+        { id: 4, name: 'Senior' },
+        { id: 5, name: 'Super Senior' }
+      ];
+    }
     const cleaned = (categories || []).map(c => {
       if (c.name === 'Kids' || c.name === 'kids') return { ...c, name: 'Kiddies' };
       return c;

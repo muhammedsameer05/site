@@ -365,21 +365,30 @@ async function initDb() {
       (2, 'H-BLU', 'Blue House', '#3B82F6', 'Knowledge is Light and Guidance', 'Captain 2', 0)`);
   }
 
-  // Ensure standard categories exist and fix 'Kids' -> 'Kiddies'
+  // Ensure all 5 standard categories exist and fix 'Kids' -> 'Kiddies'
+  const requiredCategories = [
+    { id: 1, name: 'Kiddies', min_age: 5, max_age: 7, description: 'Kiddies Category' },
+    { id: 2, name: 'Sub Junior', min_age: 8, max_age: 10, description: 'Sub Junior Category' },
+    { id: 3, name: 'Junior', min_age: 11, max_age: 13, description: 'Junior Category' },
+    { id: 4, name: 'Senior', min_age: 14, max_age: 16, description: 'Senior Category' },
+    { id: 5, name: 'Super Senior', min_age: 17, max_age: 20, description: 'Super Senior Category' }
+  ];
+
   try {
-    await run("UPDATE categories SET name = 'Kiddies' WHERE name = 'Kids' OR name = 'kids' OR id = 1");
     await run("UPDATE students SET category_name = 'Kiddies' WHERE category_name = 'Kids' OR category_name = 'kids'");
     await run("UPDATE programs SET age_group = 'Kiddies' WHERE age_group = 'Kids' OR age_group = 'kids'");
   } catch (e) {}
 
-  const categoryRows = await all('SELECT * FROM categories');
-  if (!categoryRows || categoryRows.length === 0) {
-    await run(`INSERT INTO categories (id, name, min_age, max_age, description) VALUES
-      (1, 'Kiddies', 5, 7, 'Kiddies Category'),
-      (2, 'Sub Junior', 8, 10, 'Sub Junior Category'),
-      (3, 'Junior', 11, 13, 'Junior Category'),
-      (4, 'Senior', 14, 16, 'Senior Category'),
-      (5, 'Super Senior', 17, 20, 'Super Senior Category')`);
+  for (const cat of requiredCategories) {
+    try {
+      const exists = await get('SELECT id FROM categories WHERE id = ?', [cat.id]);
+      if (!exists) {
+        await run('INSERT INTO categories (id, name, min_age, max_age, description) VALUES (?, ?, ?, ?, ?)',
+          [cat.id, cat.name, cat.min_age, cat.max_age, cat.description]);
+      } else {
+        await run('UPDATE categories SET name = ? WHERE id = ?', [cat.name, cat.id]);
+      }
+    } catch (e) {}
   }
 
   const venueCount = await get('SELECT COUNT(*) as count FROM venues');
