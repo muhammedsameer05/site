@@ -230,6 +230,15 @@ export default function ProgramManagement() {
       third_student_id: existing3rd?.student_id || name3rd
     });
 
+    fetch(`/api/programs/${program.id}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.id) {
+          setTargetProgramForWinners(data);
+        }
+      })
+      .catch(() => {});
+
     fetch('/api/students', { cache: 'no-store' })
       .then(res => res.json())
       .then(data => {
@@ -278,8 +287,63 @@ export default function ProgramManagement() {
 
   const getFilteredStudents = (query) => {
     const q = (query || '').toLowerCase().trim();
-    if (!q) return allStudentsList;
-    return allStudentsList.filter(st => (
+
+    // Show ONLY participating students for this specific program if available
+    let baseList = [];
+    if (targetProgramForWinners?.participants && targetProgramForWinners.participants.length > 0) {
+      const participantStudentIds = new Set(
+        targetProgramForWinners.participants.map(p => String(p.student_id || p.id || '').trim().toLowerCase())
+      );
+      const participantNames = new Set(
+        targetProgramForWinners.participants.map(p => (p.student_name || p.name || '').trim().toLowerCase())
+      );
+
+      baseList = allStudentsList.filter(s => {
+        const sId = String(s.id || '').trim().toLowerCase();
+        const sStuId = String(s.student_id || '').trim().toLowerCase();
+        const sAdmNo = String(s.admission_no || '').trim().toLowerCase();
+        const sName = (s.name || '').trim().toLowerCase();
+
+        return participantStudentIds.has(sId) || 
+               participantStudentIds.has(sStuId) || 
+               participantStudentIds.has(sAdmNo) || 
+               participantNames.has(sName);
+      });
+
+      // If some registered participants were not found in allStudentsList, create student representations for them
+      targetProgramForWinners.participants.forEach(p => {
+        const pName = p.student_name || p.name;
+        if (pName && !baseList.some(b => b.name?.toLowerCase().trim() === pName.toLowerCase().trim())) {
+          baseList.push({
+            id: p.student_id || p.participant_id,
+            student_id: p.student_id,
+            admission_no: p.admission_no || p.chest_no || '101',
+            chest_no: p.chest_no || p.admission_no || '101',
+            name: pName,
+            class_name: p.class_name || '',
+            house_name: p.house_name || ''
+          });
+        }
+      });
+    } else if (targetProgramForWinners?.category_name || targetProgramForWinners?.age_group) {
+      // Fallback: Filter students by matching program category if no direct participants added yet
+      const progCat = (targetProgramForWinners.category_name || targetProgramForWinners.age_group || '').toLowerCase().trim();
+      const normProgCat = (progCat === 'kids' || progCat === 'kiddies') ? 'kiddies' : progCat;
+
+      const categoryStudents = allStudentsList.filter(s => {
+        const studentCat = (s.category_name || '').toLowerCase().trim();
+        const normStudentCat = (studentCat === 'kids' || studentCat === 'kiddies') ? 'kiddies' : studentCat;
+        return normStudentCat === normProgCat;
+      });
+
+      baseList = categoryStudents.length > 0 ? categoryStudents : allStudentsList;
+    } else {
+      baseList = allStudentsList;
+    }
+
+    if (!q) return baseList;
+
+    return baseList.filter(st => (
       st.name?.toLowerCase().includes(q) ||
       st.student_id?.toLowerCase().includes(q) ||
       st.admission_no?.toLowerCase().includes(q) ||
