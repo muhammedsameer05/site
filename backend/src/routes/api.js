@@ -471,6 +471,10 @@ router.get('/houses', async (req, res) => {
     const allResults = await all(`
       SELECT r.prize, r.student_id, s.house_id 
       FROM results r 
+      JOIN programs p ON (
+        CAST(r.program_id AS TEXT) = CAST(p.id AS TEXT) OR 
+        r.program_id = p.code
+      )
       LEFT JOIN students s ON (
         CAST(r.student_id AS TEXT) = CAST(s.id AS TEXT) OR 
         r.student_id = s.student_id OR 
@@ -478,6 +482,7 @@ router.get('/houses', async (req, res) => {
         LOWER(TRIM(s.name)) = LOWER(TRIM(r.student_id))
       )
       WHERE r.prize IN ('1st', '2nd', '3rd')
+        AND (p.is_archived = 0 OR p.is_archived IS NULL)
     `);
 
     const houseMedals = {};
@@ -493,7 +498,6 @@ router.get('/houses', async (req, res) => {
           WHERE id = ? OR student_id = ? OR admission_no = ? OR LOWER(TRIM(name)) = LOWER(TRIM(?))
         `, [r.student_id, r.student_id, r.student_id, r.student_id]);
         if (stu) targetHouseId = stu.house_id;
-        else targetHouseId = (r.prize === '1st' || r.prize === '3rd') ? 1 : 2;
       }
 
       if (targetHouseId) {
@@ -535,7 +539,7 @@ router.get('/houses/:id/breakdown', async (req, res) => {
 
     const houseId = house.id;
 
-    // Fetch all winning results
+    // Fetch all winning results for active non-archived programs
     const allResults = await all(`
       SELECT r.*, 
              s.name as s_name, 
@@ -547,18 +551,19 @@ router.get('/houses/:id/breakdown', async (req, res) => {
              p.code as program_code,
              c.name as category_name
       FROM results r
+      JOIN programs p ON (
+        CAST(r.program_id AS TEXT) = CAST(p.id AS TEXT) OR 
+        r.program_id = p.code
+      )
       LEFT JOIN students s ON (
         CAST(r.student_id AS TEXT) = CAST(s.id AS TEXT) OR 
         r.student_id = s.student_id OR 
         r.student_id = s.admission_no OR
         LOWER(TRIM(s.name)) = LOWER(TRIM(r.student_id))
       )
-      LEFT JOIN programs p ON (
-        CAST(r.program_id AS TEXT) = CAST(p.id AS TEXT) OR 
-        r.program_id = p.code
-      )
       LEFT JOIN categories c ON p.category_id = c.id
       WHERE r.prize IN ('1st', '2nd', '3rd')
+        AND (p.is_archived = 0 OR p.is_archived IS NULL)
       ORDER BY r.id DESC
     `);
 
@@ -936,6 +941,10 @@ router.put('/programs/:id/archive', authenticate, requireAdmin, async (req, res)
       WHERE id = ? OR CAST(id AS TEXT) = CAST(? AS TEXT)
     `, [req.user?.name || 'Admin', targetId, targetId]);
 
+    try {
+      await run(`DELETE FROM results WHERE program_id = ? OR CAST(program_id AS TEXT) = CAST(? AS TEXT)`, [targetId, targetId]);
+    } catch (e) {}
+
     await recalculateAllHousePoints();
 
     const io = req.app.get('io');
@@ -986,6 +995,10 @@ router.delete('/programs/:id', authenticate, requireAdmin, async (req, res) => {
       SET is_archived = 1, archived_at = CURRENT_TIMESTAMP, archived_by = ? 
       WHERE id = ? OR CAST(id AS TEXT) = CAST(? AS TEXT)
     `, [req.user?.name || 'Admin', targetId, targetId]);
+
+    try {
+      await run(`DELETE FROM results WHERE program_id = ? OR CAST(program_id AS TEXT) = CAST(? AS TEXT)`, [targetId, targetId]);
+    } catch (e) {}
 
     await recalculateAllHousePoints();
 
