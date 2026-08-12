@@ -431,24 +431,33 @@ export default function ProgramManagement() {
           <div className="flex min-h-full items-center justify-center p-2 text-center sm:p-4">
             <div 
               onClick={e => e.stopPropagation()}
-              className="relative transform rounded-3xl bg-white text-left shadow-2xl transition-all w-full max-w-4xl p-6 sm:p-8 my-auto border border-slate-200 text-slate-900 space-y-6 animate-fade-in-up"
+              className="relative transform rounded-3xl bg-white text-left shadow-2xl transition-all w-full max-w-4xl overflow-hidden my-auto border border-slate-200 text-slate-900 animate-fade-in-up"
             >
-            
-            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
-              <div>
-                <h3 className="text-lg font-extrabold text-slate-900 flex items-center space-x-2">
-                  <Trophy className="w-5 h-5 text-amber-600" />
-                  <span>Assign 1st, 2nd, 3rd Winners</span>
-                </h3>
-                <p className="text-xs text-amber-700 font-bold">{targetProgramForWinners.name}</p>
+              {/* Header Banner matching screenshot theme */}
+              <div className="bg-gradient-to-r from-emerald-600 to-teal-700 p-6 text-white flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center font-black text-xl border border-white/30">
+                    <Trophy className="w-6 h-6 text-amber-300" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-black text-white">
+                      Assign Competition Winners
+                    </h2>
+                    <p className="text-xs font-mono font-bold text-emerald-100">
+                      Program: {targetProgramForWinners.name} ({targetProgramForWinners.code || `PRG-${targetProgramForWinners.id}`})
+                    </p>
+                  </div>
+                </div>
+
+                <button 
+                  onClick={() => setShowWinnersModal(false)}
+                  className="w-9 h-9 rounded-full bg-black/20 hover:bg-black/40 flex items-center justify-center text-white transition"
+                >
+                  <X className="w-5 h-5" />
+                </button>
               </div>
-              <button 
-                onClick={() => setShowWinnersModal(false)}
-                className="p-1 rounded-lg bg-slate-100 text-slate-400 hover:text-slate-700"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
+
+              <div className="p-6 sm:p-8 space-y-6">
 
             <form onSubmit={handleSaveWinners} className="space-y-4">
               
@@ -663,7 +672,7 @@ export default function ProgramManagement() {
                 <button
                   type="button"
                   onClick={() => setShowWinnersModal(false)}
-                  className="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold border border-slate-200"
+                  className="px-6 py-2.5 rounded-xl bg-slate-100 text-slate-700 text-xs font-extrabold border border-slate-200"
                 >
                   Cancel
                 </button>
@@ -671,34 +680,51 @@ export default function ProgramManagement() {
                 <button
                   type="submit"
                   disabled={winnersSaving}
-                  className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-md flex items-center space-x-2 transition"
+                  className="px-8 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs shadow-lg flex items-center space-x-2 transition"
                 >
-                  <CheckCircle className="w-4 h-4" />
+                  <CheckCircle className="w-4 h-4 text-emerald-400" />
                   <span>{winnersSaving ? 'Saving Winners...' : 'Save & Publish Winners'}</span>
                 </button>
               </div>
 
             </form>
           </div>
-          {/* Create / Edit Program Modal */}
+        </div>
+      </div>
+    </div>
+    )}
+
+      {/* Create / Edit Program Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-md p-4 sm:p-6">
           <div className="flex min-h-full items-center justify-center p-2 text-center sm:p-4">
-            <div className="relative transform rounded-3xl bg-white text-left shadow-2xl transition-all w-full max-w-4xl p-6 sm:p-8 my-auto border border-slate-200 text-slate-900 space-y-5 animate-fade-in-up">
+            <div className="relative transform rounded-3xl bg-white text-left shadow-2xl transition-all w-full max-w-4xl overflow-hidden my-auto border border-slate-200 text-slate-900 animate-fade-in-up">
               
-              <div className="flex items-center justify-between border-b border-slate-200 pb-3">
-                <h3 className="text-xl font-black text-slate-900">
-                  {formData.id ? 'Edit Program' : 'Create New Program'}
-                </h3>
+              {/* Header Banner matching screenshot theme */}
+              <div className="bg-gradient-to-r from-emerald-600 to-teal-700 p-6 text-white flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center font-black text-xl border border-white/30">
+                    <Calendar className="w-6 h-6 text-amber-300" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-black text-white">
+                      {formData.id ? 'Edit Program Item' : 'Create New Program'}
+                    </h2>
+                    <p className="text-xs font-mono font-bold text-emerald-100">
+                      {formData.id ? `Code: #${formData.code || formData.id}` : 'Configure competition details, stage venue, and age category'}
+                    </p>
+                  </div>
+                </div>
+
                 <button 
                   onClick={() => setShowModal(false)}
-                  className="p-1.5 rounded-xl bg-slate-100 text-slate-400 hover:text-slate-700"
+                  className="w-9 h-9 rounded-full bg-black/20 hover:bg-black/40 flex items-center justify-center text-white transition"
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
-              <form onSubmit={handleSaveProgram} className="space-y-4 text-xs font-semibold text-slate-700">
+              <form onSubmit={handleSaveProgram} className="p-6 sm:p-8 space-y-5 text-xs font-semibold text-slate-700">
                 
                 <div>
                   <label className="block mb-1 text-slate-900 font-bold">Program Code</label>
@@ -780,15 +806,15 @@ export default function ProgramManagement() {
                   <button
                     type="button"
                     onClick={() => setShowModal(false)}
-                    className="px-5 py-2.5 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 font-bold transition"
+                    className="px-6 py-2.5 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 hover:bg-slate-200 font-extrabold transition"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold shadow-md transition"
+                    className="px-8 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold shadow-lg transition"
                   >
-                    {formData.id ? 'Save Changes' : 'Create Program'}
+                    {formData.id ? 'Save Program Changes' : 'Create Program'}
                   </button>
                 </div>
 
@@ -796,8 +822,6 @@ export default function ProgramManagement() {
 
             </div>
           </div>
-        </div>
-      )}      </div>
         </div>
       )}
 
@@ -915,9 +939,9 @@ export default function ProgramManagement() {
                 Close
               </button>
             </div>
-            </div>
           </div>
         </div>
+      </div>
       )}
 
     </div>

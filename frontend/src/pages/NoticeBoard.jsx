@@ -141,19 +141,32 @@ export default function NoticeBoard() {
       {showModal && (
         <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-md p-4 sm:p-6">
           <div className="flex min-h-full items-center justify-center p-2 text-center sm:p-4">
-            <div className="relative transform rounded-3xl bg-white text-left shadow-2xl transition-all w-full max-w-3xl p-6 sm:p-8 my-auto border border-slate-200 text-slate-900 animate-fade-in-up">
-              <button
-                onClick={() => setShowModal(false)}
-                className="absolute top-4 right-4 text-slate-400 hover:text-slate-700 p-1"
-              >
-                <X className="w-5 h-5" />
-              </button>
+            <div className="relative transform rounded-3xl bg-white text-left shadow-2xl transition-all w-full max-w-3xl overflow-hidden my-auto border border-slate-200 text-slate-900 animate-fade-in-up">
+              {/* Header Banner matching screenshot theme */}
+              <div className="bg-gradient-to-r from-emerald-600 to-teal-700 p-6 text-white flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center font-black text-xl border border-white/30">
+                    <Megaphone className="w-6 h-6 text-amber-300" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-black text-white">
+                      Post Official Announcement
+                    </h2>
+                    <p className="text-xs font-mono font-bold text-emerald-100">
+                      Broadcast important updates to Madrasa Milad noticeboard
+                    </p>
+                  </div>
+                </div>
 
-              <h3 className="text-lg font-bold emerald-gradient-text mb-4 text-center">
-                Post Official Announcement
-              </h3>
+                <button 
+                  onClick={() => setShowModal(false)}
+                  className="w-9 h-9 rounded-full bg-black/20 hover:bg-black/40 flex items-center justify-center text-white transition"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
 
-              <form onSubmit={handleCreateNotice} className="space-y-4 text-xs font-bold">
+              <form onSubmit={handleCreateNotice} className="p-6 sm:p-8 space-y-5 text-xs font-bold">
                 <div>
                   <label className="block text-slate-700 mb-1">Announcement Title</label>
                   <input
@@ -194,16 +207,16 @@ export default function NoticeBoard() {
                   <button
                     type="button"
                     onClick={() => setShowModal(false)}
-                    className="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 font-bold border border-slate-200 transition"
+                    className="px-6 py-2.5 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 hover:bg-slate-200 font-extrabold transition"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="px-6 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold shadow transition flex items-center space-x-1.5 disabled:opacity-50"
+                    className="px-8 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold shadow-lg transition flex items-center space-x-2 disabled:opacity-50"
                   >
-                    <Send className="w-3.5 h-3.5" />
+                    <Send className="w-4 h-4 text-emerald-400" />
                     <span>{submitting ? 'Publishing...' : 'Publish Notice'}</span>
                   </button>
                 </div>
