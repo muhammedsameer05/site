@@ -9,48 +9,96 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/reports/dashboard-stats')
-      .then(res => res.json())
-      .then(data => {
-        if (data && data.cards) {
-          setStats(data);
-        } else {
+    let isSubscribed = true;
+
+    const loadDashboardStats = async () => {
+      try {
+        const res = await fetch('/api/reports/dashboard-stats', { cache: 'no-store' });
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.cards && (data.cards.totalStudents > 0 || data.cards.totalPrograms > 0 || data.cards.totalHouses > 0)) {
+            if (isSubscribed) {
+              setStats(data);
+              setLoading(false);
+              return;
+            }
+          }
+        }
+      } catch (e) {}
+
+      // Fallback: Fetch directly from endpoints
+      try {
+        const [studentsRes, programsRes, housesRes, categoriesRes] = await Promise.all([
+          fetch('/api/students', { cache: 'no-store' }).then(r => r.json()).catch(() => []),
+          fetch('/api/programs', { cache: 'no-store' }).then(r => r.json()).catch(() => []),
+          fetch('/api/houses', { cache: 'no-store' }).then(r => r.json()).catch(() => []),
+          fetch('/api/categories', { cache: 'no-store' }).then(r => r.json()).catch(() => [])
+        ]);
+
+        const students = Array.isArray(studentsRes) ? studentsRes : [];
+        const programs = Array.isArray(programsRes) ? programsRes : [];
+        const houses = Array.isArray(housesRes) ? housesRes : [];
+        const categories = Array.isArray(categoriesRes) ? categoriesRes : [];
+
+        const runningPrograms = programs.filter(p => p.status === 'ongoing').length;
+        const completedPrograms = programs.filter(p => p.status === 'completed').length;
+        const pendingPrograms = programs.filter(p => !p.status || p.status === 'pending').length;
+
+        // Distinct participants
+        const participantSet = new Set();
+        programs.forEach(p => {
+          if (p.participants && Array.isArray(p.participants)) {
+            p.participants.forEach(pt => {
+              if (pt.student_id || pt.id) participantSet.add(String(pt.student_id || pt.id));
+            });
+          }
+        });
+
+        // Category breakdown
+        const categoryMap = new Map();
+        categories.forEach(c => categoryMap.set(String(c.id), { id: c.id, name: c.name, program_count: 0 }));
+        programs.forEach(p => {
+          const catKey = String(p.category_id || 1);
+          if (categoryMap.has(catKey)) {
+            categoryMap.get(catKey).program_count += 1;
+          } else {
+            categoryMap.set(catKey, { id: p.category_id || 1, name: p.category_name || 'Category', program_count: 1 });
+          }
+        });
+
+        if (isSubscribed) {
           setStats({
             cards: {
-              totalStudents: 0,
-              totalPrograms: 0,
+              totalStudents: students.length,
+              totalPrograms: programs.length,
               totalJudges: 0,
-              totalHouses: 0,
-              totalCategories: 0,
-              runningPrograms: 0,
-              completedPrograms: 0,
-              pendingPrograms: 0,
-              totalParticipants: 0
+              totalHouses: houses.length,
+              totalCategories: categories.length,
+              runningPrograms,
+              completedPrograms,
+              pendingPrograms,
+              totalParticipants: participantSet.size
             },
-            houses: [],
-            categoryStats: []
+            houses: houses.map(h => ({
+              id: h.id,
+              name: h.name,
+              code: h.code,
+              color_hex: h.color_hex,
+              total_points: h.total_points || 0
+            })).sort((a, b) => (b.total_points || 0) - (a.total_points || 0)),
+            categoryStats: Array.from(categoryMap.values())
           });
+          setLoading(false);
         }
-        setLoading(false);
-      })
-      .catch(() => {
-        setStats({
-          cards: {
-            totalStudents: 0,
-            totalPrograms: 0,
-            totalJudges: 0,
-            totalHouses: 0,
-            totalCategories: 0,
-            runningPrograms: 0,
-            completedPrograms: 0,
-            pendingPrograms: 0,
-            totalParticipants: 0
-          },
-          houses: [],
-          categoryStats: []
-        });
-        setLoading(false);
-      });
+      } catch (err) {
+        if (isSubscribed) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadDashboardStats();
+    return () => { isSubscribed = false; };
   }, []);
 
   if (loading) {
