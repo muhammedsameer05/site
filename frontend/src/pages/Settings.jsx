@@ -17,25 +17,38 @@ export default function Settings() {
   const [savedMsg, setSavedMsg] = useState(false);
 
   useEffect(() => {
-    const saved = localStorage.getItem('milad_system_settings');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        setSettings(prev => ({
-          ...prev,
-          ...parsed,
-          cooldown_target: parsed.cooldown_target || localStorage.getItem('milad_cooldown_target_date') || '2026-08-15T09:00'
-        }));
-      } catch (e) {}
-    }
+    fetch('/api/settings')
+      .then(res => res.json())
+      .then(data => {
+        if (data && typeof data === 'object' && Object.keys(data).length > 0) {
+          setSettings(prev => ({
+            ...prev,
+            ...data,
+            cooldown_target: data.cooldown_target || prev.cooldown_target
+          }));
+          if (data.cooldown_target) {
+            localStorage.setItem('milad_cooldown_target_date', data.cooldown_target);
+          }
+        }
+      })
+      .catch(() => {});
   }, []);
 
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
     localStorage.setItem('milad_system_settings', JSON.stringify(settings));
     if (settings.cooldown_target) {
       localStorage.setItem('milad_cooldown_target_date', settings.cooldown_target);
     }
+
+    try {
+      await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(settings)
+      });
+    } catch (err) {}
+
     setSavedMsg(true);
     setTimeout(() => setSavedMsg(false), 3000);
   };

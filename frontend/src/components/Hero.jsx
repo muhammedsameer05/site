@@ -6,6 +6,19 @@ import { useLanguage } from '../context/LanguageContext';
 export default function Hero({ onNavigate }) {
   const { t } = useLanguage();
   const [timerFinished, setTimerFinished] = useState(false);
+  const [cooldownTarget, setCooldownTarget] = useState(localStorage.getItem('milad_cooldown_target_date') || '2026-08-24T09:00:00');
+
+  useEffect(() => {
+    fetch('/api/settings')
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.cooldown_target) {
+          setCooldownTarget(data.cooldown_target);
+          localStorage.setItem('milad_cooldown_target_date', data.cooldown_target);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   return (
     <div className="relative overflow-hidden bg-gradient-to-b from-white via-emerald-50/60 to-slate-50 py-12 sm:py-16 border-b border-emerald-100 rounded-3xl my-4 shadow-sm">
@@ -68,7 +81,7 @@ export default function Hero({ onNavigate }) {
               Grand Festival Countdown
             </div>
             <CountdownTimer 
-              targetDate={localStorage.getItem('milad_cooldown_target_date') || '2026-08-15T09:00:00'} 
+              targetDate={cooldownTarget} 
               onFinish={() => setTimerFinished(true)}
             />
           </div>

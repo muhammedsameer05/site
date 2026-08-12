@@ -1444,6 +1444,38 @@ router.delete('/gallery/:id', async (req, res) => {
 });
 
 // -------------------------------------------------------------
+// SYSTEM SETTINGS & COOLDOWN TARGET ENGINE
+// -------------------------------------------------------------
+router.get('/settings', async (req, res) => {
+  try {
+    const rows = await all('SELECT * FROM settings');
+    const settingsObj = {};
+    for (const r of rows) {
+      settingsObj[r.key_name] = r.value;
+    }
+    res.json(settingsObj);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.post('/settings', async (req, res) => {
+  try {
+    const settingsData = req.body || {};
+    for (const [key, val] of Object.entries(settingsData)) {
+      await run(`
+        INSERT OR REPLACE INTO settings (key_name, value)
+        VALUES (?, ?)
+      `, [key, String(val)]);
+    }
+    triggerPersistenceSync();
+    res.json({ success: true, message: 'Settings saved successfully' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// -------------------------------------------------------------
 // ARCHIVE MANAGEMENT & AUDIT LOGS
 // -------------------------------------------------------------
 router.get('/archive/all', authenticate, requireAdmin, async (req, res) => {

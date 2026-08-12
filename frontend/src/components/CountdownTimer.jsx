@@ -1,11 +1,57 @@
-import React, { useState, useEffect } from 'react';
+function parseTargetDate(dateStr) {
+  if (!dateStr) return new Date('2026-08-24T09:00:00').getTime();
+  
+  let cleanStr = String(dateStr).trim();
+  
+  // Standard ISO parser
+  let timestamp = Date.parse(cleanStr);
+  if (!isNaN(timestamp)) return timestamp;
+
+  // Replace space with T if formatted like '2026-08-24 09:00'
+  if (cleanStr.includes(' ')) {
+    let isoFormatted = cleanStr.replace(' ', 'T');
+    timestamp = Date.parse(isoFormatted);
+    if (!isNaN(timestamp)) return timestamp;
+  }
+
+  // Regex parse for DD-MM-YYYY or YYYY-MM-DD
+  const parts = cleanStr.match(/^(\d{1,4})[-/](\d{1,2})[-/](\d{1,4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(AM|PM)?)?$/i);
+  if (parts) {
+    let num1 = parseInt(parts[1], 10);
+    let num2 = parseInt(parts[2], 10);
+    let num3 = parseInt(parts[3], 10);
+    
+    let year, month, day;
+    if (num1 > 1000) { // YYYY-MM-DD
+      year = num1;
+      month = num2 - 1;
+      day = num3;
+    } else { // DD-MM-YYYY
+      day = num1;
+      month = num2 - 1;
+      year = num3;
+    }
+
+    let hours = parts[4] ? parseInt(parts[4], 10) : 9;
+    let minutes = parts[5] ? parseInt(parts[5], 10) : 0;
+    let seconds = parts[6] ? parseInt(parts[6], 10) : 0;
+    let ampm = parts[7] ? parts[7].toUpperCase() : null;
+
+    if (ampm === 'PM' && hours < 12) hours += 12;
+    if (ampm === 'AM' && hours === 12) hours = 0;
+
+    return new Date(year, month, day, hours, minutes, seconds).getTime();
+  }
+
+  return new Date('2026-08-24T09:00:00').getTime();
+}
 
 export default function CountdownTimer({ targetDate, onFinish }) {
   const [timeLeft, setTimeLeft] = useState(null);
   const [isFinished, setIsFinished] = useState(false);
 
   useEffect(() => {
-    const target = new Date(targetDate || '2026-08-15T09:00:00').getTime();
+    const target = parseTargetDate(targetDate);
 
     const calculate = () => {
       const now = new Date().getTime();
