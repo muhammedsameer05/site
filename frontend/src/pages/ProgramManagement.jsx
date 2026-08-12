@@ -710,16 +710,16 @@ export default function ProgramManagement() {
       {/* Create / Edit Program Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-900/60 backdrop-blur-md animate-fade-in">
-          <div className="relative w-full max-w-3xl bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[85vh] sm:max-h-[88vh] text-slate-900 animate-scale-up">
+          <div className="relative w-full max-w-3xl bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[90vh] text-slate-900 animate-scale-up">
             
             {/* Header Banner matching screenshot theme */}
-            <div className="bg-gradient-to-r from-emerald-600 to-teal-700 p-6 text-white flex items-center justify-between shrink-0">
+            <div className="bg-gradient-to-r from-emerald-600 to-teal-700 p-5 sm:p-6 text-white flex items-center justify-between shrink-0">
               <div className="flex items-center space-x-3">
                 <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center font-black text-xl border border-white/30">
                   <Calendar className="w-6 h-6 text-amber-300" />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-black text-white">
+                  <h2 className="text-xl sm:text-2xl font-black text-white">
                     {formData.id ? 'Edit Program Item' : 'Create New Program'}
                   </h2>
                   <p className="text-xs font-mono font-bold text-emerald-100">
@@ -738,7 +738,7 @@ export default function ProgramManagement() {
             </div>
 
             <form onSubmit={handleSaveProgram} className="flex flex-col flex-1 overflow-hidden">
-              <div className="p-6 sm:p-8 space-y-5 text-xs font-semibold text-slate-700 overflow-y-auto flex-1">
+              <div className="p-5 sm:p-6 space-y-4 text-xs font-semibold text-slate-700 overflow-y-auto flex-1">
                 
                 <div>
                   <label className="block mb-1 text-slate-900 font-bold">Program Code</label>

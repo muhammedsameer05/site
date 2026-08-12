@@ -242,6 +242,22 @@ async function initDb() {
       FOREIGN KEY (venue_id) REFERENCES venues(id)
     )`);
 
+    // Ensure is_archived and other columns exist on pre-existing SQLite/Postgres programs table
+    const programCols = [
+      "is_archived INTEGER DEFAULT 0",
+      "archived_at DATETIME",
+      "archived_by TEXT",
+      "duration_minutes INTEGER DEFAULT 10",
+      "age_group TEXT DEFAULT 'Sub Junior'",
+      "type TEXT DEFAULT 'individual'",
+      "status TEXT DEFAULT 'pending'"
+    ];
+    for (const colDef of programCols) {
+      try {
+        await run(`ALTER TABLE programs ADD COLUMN ${colDef}`);
+      } catch (e) {}
+    }
+
     await run(`CREATE TABLE IF NOT EXISTS program_judges (
       program_id INTEGER NOT NULL,
       judge_id INTEGER NOT NULL,

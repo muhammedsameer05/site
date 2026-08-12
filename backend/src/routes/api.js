@@ -854,6 +854,17 @@ router.post('/programs', authenticate, requireAdmin, async (req, res) => {
     if (!code || !code.trim()) {
       code = `PRG-${Math.floor(100 + Math.random() * 900)}`;
     }
+
+    try {
+      await run(`ALTER TABLE programs ADD COLUMN is_archived INTEGER DEFAULT 0`);
+    } catch (e) {}
+    try {
+      await run(`ALTER TABLE programs ADD COLUMN archived_at DATETIME`);
+    } catch (e) {}
+    try {
+      await run(`ALTER TABLE programs ADD COLUMN archived_by TEXT`);
+    } catch (e) {}
+
     const result = await run(`
       INSERT INTO programs (code, name, category_id, age_group, type, venue_id, program_date, start_time, end_time, max_participants, status, is_archived)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
@@ -909,6 +920,16 @@ router.put('/programs/:id', authenticate, requireAdmin, async (req, res) => {
 router.put('/programs/:id/archive', authenticate, requireAdmin, async (req, res) => {
   try {
     const targetId = req.params.id;
+    try {
+      await run(`ALTER TABLE programs ADD COLUMN is_archived INTEGER DEFAULT 0`);
+    } catch (e) {}
+    try {
+      await run(`ALTER TABLE programs ADD COLUMN archived_at DATETIME`);
+    } catch (e) {}
+    try {
+      await run(`ALTER TABLE programs ADD COLUMN archived_by TEXT`);
+    } catch (e) {}
+
     await run(`
       UPDATE programs 
       SET is_archived = 1, archived_at = CURRENT_TIMESTAMP, archived_by = ? 
