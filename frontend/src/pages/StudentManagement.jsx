@@ -435,8 +435,16 @@ export default function StudentManagement() {
                         const rawProgCat = (prog.category_name || prog.age_group || '').toLowerCase().trim();
                         const progCat = (rawProgCat === 'kids' || rawProgCat === 'kiddies') ? 'kiddies' : rawProgCat;
 
-                        if (!progCat) return true;
-                        return progCat === normStudentCat;
+                        if (progCat && progCat !== normStudentCat) return false;
+
+                        // Filter by Gender: Male students cannot enroll in Female programs and vice versa
+                        const stuGender = (formData.gender || 'male').toLowerCase().trim();
+                        const progGender = (prog.gender_category || 'Male').toLowerCase().trim();
+
+                        if (progGender === 'male' && stuGender !== 'male') return false;
+                        if (progGender === 'female' && stuGender !== 'female') return false;
+
+                        return true;
                       });
 
                       if (categoryPrograms.length === 0) {

@@ -250,7 +250,8 @@ async function initDb() {
       "duration_minutes INTEGER DEFAULT 10",
       "age_group TEXT DEFAULT 'Sub Junior'",
       "type TEXT DEFAULT 'individual'",
-      "status TEXT DEFAULT 'pending'"
+      "status TEXT DEFAULT 'pending'",
+      "gender_category TEXT DEFAULT 'Male'"
     ];
     for (const colDef of programCols) {
       try {

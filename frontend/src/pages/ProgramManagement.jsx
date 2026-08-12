@@ -32,6 +32,7 @@ export default function ProgramManagement() {
     name: '',
     category_id: 1,
     type: 'individual',
+    gender_category: 'Male',
     venue_id: 1,
     program_date: '2026-08-15',
     start_time: '09:00',
@@ -341,6 +342,15 @@ export default function ProgramManagement() {
       baseList = allStudentsList;
     }
 
+    // Filter by gender if specified (Male vs Female)
+    const progGender = (targetProgramForWinners?.gender_category || 'Male').toLowerCase().trim();
+    if (progGender === 'male' || progGender === 'female') {
+      baseList = baseList.filter(s => {
+        const sGen = (s.gender || 'male').toLowerCase().trim();
+        return sGen === progGender || sGen === 'general';
+      });
+    }
+
     if (!q) return baseList;
 
     return baseList.filter(st => (
@@ -377,6 +387,7 @@ export default function ProgramManagement() {
                 name: '',
                 category_id: 1,
                 type: 'individual',
+                gender_category: 'Male',
                 venue_id: 1,
                 program_date: '2026-08-15',
                 start_time: '09:00',
@@ -409,7 +420,7 @@ export default function ProgramManagement() {
                       </span>
                     )}
                     <span className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-100 text-emerald-900 border border-emerald-300">
-                      {p.category_name || 'Category'} • {p.type || 'individual'}
+                      {p.category_name || 'Category'} • {p.type || 'individual'} • {p.gender_category === 'Female' ? '👧 Female' : p.gender_category === 'General' ? '👫 General' : '👦 Male'}
                     </span>
                   </div>
 
@@ -423,6 +434,7 @@ export default function ProgramManagement() {
                             name: p.name,
                             category_id: p.category_id || 1,
                             type: p.type || 'individual',
+                            gender_category: p.gender_category || 'Male',
                             venue_id: p.venue_id || 1,
                             program_date: p.program_date || '2026-08-15',
                             start_time: p.start_time || '09:00',
@@ -832,7 +844,7 @@ export default function ProgramManagement() {
                   />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <label className="block mb-1 text-slate-900 font-bold">Category</label>
                     <select 
@@ -857,6 +869,19 @@ export default function ProgramManagement() {
                     >
                       <option value="individual">Individual</option>
                       <option value="group">Group / Team</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block mb-1 text-slate-900 font-bold">Gender Category</label>
+                    <select 
+                      value={formData.gender_category || 'Male'}
+                      onChange={e => setFormData({ ...formData, gender_category: e.target.value })}
+                      className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-slate-900 font-bold focus:border-emerald-500 focus:outline-none"
+                    >
+                      <option value="Male">👦 Male Only (ആൺകുട്ടികൾ)</option>
+                      <option value="Female">👧 Female Only (പെൺകുട്ടികൾ)</option>
+                      <option value="General">👫 General / Both (പൊതുവായത്)</option>
                     </select>
                   </div>
                 </div>

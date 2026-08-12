@@ -75,9 +75,9 @@ async function restoreFromDatabaseSnapshot(dbHelpers) {
         console.log(`[PERSISTENCE] Restoring ${snapshot.programs.length} production programs from snapshot...`);
         for (const p of snapshot.programs) {
           await run(`
-            INSERT OR REPLACE INTO programs (id, code, name, category_id, age_group, type, venue_id, program_date, start_time, end_time, max_participants, status, duration_minutes, is_archived, archived_at, archived_by, created_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-          `, [p.id, p.code, p.name, p.category_id, p.age_group, p.type, p.venue_id, p.program_date, p.start_time, p.end_time, p.max_participants, p.status, p.duration_minutes, p.is_archived || 0, p.archived_at, p.archived_by, p.created_at]);
+            INSERT OR REPLACE INTO programs (id, code, name, category_id, age_group, type, gender_category, venue_id, program_date, start_time, end_time, max_participants, status, duration_minutes, is_archived, archived_at, archived_by, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          `, [p.id, p.code, p.name, p.category_id, p.age_group, p.type, p.gender_category || 'Male', p.venue_id, p.program_date, p.start_time, p.end_time, p.max_participants, p.status, p.duration_minutes, p.is_archived || 0, p.archived_at, p.archived_by, p.created_at]);
         }
       }
     }
