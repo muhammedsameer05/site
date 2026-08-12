@@ -3,6 +3,21 @@ import { Calendar, Plus, Users, Clock, Edit, Trash2, Award, Trophy, CheckCircle,
 
 import { useAuth } from '../context/AuthContext';
 
+const DEFAULT_CATEGORIES = [
+  { id: 1, name: 'Kiddies' },
+  { id: 2, name: 'Sub Junior' },
+  { id: 3, name: 'Junior' },
+  { id: 4, name: 'Senior' },
+  { id: 5, name: 'Super Senior' }
+];
+
+const DEFAULT_VENUES = [
+  { id: 1, name: 'Main Stage (Auditorium)' },
+  { id: 2, name: 'Stage 2 (Seminar Hall)' },
+  { id: 3, name: 'Stage 3 (Open Ground)' },
+  { id: 4, name: 'Classroom A' }
+];
+
 export default function ProgramManagement() {
   const { user, token } = useAuth();
   const role = user?.role || 'public';
@@ -758,7 +773,7 @@ export default function ProgramManagement() {
                       onChange={e => setFormData({ ...formData, category_id: e.target.value })}
                       className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-slate-900 font-bold focus:border-emerald-500 focus:outline-none"
                     >
-                      {categoriesList.map(c => (
+                      {(categories.length > 0 ? categories : DEFAULT_CATEGORIES).map(c => (
                         <option key={c.id} value={c.id}>{c.name}</option>
                       ))}
                     </select>
@@ -771,7 +786,7 @@ export default function ProgramManagement() {
                       onChange={e => setFormData({ ...formData, venue_id: e.target.value })}
                       className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-slate-900 font-bold focus:border-emerald-500 focus:outline-none"
                     >
-                      {venuesList.map(v => (
+                      {DEFAULT_VENUES.map(v => (
                         <option key={v.id} value={v.id}>{v.name}</option>
                       ))}
                     </select>
