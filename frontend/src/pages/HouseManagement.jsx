@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, Plus, Edit, Award, Trophy, Users, CheckCircle } from 'lucide-react';
+import { Shield, Plus, Edit, Award, Trophy, Users, CheckCircle, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import HouseBreakdownModal from '../components/HouseBreakdownModal';
 

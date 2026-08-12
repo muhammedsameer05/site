@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BookOpen, Clock, AlertTriangle, Bell, Plus, Send, X, CheckCircle } from 'lucide-react';
+import { BookOpen, Clock, AlertTriangle, Bell, Plus, Send, X, CheckCircle, Megaphone } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export default function NoticeBoard() {

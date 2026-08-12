@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  User, Plus, Search, Award, Edit, Trash2, CheckCircle, Save, X
+  User, UserCheck, Plus, Search, Award, Edit, Trash2, CheckCircle, Save, X
 } from 'lucide-react';
 import QRCodeModal from '../components/QRCodeModal';
 import { useAuth } from '../context/AuthContext';
