@@ -386,7 +386,7 @@ export default function StudentManagement() {
                   </div>
                 </div>
 
-                {/* Row 3: Class & Parent Contact */}
+                {/* Row 3: Class & Gender */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-slate-700 font-bold mb-1.5">Class / Standard</label>
@@ -400,14 +400,15 @@ export default function StudentManagement() {
                   </div>
 
                   <div>
-                    <label className="block text-slate-700 font-bold mb-1.5">Parent Contact Number</label>
-                    <input
-                      type="text"
-                      value={formData.parent_phone}
-                      onChange={e => setFormData({ ...formData, parent_phone: e.target.value })}
-                      placeholder="+91 98765 43210"
+                    <label className="block text-slate-700 font-bold mb-1.5">Gender (Male / Female)</label>
+                    <select
+                      value={formData.gender || 'male'}
+                      onChange={e => setFormData({ ...formData, gender: e.target.value })}
                       className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-slate-900 font-bold focus:border-emerald-500 focus:outline-none"
-                    />
+                    >
+                      <option value="male">Male (ആൺകുട്ടി)</option>
+                      <option value="female">Female (പെൺകുട്ടി)</option>
+                    </select>
                   </div>
                 </div>
 
