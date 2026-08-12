@@ -278,6 +278,9 @@ async function initDb() {
   const persistence = require('./persistence');
   await persistence.restoreFromDatabaseSnapshot({ run, get, all });
 
+  // Instantly sync live SQLite database state back to disk snapshot
+  await persistence.syncDatabaseSnapshot({ run, get, all });
+
   console.log('[DB] Database initialized safely with strict data persistence! Archiving & Audit Logs ready.');
 }
 
