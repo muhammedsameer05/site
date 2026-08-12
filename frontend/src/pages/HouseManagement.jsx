@@ -204,75 +204,77 @@ export default function HouseManagement() {
 
       {/* Edit / Create House Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-md p-4 sm:p-6 overflow-y-auto">
-          <div className="glass-panel w-full max-w-3xl rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-2xl bg-white text-slate-900 my-auto">
-            <h3 className="text-lg font-extrabold emerald-gradient-text mb-4">
-              {editingHouseId ? 'Edit House Details' : 'Create New House'}
-            </h3>
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-md p-4 sm:p-6">
+          <div className="flex min-h-full items-center justify-center p-2 text-center sm:p-4">
+            <div className="relative transform rounded-3xl bg-white text-left shadow-2xl transition-all w-full max-w-3xl p-6 sm:p-8 my-auto border border-slate-200 text-slate-900 animate-fade-in-up">
+              <h3 className="text-xl font-black emerald-gradient-text mb-4">
+                {editingHouseId ? 'Edit House Details' : 'Create New House'}
+              </h3>
 
-            <form onSubmit={handleSave} className="space-y-4 text-xs font-semibold">
-              <div>
-                <label className="block text-slate-700 font-bold mb-1">House Name (Editable)</label>
-                <input
-                  type="text"
-                  required
-                  value={formData.name}
-                  onChange={e => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="e.g. Abu Bakr House / Green House"
-                  className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-slate-900 font-bold text-sm focus:outline-none focus:border-emerald-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-slate-700 font-bold mb-1">House Theme Color</label>
-                <div className="flex items-center space-x-3">
+              <form onSubmit={handleSave} className="space-y-4 text-xs font-semibold">
+                <div>
+                  <label className="block text-slate-700 font-bold mb-1">House Name (Editable)</label>
                   <input
-                    type="color"
-                    value={formData.color_hex}
-                    onChange={e => setFormData({ ...formData, color_hex: e.target.value })}
-                    className="w-12 h-10 bg-slate-50 border border-slate-300 rounded-xl p-1 cursor-pointer"
+                    type="text"
+                    required
+                    value={formData.name}
+                    onChange={e => setFormData({ ...formData, name: e.target.value })}
+                    placeholder="e.g. Abu Bakr House / Green House"
+                    className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-slate-900 font-bold text-sm focus:outline-none focus:border-emerald-500"
                   />
-                  <span className="font-mono text-slate-700 font-bold">{formData.color_hex}</span>
                 </div>
-              </div>
 
-              <div>
-                <label className="block text-slate-700 font-bold mb-1">House Motto</label>
-                <input
-                  type="text"
-                  value={formData.motto}
-                  onChange={e => setFormData({ ...formData, motto: e.target.value })}
-                  placeholder="Knowledge, Faith, and Virtue"
-                  className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-slate-900 focus:border-emerald-500"
-                />
-              </div>
+                <div>
+                  <label className="block text-slate-700 font-bold mb-1">House Theme Color</label>
+                  <div className="flex items-center space-x-3">
+                    <input
+                      type="color"
+                      value={formData.color_hex}
+                      onChange={e => setFormData({ ...formData, color_hex: e.target.value })}
+                      className="w-12 h-10 bg-slate-50 border border-slate-300 rounded-xl p-1 cursor-pointer"
+                    />
+                    <span className="font-mono text-slate-700 font-bold">{formData.color_hex}</span>
+                  </div>
+                </div>
 
-              <div>
-                <label className="block text-slate-700 font-bold mb-1">House Captain Name</label>
-                <input
-                  type="text"
-                  value={formData.captain_name}
-                  onChange={e => setFormData({ ...formData, captain_name: e.target.value })}
-                  className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-slate-900 focus:border-emerald-500"
-                />
-              </div>
+                <div>
+                  <label className="block text-slate-700 font-bold mb-1">House Motto</label>
+                  <input
+                    type="text"
+                    value={formData.motto}
+                    onChange={e => setFormData({ ...formData, motto: e.target.value })}
+                    placeholder="Knowledge, Faith, and Virtue"
+                    className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-slate-900 focus:border-emerald-500"
+                  />
+                </div>
 
-              <div className="flex justify-end space-x-3 pt-4 border-t border-slate-200">
-                <button
-                  type="button"
-                  onClick={() => setShowModal(false)}
-                  className="px-4 py-2.5 rounded-xl bg-slate-100 text-slate-700 font-bold border border-slate-200"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold shadow-md transition"
-                >
-                  Save House Changes
-                </button>
-              </div>
-            </form>
+                <div>
+                  <label className="block text-slate-700 font-bold mb-1">House Captain Name</label>
+                  <input
+                    type="text"
+                    value={formData.captain_name}
+                    onChange={e => setFormData({ ...formData, captain_name: e.target.value })}
+                    className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-slate-900 focus:border-emerald-500"
+                  />
+                </div>
+
+                <div className="flex justify-end space-x-3 pt-4 border-t border-slate-200">
+                  <button
+                    type="button"
+                    onClick={() => setShowModal(false)}
+                    className="px-4 py-2.5 rounded-xl bg-slate-100 text-slate-700 font-bold border border-slate-200"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold shadow-md transition"
+                  >
+                    Save House Changes
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
       )}

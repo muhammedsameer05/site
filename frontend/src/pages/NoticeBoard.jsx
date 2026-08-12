@@ -139,62 +139,76 @@ export default function NoticeBoard() {
 
       {/* Post Announcement Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-md p-4 sm:p-6 overflow-y-auto">
-          <div className="glass-panel w-full max-w-3xl rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-2xl relative bg-white text-slate-900 my-auto">
-            <button
-              onClick={() => setShowModal(false)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-slate-700 p-1"
-            >
-              <X className="w-5 h-5" />
-            </button>
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-md p-4 sm:p-6">
+          <div className="flex min-h-full items-center justify-center p-2 text-center sm:p-4">
+            <div className="relative transform rounded-3xl bg-white text-left shadow-2xl transition-all w-full max-w-3xl p-6 sm:p-8 my-auto border border-slate-200 text-slate-900 animate-fade-in-up">
+              <button
+                onClick={() => setShowModal(false)}
+                className="absolute top-4 right-4 text-slate-400 hover:text-slate-700 p-1"
+              >
+                <X className="w-5 h-5" />
+              </button>
 
-            <h3 className="text-lg font-bold emerald-gradient-text mb-4 text-center">
-              Post Official Announcement
-            </h3>
+              <h3 className="text-lg font-bold emerald-gradient-text mb-4 text-center">
+                Post Official Announcement
+              </h3>
 
-            <form onSubmit={handleCreateNotice} className="space-y-4 text-xs font-bold">
-              <div>
-                <label className="block text-slate-700 mb-1">Announcement Title</label>
-                <input
-                  type="text"
-                  required
-                  value={formData.title}
-                  onChange={e => setFormData({ ...formData, title: e.target.value })}
-                  placeholder="Title of announcement..."
-                  className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-slate-900 focus:border-emerald-500 focus:outline-none"
-                />
-              </div>
+              <form onSubmit={handleCreateNotice} className="space-y-4 text-xs font-bold">
+                <div>
+                  <label className="block text-slate-700 mb-1">Announcement Title</label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.title}
+                    onChange={e => setFormData({ ...formData, title: e.target.value })}
+                    placeholder="e.g. Schedule Change for Stage 1"
+                    className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-slate-900 focus:border-emerald-500 focus:outline-none"
+                  />
+                </div>
 
-              <div>
-                <label className="block text-slate-700 mb-1">Announcement Content</label>
-                <textarea
-                  required
-                  rows={4}
-                  value={formData.content}
-                  onChange={e => setFormData({ ...formData, content: e.target.value })}
-                  placeholder="Enter detailed notice content..."
-                  className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-slate-900 focus:border-emerald-500 focus:outline-none"
-                />
-              </div>
+                <div>
+                  <label className="block text-slate-700 mb-1">Priority Level</label>
+                  <select
+                    value={formData.priority}
+                    onChange={e => setFormData({ ...formData, priority: e.target.value })}
+                    className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-slate-900 focus:border-emerald-500 focus:outline-none"
+                  >
+                    <option value="normal">Normal Priority</option>
+                    <option value="high">High Priority / Urgent</option>
+                  </select>
+                </div>
 
-              <div className="flex justify-end space-x-2 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setShowModal(false)}
-                  className="px-4 py-2 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 hover:bg-slate-200 font-bold transition"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="px-6 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold shadow transition flex items-center space-x-1.5 disabled:opacity-50"
-                >
-                  <Send className="w-3.5 h-3.5" />
-                  <span>{submitting ? 'Publishing...' : 'Publish Notice'}</span>
-                </button>
-              </div>
-            </form>
+                <div>
+                  <label className="block text-slate-700 mb-1">Content / Message Body</label>
+                  <textarea
+                    rows="4"
+                    required
+                    value={formData.content}
+                    onChange={e => setFormData({ ...formData, content: e.target.value })}
+                    placeholder="Type detailed announcement message..."
+                    className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-slate-900 focus:border-emerald-500 focus:outline-none"
+                  />
+                </div>
+
+                <div className="flex justify-end space-x-3 pt-3 border-t border-slate-200">
+                  <button
+                    type="button"
+                    onClick={() => setShowModal(false)}
+                    className="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 font-bold border border-slate-200 transition"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    className="px-6 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold shadow transition flex items-center space-x-1.5 disabled:opacity-50"
+                  >
+                    <Send className="w-3.5 h-3.5" />
+                    <span>{submitting ? 'Publishing...' : 'Publish Notice'}</span>
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
       )}

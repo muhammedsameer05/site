@@ -251,8 +251,9 @@ export default function Gallery() {
 
       {/* Edit Image Modal */}
       {showEditModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-md p-4 sm:p-6 overflow-y-auto">
-          <div className="glass-panel w-full max-w-3xl rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-2xl bg-white text-slate-900 my-auto space-y-4 animate-fade-in-up">
+        <div className="fixed inset-0 z-[100] overflow-y-auto bg-slate-900/60 backdrop-blur-md p-4 sm:p-6">
+          <div className="flex min-h-full items-center justify-center p-2 text-center sm:p-4">
+            <div className="relative transform rounded-3xl bg-white text-left shadow-2xl transition-all w-full max-w-3xl p-6 sm:p-8 my-auto border border-slate-200 text-slate-900 space-y-4 animate-fade-in-up">
             <div className="flex items-center justify-between border-b border-slate-200 pb-3">
               <h3 className="text-base font-extrabold emerald-gradient-text flex items-center space-x-2">
                 <Edit className="w-5 h-5 text-emerald-600" />
@@ -325,12 +326,14 @@ export default function Gallery() {
             </form>
           </div>
         </div>
+      </div>
       )}
 
       {/* Admin Upload Modal */}
       {showUploadModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-md p-4 sm:p-6 overflow-y-auto">
-          <div className="glass-panel w-full max-w-3xl rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-2xl bg-white text-slate-900 my-auto space-y-4 animate-fade-in-up">
+        <div className="fixed inset-0 z-[100] overflow-y-auto bg-slate-900/60 backdrop-blur-md p-4 sm:p-6">
+          <div className="flex min-h-full items-center justify-center p-2 text-center sm:p-4">
+            <div className="relative transform rounded-3xl bg-white text-left shadow-2xl transition-all w-full max-w-3xl p-6 sm:p-8 my-auto border border-slate-200 text-slate-900 space-y-4 animate-fade-in-up">
             <div className="flex items-center justify-between border-b border-slate-200 pb-3 mb-4">
               <h3 className="text-base font-extrabold emerald-gradient-text flex items-center space-x-2">
                 <ImageIcon className="w-5 h-5 text-emerald-600" />
@@ -404,6 +407,7 @@ export default function Gallery() {
             </form>
           </div>
         </div>
+      </div>
       )}
 
       {/* Lightbox Preview Modal */}

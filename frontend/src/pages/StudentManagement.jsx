@@ -300,193 +300,195 @@ export default function StudentManagement() {
 
       {/* Edit / Add Student Modal matching user screenshot */}
       {showForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-md p-4 sm:p-6 overflow-y-auto">
-          <div className="glass-panel w-full max-w-4xl rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-2xl bg-white text-slate-900 my-auto">
-            {/* Modal Header */}
-            <div className="flex items-center justify-between border-b border-slate-200 pb-4 mb-6">
-              <h3 className="text-xl font-black text-slate-900 flex items-center space-x-2">
-                <span>{formData.id ? `Edit Student Profile (#${formData.admission_no || formData.id})` : 'Add New Student Profile'}</span>
-              </h3>
-              <button 
-                type="button" 
-                onClick={() => setShowForm(false)}
-                className="text-slate-400 hover:text-slate-700 p-1.5 rounded-xl hover:bg-slate-100 transition"
-              >
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-
-            <form onSubmit={handleSave} className="space-y-5 text-xs">
-              {/* Row 1: Chest No & Student Name */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-slate-700 font-bold mb-1.5">Chest Number (Chest No)</label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.admission_no}
-                    onChange={e => setFormData({ ...formData, admission_no: e.target.value })}
-                    placeholder="101"
-                    className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-emerald-700 font-bold font-mono text-sm focus:border-emerald-500 focus:outline-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-slate-700 font-bold mb-1.5">Student's Name (Student Name)</label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.name}
-                    onChange={e => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="e.g. മുഹമ്മദ് അൻഷിദ് or Muhammed Anshid"
-                    className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-slate-900 font-bold text-sm focus:border-emerald-500 focus:outline-none"
-                  />
-                </div>
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-md p-4 sm:p-6">
+          <div className="flex min-h-full items-center justify-center p-2 text-center sm:p-4">
+            <div className="relative transform rounded-3xl bg-white text-left shadow-2xl transition-all w-full max-w-4xl p-6 sm:p-8 my-auto border border-slate-200 text-slate-900 animate-fade-in-up">
+              {/* Modal Header */}
+              <div className="flex items-center justify-between border-b border-slate-200 pb-4 mb-6">
+                <h3 className="text-xl font-black text-slate-900 flex items-center space-x-2">
+                  <span>{formData.id ? `Edit Student Profile (#${formData.admission_no || formData.id})` : 'Add New Student Profile'}</span>
+                </h3>
+                <button 
+                  type="button" 
+                  onClick={() => setShowForm(false)}
+                  className="text-slate-400 hover:text-slate-700 p-1.5 rounded-xl hover:bg-slate-100 transition"
+                >
+                  <X className="w-6 h-6" />
+                </button>
               </div>
 
-              {/* Row 2: Gender, Category, Class & House */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <form onSubmit={handleSave} className="space-y-5 text-xs">
+                {/* Row 1: Chest No & Student Name */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-slate-700 font-bold mb-1.5">Chest Number (Chest No)</label>
+                    <input
+                      type="text"
+                      required
+                      value={formData.admission_no}
+                      onChange={e => setFormData({ ...formData, admission_no: e.target.value })}
+                      placeholder="101"
+                      className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-emerald-700 font-bold font-mono text-sm focus:border-emerald-500 focus:outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-slate-700 font-bold mb-1.5">Student's Name (Student Name)</label>
+                    <input
+                      type="text"
+                      required
+                      value={formData.name}
+                      onChange={e => setFormData({ ...formData, name: e.target.value })}
+                      placeholder="e.g. മുഹമ്മദ് അൻഷിദ് or Muhammed Anshid"
+                      className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-slate-900 font-bold text-sm focus:border-emerald-500 focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                {/* Row 2: Gender, Category, Class & House */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div>
+                    <label className="block text-slate-700 font-bold mb-1.5">Gender</label>
+                    <select
+                      value={formData.gender || 'male'}
+                      onChange={e => setFormData({ ...formData, gender: e.target.value })}
+                      className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-slate-900 font-bold focus:border-emerald-500 focus:outline-none"
+                    >
+                      <option value="male">Male (ആൺകുട്ടി)</option>
+                      <option value="female">Female (പെൺകുട്ടി)</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-slate-700 font-bold mb-1.5">Category</label>
+                    <select
+                      value={formData.category_name}
+                      onChange={e => setFormData({ ...formData, category_name: e.target.value })}
+                      className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-slate-900 font-bold focus:border-emerald-500 focus:outline-none"
+                    >
+                      {categories.map((cat, idx) => (
+                        <option key={idx} value={cat}>{cat}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-slate-700 font-bold mb-1.5">Class</label>
+                    <input
+                      type="text"
+                      required
+                      value={formData.class_name}
+                      onChange={e => setFormData({ ...formData, class_name: e.target.value })}
+                      placeholder="Class 6"
+                      className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-slate-900 font-bold focus:border-emerald-500 focus:outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-slate-700 font-bold mb-1.5">House</label>
+                    <select
+                      value={formData.house_id}
+                      onChange={e => setFormData({ ...formData, house_id: e.target.value })}
+                      className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-slate-900 font-bold focus:border-emerald-500 focus:outline-none"
+                    >
+                      {houses.map(h => (
+                        <option key={h.id} value={h.id}>{h.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {/* Contest Items Participating (Registered Items) */}
                 <div>
-                  <label className="block text-slate-700 font-bold mb-1.5">Gender</label>
-                  <select
-                    value={formData.gender || 'male'}
-                    onChange={e => setFormData({ ...formData, gender: e.target.value })}
-                    className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-slate-900 font-bold focus:border-emerald-500 focus:outline-none"
-                  >
-                    <option value="male">Male (ആൺകുട്ടി)</option>
-                    <option value="female">Female (പെൺകുട്ടി)</option>
-                  </select>
-                </div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="block text-slate-800 font-extrabold text-xs uppercase tracking-wider">
+                      Contest Items Participating (Registered Items)
+                    </label>
+                    <span className="text-[11px] font-bold text-amber-700 font-mono">
+                      Category: {formData.category_name || 'Sub Junior'}
+                    </span>
+                  </div>
 
-                <div>
-                  <label className="block text-slate-700 font-bold mb-1.5">Category</label>
-                  <select
-                    value={formData.category_name}
-                    onChange={e => setFormData({ ...formData, category_name: e.target.value })}
-                    className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-slate-900 font-bold focus:border-emerald-500 focus:outline-none"
-                  >
-                    {categories.map((cat, idx) => (
-                      <option key={idx} value={cat}>{cat}</option>
-                    ))}
-                  </select>
-                </div>
+                  <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3 max-h-56 overflow-y-auto">
+                    {(() => {
+                      const studentCat = (formData.category_name || 'Sub Junior').toLowerCase().trim();
+                      const displayedPrograms = allPrograms.filter(prog => {
+                        const progCat = (prog.category_name || prog.age_group || '').toLowerCase().trim();
+                        const isChecked = registeredProgramIds.includes(prog.id);
+                        return isChecked || progCat === studentCat;
+                      });
 
-                <div>
-                  <label className="block text-slate-700 font-bold mb-1.5">Class</label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.class_name}
-                    onChange={e => setFormData({ ...formData, class_name: e.target.value })}
-                    placeholder="Class 6"
-                    className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-slate-900 font-bold focus:border-emerald-500 focus:outline-none"
-                  />
-                </div>
+                      if (displayedPrograms.length === 0) {
+                        return (
+                          <div className="text-slate-500 text-center py-6 font-mono text-xs">
+                            <p>No programs available for category <span className="text-amber-700 font-bold">"{formData.category_name || 'Sub Junior'}"</span></p>
+                          </div>
+                        );
+                      }
 
-                <div>
-                  <label className="block text-slate-700 font-bold mb-1.5">House</label>
-                  <select
-                    value={formData.house_id}
-                    onChange={e => setFormData({ ...formData, house_id: e.target.value })}
-                    className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-slate-900 font-bold focus:border-emerald-500 focus:outline-none"
-                  >
-                    {houses.map(h => (
-                      <option key={h.id} value={h.id}>{h.name}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              {/* Contest Items Participating (Registered Items) */}
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <label className="block text-slate-800 font-extrabold text-xs uppercase tracking-wider">
-                    Contest Items Participating (Registered Items)
-                  </label>
-                  <span className="text-[11px] font-bold text-amber-700 font-mono">
-                    Category: {formData.category_name || 'Sub Junior'}
-                  </span>
-                </div>
-
-                <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3 max-h-56 overflow-y-auto">
-                  {(() => {
-                    const studentCat = (formData.category_name || 'Sub Junior').toLowerCase().trim();
-                    const displayedPrograms = allPrograms.filter(prog => {
-                      const progCat = (prog.category_name || prog.age_group || '').toLowerCase().trim();
-                      const isChecked = registeredProgramIds.includes(prog.id);
-                      return isChecked || progCat === studentCat;
-                    });
-
-                    if (displayedPrograms.length === 0) {
                       return (
-                        <div className="text-slate-500 text-center py-6 font-mono text-xs">
-                          <p>No programs available for category <span className="text-amber-700 font-bold">"{formData.category_name || 'Sub Junior'}"</span></p>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                          {displayedPrograms.map(prog => {
+                            const isChecked = registeredProgramIds.includes(prog.id);
+                            return (
+                              <label 
+                                key={prog.id} 
+                                className={`flex items-start space-x-3 p-3 rounded-xl border cursor-pointer transition ${
+                                  isChecked 
+                                    ? 'bg-emerald-50 border-emerald-500 text-emerald-950 font-bold shadow-sm' 
+                                    : 'bg-white border-slate-200 text-slate-700 hover:border-emerald-400'
+                                }`}
+                              >
+                                <input 
+                                  type="checkbox"
+                                  checked={isChecked}
+                                  onChange={() => {
+                                    if (isChecked) {
+                                      setRegisteredProgramIds(prev => prev.filter(id => id !== prog.id));
+                                    } else {
+                                      setRegisteredProgramIds(prev => [...prev, prog.id]);
+                                    }
+                                  }}
+                                  className="mt-0.5 w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 accent-emerald-600"
+                                />
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center justify-between gap-1">
+                                    <p className="font-bold text-xs leading-snug truncate text-slate-900">{prog.name}</p>
+                                    <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-300 whitespace-nowrap">
+                                      {prog.category_name || prog.age_group || formData.category_name}
+                                    </span>
+                                  </div>
+                                  <p className="text-[10px] text-slate-500 font-mono mt-0.5">
+                                    {prog.code || `PRG-${prog.id}`}
+                                  </p>
+                                </div>
+                              </label>
+                            );
+                          })}
                         </div>
                       );
-                    }
-
-                    return (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                        {displayedPrograms.map(prog => {
-                          const isChecked = registeredProgramIds.includes(prog.id);
-                          return (
-                            <label 
-                              key={prog.id} 
-                              className={`flex items-start space-x-3 p-3 rounded-xl border cursor-pointer transition ${
-                                isChecked 
-                                  ? 'bg-emerald-50 border-emerald-500 text-emerald-950 font-bold shadow-sm' 
-                                  : 'bg-white border-slate-200 text-slate-700 hover:border-emerald-400'
-                              }`}
-                            >
-                              <input 
-                                type="checkbox"
-                                checked={isChecked}
-                                onChange={() => {
-                                  if (isChecked) {
-                                    setRegisteredProgramIds(prev => prev.filter(id => id !== prog.id));
-                                  } else {
-                                    setRegisteredProgramIds(prev => [...prev, prog.id]);
-                                  }
-                                }}
-                                className="mt-0.5 w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 accent-emerald-600"
-                              />
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center justify-between gap-1">
-                                  <p className="font-bold text-xs leading-snug truncate text-slate-900">{prog.name}</p>
-                                  <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-300 whitespace-nowrap">
-                                    {prog.category_name || prog.age_group || formData.category_name}
-                                  </span>
-                                </div>
-                                <p className="text-[10px] text-slate-500 font-mono mt-0.5">
-                                  {prog.code || `PRG-${prog.id}`}
-                                </p>
-                              </div>
-                            </label>
-                          );
-                        })}
-                      </div>
-                    );
-                  })()}
+                    })()}
+                  </div>
                 </div>
-              </div>
 
-              {/* Modal Footer */}
-              <div className="flex justify-end space-x-3 pt-4 border-t border-slate-200">
-                <button
-                  type="button"
-                  onClick={() => setShowForm(false)}
-                  className="px-5 py-2.5 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 hover:bg-slate-200 font-bold transition"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-7 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold shadow-md transition"
-                >
-                  Save
-                </button>
-              </div>
-            </form>
+                {/* Modal Footer */}
+                <div className="flex justify-end space-x-3 pt-4 border-t border-slate-200">
+                  <button
+                    type="button"
+                    onClick={() => setShowForm(false)}
+                    className="px-5 py-2.5 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 hover:bg-slate-200 font-bold transition"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-7 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold shadow-md transition"
+                  >
+                    Save
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
       )}
