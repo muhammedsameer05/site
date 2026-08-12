@@ -426,9 +426,17 @@ export default function StudentManagement() {
                   <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3 max-h-44 overflow-y-auto">
                     {(() => {
                       const studentCat = (formData.category_name || 'Sub Junior').toLowerCase().trim();
+                      const normStudentCat = (studentCat === 'kids' || studentCat === 'kiddies') ? 'kiddies' : studentCat;
+
                       const categoryPrograms = allPrograms.filter(prog => {
-                        const progCat = (prog.category_name || prog.age_group || '').toLowerCase().trim();
-                        return !progCat || progCat === studentCat || studentCat.includes(progCat) || progCat.includes(studentCat);
+                        const isChecked = registeredProgramIds.includes(prog.id) || registeredProgramIds.map(String).includes(String(prog.id));
+                        if (isChecked) return true;
+
+                        const rawProgCat = (prog.category_name || prog.age_group || '').toLowerCase().trim();
+                        const progCat = (rawProgCat === 'kids' || rawProgCat === 'kiddies') ? 'kiddies' : rawProgCat;
+
+                        if (!progCat) return true;
+                        return progCat === normStudentCat;
                       });
 
                       if (categoryPrograms.length === 0) {
