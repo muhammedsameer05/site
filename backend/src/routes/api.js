@@ -407,6 +407,19 @@ async function recalculateAllHousePoints() {
     // Reset all houses to 0 points first
     await run("UPDATE houses SET total_points = 0");
 
+    // Automatically purge old orphan results belonging to deleted students or deleted programs
+    try {
+      await run(`
+        DELETE FROM results 
+        WHERE student_id NOT IN (
+          SELECT CAST(id AS TEXT) FROM students 
+          UNION SELECT student_id FROM students 
+          UNION SELECT admission_no FROM students 
+          UNION SELECT LOWER(TRIM(name)) FROM students
+        )
+      `);
+    } catch (e) {}
+
     const allResults = await all(`
       SELECT r.points_awarded, r.prize, r.student_id, s.house_id 
       FROM results r 
@@ -1537,6 +1550,26 @@ router.post('/database/import', authenticate, requireAdmin, async (req, res) => 
     if (!snapshot || typeof snapshot !== 'object') {
       return res.status(400).json({ error: 'Invalid backup JSON file content.' });
     }
+
+    // Purge current database operational tables to perform a clean 100% snapshot restore
+    try {
+      await run('DELETE FROM results');
+      await run('DELETE FROM marks');
+      await run('DELETE FROM program_participants');
+      await run('DELETE FROM certificates');
+      if (Array.isArray(snapshot.students)) {
+        await run('DELETE FROM students');
+      }
+      if (Array.isArray(snapshot.programs)) {
+        await run('DELETE FROM programs');
+      }
+      if (Array.isArray(snapshot.announcements)) {
+        await run('DELETE FROM announcements');
+      }
+      if (Array.isArray(snapshot.gallery)) {
+        await run('DELETE FROM gallery');
+      }
+    } catch (e) {}
 
     // Restore Settings
     if (Array.isArray(snapshot.settings)) {
