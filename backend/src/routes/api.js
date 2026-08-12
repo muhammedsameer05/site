@@ -1584,11 +1584,33 @@ router.post('/database/import', authenticate, requireAdmin, async (req, res) => 
 
     // Restore Marks
     if (Array.isArray(snapshot.marks)) {
+      try {
+        await run("ALTER TABLE marks ADD COLUMN criteria_scores TEXT");
+      } catch (e) {}
+      try {
+        await run("ALTER TABLE marks ADD COLUMN total_score REAL DEFAULT 0");
+      } catch (e) {}
+      try {
+        await run("ALTER TABLE marks ADD COLUMN remarks TEXT");
+      } catch (e) {}
+      try {
+        await run("ALTER TABLE marks ADD COLUMN updated_at DATETIME");
+      } catch (e) {}
+
       for (const m of snapshot.marks) {
-        await run(`
-          INSERT OR REPLACE INTO marks (id, program_id, student_id, judge_id, criteria_scores, total_score, remarks, updated_at)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        `, [m.id, m.program_id, m.student_id, m.judge_id || 1, typeof m.criteria_scores === 'object' ? JSON.stringify(m.criteria_scores) : m.criteria_scores, m.total_score || 0, m.remarks || '', m.updated_at || new Date().toISOString()]);
+        try {
+          await run(`
+            INSERT OR REPLACE INTO marks (id, program_id, student_id, judge_id, criteria_scores, total_score, remarks, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+          `, [m.id, m.program_id, m.student_id, m.judge_id || 1, typeof m.criteria_scores === 'object' ? JSON.stringify(m.criteria_scores) : m.criteria_scores, m.total_score || m.total_mark || 0, m.remarks || '', m.updated_at || m.submitted_at || new Date().toISOString()]);
+        } catch (e) {
+          try {
+            await run(`
+              INSERT OR REPLACE INTO marks (id, program_id, student_id, judge_id, total_mark, submitted_at)
+              VALUES (?, ?, ?, ?, ?, ?)
+            `, [m.id, m.program_id, m.student_id, m.judge_id || 1, m.total_score || m.total_mark || 0, m.submitted_at || new Date().toISOString()]);
+          } catch (e2) {}
+        }
       }
     }
 

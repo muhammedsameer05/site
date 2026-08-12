@@ -357,6 +357,20 @@ async function initDb() {
     )`);
   }
 
+  // Safe column migrations for existing databases
+  try {
+    await run("ALTER TABLE marks ADD COLUMN criteria_scores TEXT");
+  } catch (e) {}
+  try {
+    await run("ALTER TABLE marks ADD COLUMN total_score REAL DEFAULT 0");
+  } catch (e) {}
+  try {
+    await run("ALTER TABLE marks ADD COLUMN remarks TEXT");
+  } catch (e) {}
+  try {
+    await run("ALTER TABLE marks ADD COLUMN updated_at DATETIME");
+  } catch (e) {}
+
   // Ensure default seeds exist if empty
   const houseRows = await all('SELECT * FROM houses');
   if (houseRows.length === 0) {
