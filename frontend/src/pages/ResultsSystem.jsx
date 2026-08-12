@@ -1,8 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Trophy, Award, RefreshCw, Printer, X, Download } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { useAuth } from '../context/AuthContext';
 
 export default function ResultsSystem() {
+  const { user } = useAuth();
+  const role = user?.role || 'public';
+  const isAdmin = ['super_admin', 'admin', 'stage_coordinator'].includes(role);
+
   const [programs, setPrograms] = useState([]);
   const [selectedProgramId, setSelectedProgramId] = useState(null);
   const [results, setResults] = useState([]);
@@ -160,14 +165,14 @@ export default function ResultsSystem() {
                 <th className="p-4">Class</th>
                 <th className="p-4">House</th>
                 <th className="p-4 text-right">House Points</th>
-                <th className="p-4 text-center">Action / Certificate</th>
+                {isAdmin && <th className="p-4 text-center">Action / Certificate</th>}
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {loading ? (
-                <tr><td colSpan="6" className="p-8 text-center text-emerald-700 font-mono font-bold">Loading Results...</td></tr>
+                <tr><td colSpan={isAdmin ? "6" : "5"} className="p-8 text-center text-emerald-700 font-mono font-bold">Loading Results...</td></tr>
               ) : results.length === 0 ? (
-                <tr><td colSpan="6" className="p-8 text-center text-slate-500 font-medium">No results calculated yet for this program. Click 'Calculate & Award Prizes' above.</td></tr>
+                <tr><td colSpan={isAdmin ? "6" : "5"} className="p-8 text-center text-slate-500 font-medium">No results calculated yet for this program.</td></tr>
               ) : (
                 results.map((r) => (
                   <tr key={r.id} className="hover:bg-emerald-50/30 transition">
@@ -194,15 +199,17 @@ export default function ResultsSystem() {
                       </span>
                     </td>
                     <td className="p-4 text-right font-black font-mono text-emerald-700 text-base">+{r.points_awarded} Pts</td>
-                    <td className="p-4 text-center">
-                      <button
-                        onClick={() => setSelectedCert({ ...r, program_name: selectedProgram?.name || 'Competition' })}
-                        className="px-3 py-1.5 rounded-lg bg-emerald-100 hover:bg-emerald-200 border border-emerald-300 text-emerald-900 font-bold text-xs inline-flex items-center space-x-1.5 transition"
-                      >
-                        <Award className="w-3.5 h-3.5 text-emerald-600" />
-                        <span>Print / Download Certificate</span>
-                      </button>
-                    </td>
+                    {isAdmin && (
+                      <td className="p-4 text-center">
+                        <button
+                          onClick={() => setSelectedCert({ ...r, program_name: selectedProgram?.name || 'Competition' })}
+                          className="px-3 py-1.5 rounded-lg bg-emerald-100 hover:bg-emerald-200 border border-emerald-300 text-emerald-900 font-bold text-xs inline-flex items-center space-x-1.5 transition"
+                        >
+                          <Award className="w-3.5 h-3.5 text-emerald-600" />
+                          <span>Print / Download Certificate</span>
+                        </button>
+                      </td>
+                    )}
                   </tr>
                 ))
               )}
