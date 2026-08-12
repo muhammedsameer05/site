@@ -1397,6 +1397,65 @@ router.get('/reports/dashboard-stats', async (req, res) => {
 });
 
 // -------------------------------------------------------------
+// -------------------------------------------------------------
+// REPORTS & DASHBOARD STATS
+// -------------------------------------------------------------
+router.get('/reports/dashboard-stats', async (req, res) => {
+  try {
+    await recalculateAllHousePoints();
+
+    const [
+      studentsCount,
+      programsCount,
+      judgesCount,
+      housesCount,
+      categoriesCount,
+      runningCount,
+      completedCount,
+      pendingCount,
+      participantsCount
+    ] = await Promise.all([
+      get("SELECT COUNT(*) as count FROM students WHERE (is_archived = 0 OR is_archived IS NULL)"),
+      get("SELECT COUNT(*) as count FROM programs WHERE (is_archived = 0 OR is_archived IS NULL)"),
+      get("SELECT COUNT(*) as count FROM judges"),
+      get("SELECT COUNT(*) as count FROM houses"),
+      get("SELECT COUNT(*) as count FROM categories"),
+      get("SELECT COUNT(*) as count FROM programs WHERE status = 'ongoing' AND (is_archived = 0 OR is_archived IS NULL)"),
+      get("SELECT COUNT(*) as count FROM programs WHERE status = 'completed' AND (is_archived = 0 OR is_archived IS NULL)"),
+      get("SELECT COUNT(*) as count FROM programs WHERE (status = 'pending' OR status IS NULL) AND (is_archived = 0 OR is_archived IS NULL)"),
+      get("SELECT COUNT(DISTINCT student_id) as count FROM program_participants")
+    ]);
+
+    const houses = await all("SELECT id, code, name, color_hex, total_points FROM houses ORDER BY total_points DESC");
+
+    const categoryStats = await all(`
+      SELECT c.id, c.name, COUNT(p.id) as program_count
+      FROM categories c
+      LEFT JOIN programs p ON (p.category_id = c.id OR p.category_id = CAST(c.id AS TEXT)) AND (p.is_archived = 0 OR p.is_archived IS NULL)
+      GROUP BY c.id, c.name
+      ORDER BY c.id ASC
+    `);
+
+    res.json({
+      cards: {
+        totalStudents: studentsCount?.count || 0,
+        totalPrograms: programsCount?.count || 0,
+        totalJudges: judgesCount?.count || 0,
+        totalHouses: housesCount?.count || 0,
+        totalCategories: categoriesCount?.count || 0,
+        runningPrograms: runningCount?.count || 0,
+        completedPrograms: completedCount?.count || 0,
+        pendingPrograms: pendingCount?.count || 0,
+        totalParticipants: participantsCount?.count || 0
+      },
+      houses: houses || [],
+      categoryStats: categoryStats || []
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // GALLERY ENDPOINTS
 // -------------------------------------------------------------
 router.get('/gallery', async (req, res) => {
