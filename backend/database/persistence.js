@@ -8,6 +8,7 @@ async function syncDatabaseSnapshot(dbHelpers) {
   try {
     const { all } = dbHelpers;
     const snapshot = {
+      settings: await all('SELECT * FROM settings'),
       students: await all('SELECT * FROM students'),
       programs: await all('SELECT * FROM programs'),
       program_participants: await all('SELECT * FROM program_participants'),
@@ -40,6 +41,18 @@ async function restoreFromDatabaseSnapshot(dbHelpers) {
     const rawData = fs.readFileSync(snapshotPath, 'utf-8');
     const snapshot = JSON.parse(rawData);
     const { run, get } = dbHelpers;
+
+    // Restore Settings
+    if (Array.isArray(snapshot.settings) && snapshot.settings.length > 0) {
+      for (const st of snapshot.settings) {
+        if (st.key_name) {
+          await run(`
+            INSERT OR REPLACE INTO settings (key_name, value)
+            VALUES (?, ?)
+          `, [st.key_name, String(st.value || '')]);
+        }
+      }
+    }
 
     // Restore Students
     if (Array.isArray(snapshot.students) && snapshot.students.length > 0) {

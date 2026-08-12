@@ -584,13 +584,6 @@ router.get('/houses/:id/breakdown', async (req, res) => {
 
         if (stu && (String(stu.house_id) === String(houseId) || String(stu.house_id).toUpperCase() === String(house.code).toUpperCase())) {
           isMatch = true;
-        } else if (!stu) {
-          // If no student row exists, default 1st & 3rd to Green House (1), 2nd to Blue House (2)
-          if (r.prize === '1st' || r.prize === '3rd') {
-            if (String(houseId) === '1' || String(house.code).includes('GRN')) isMatch = true;
-          } else if (r.prize === '2nd') {
-            if (String(houseId) === '2' || String(house.code).includes('BLU')) isMatch = true;
-          }
         }
       }
 
@@ -1514,6 +1507,7 @@ router.post('/settings/reset-demo-data', authenticate, requireAdmin, async (req,
 router.get('/database/export', async (req, res) => {
   try {
     const snapshot = {
+      settings: await all('SELECT * FROM settings'),
       students: await all('SELECT * FROM students'),
       programs: await all('SELECT * FROM programs'),
       program_participants: await all('SELECT * FROM program_participants'),
@@ -1542,6 +1536,18 @@ router.post('/database/import', authenticate, requireAdmin, async (req, res) => 
     const snapshot = req.body;
     if (!snapshot || typeof snapshot !== 'object') {
       return res.status(400).json({ error: 'Invalid backup JSON file content.' });
+    }
+
+    // Restore Settings
+    if (Array.isArray(snapshot.settings)) {
+      for (const s of snapshot.settings) {
+        if (s.key_name) {
+          await run(`
+            INSERT OR REPLACE INTO settings (key_name, value)
+            VALUES (?, ?)
+          `, [s.key_name, String(s.value || '')]);
+        }
+      }
     }
 
     // Restore Houses
