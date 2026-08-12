@@ -204,9 +204,8 @@ export default function HouseManagement() {
 
       {/* Edit / Create House Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-md p-4 sm:p-6">
-          <div className="flex min-h-full items-center justify-center p-2 text-center sm:p-4">
-            <div className="relative transform rounded-3xl bg-white text-left shadow-2xl transition-all w-full max-w-3xl overflow-hidden my-auto border border-slate-200 text-slate-900 animate-fade-in-up">
+        <div className="fixed inset-0 z-50 flex items-start justify-center p-4 sm:p-6 pt-20 sm:pt-24 pb-12 bg-slate-900/60 backdrop-blur-md overflow-y-auto animate-fade-in">
+          <div className="relative w-full max-w-3xl bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[85vh] text-slate-900 animate-scale-up">
               {/* Header Banner matching screenshot theme */}
               <div 
                 className="p-6 text-white flex items-center justify-between transition-all"
@@ -298,7 +297,6 @@ export default function HouseManagement() {
                 </div>
               </form>
             </div>
-          </div>
         </div>
       )}
 

@@ -300,8 +300,8 @@ export default function StudentManagement() {
 
       {/* Edit / Add Student Modal matching user screenshot */}
       {showForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-900/60 backdrop-blur-md animate-fade-in">
-          <div className="relative w-full max-w-4xl bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[90vh] text-slate-900 animate-scale-up">
+        <div className="fixed inset-0 z-50 flex items-start justify-center p-4 sm:p-6 pt-20 sm:pt-24 pb-12 bg-slate-900/60 backdrop-blur-md overflow-y-auto animate-fade-in">
+          <div className="relative w-full max-w-4xl bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[85vh] text-slate-900 animate-scale-up">
             
             {/* Header Banner matching user screenshot */}
             <div className="bg-gradient-to-r from-emerald-600 to-teal-700 p-6 text-white flex items-center justify-between shrink-0">
