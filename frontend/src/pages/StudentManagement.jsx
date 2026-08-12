@@ -300,19 +300,19 @@ export default function StudentManagement() {
 
       {/* Edit / Add Student Modal matching user screenshot */}
       {showForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-md p-4 overflow-y-auto">
-          <div className="glass-panel w-full max-w-2xl rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-2xl bg-white text-slate-900 my-8 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-md p-4 sm:p-6 overflow-y-auto">
+          <div className="glass-panel w-full max-w-4xl rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-2xl bg-white text-slate-900 my-auto max-h-[92vh] overflow-y-auto">
             {/* Modal Header */}
             <div className="flex items-center justify-between border-b border-slate-200 pb-4 mb-6">
-              <h3 className="text-lg font-black text-slate-900 flex items-center space-x-2">
-                <span>{formData.id ? `Edit Student Information (#${formData.admission_no || formData.id})` : 'Add New Student Profile'}</span>
+              <h3 className="text-xl font-black text-slate-900 flex items-center space-x-2">
+                <span>{formData.id ? `Edit Student Profile (#${formData.admission_no || formData.id})` : 'Add New Student Profile'}</span>
               </h3>
               <button 
                 type="button" 
                 onClick={() => setShowForm(false)}
-                className="text-slate-400 hover:text-slate-700 p-1 rounded-lg hover:bg-slate-100 transition"
+                className="text-slate-400 hover:text-slate-700 p-1.5 rounded-xl hover:bg-slate-100 transition"
               >
-                <X className="w-5 h-5" />
+                <X className="w-6 h-6" />
               </button>
             </div>
 
@@ -327,7 +327,7 @@ export default function StudentManagement() {
                     value={formData.admission_no}
                     onChange={e => setFormData({ ...formData, admission_no: e.target.value })}
                     placeholder="101"
-                    className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-emerald-700 font-bold font-mono focus:border-emerald-500 focus:outline-none"
+                    className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-emerald-700 font-bold font-mono text-sm focus:border-emerald-500 focus:outline-none"
                   />
                 </div>
 
@@ -339,13 +339,13 @@ export default function StudentManagement() {
                     value={formData.name}
                     onChange={e => setFormData({ ...formData, name: e.target.value })}
                     placeholder="e.g. മുഹമ്മദ് അൻഷിദ് or Muhammed Anshid"
-                    className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-slate-900 font-bold focus:border-emerald-500 focus:outline-none"
+                    className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-slate-900 font-bold text-sm focus:border-emerald-500 focus:outline-none"
                   />
                 </div>
               </div>
 
               {/* Row 2: Gender, Category, Class & House */}
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div>
                   <label className="block text-slate-700 font-bold mb-1.5">Gender</label>
                   <select
