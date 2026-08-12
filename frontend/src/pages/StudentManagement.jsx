@@ -300,8 +300,8 @@ export default function StudentManagement() {
 
       {/* Edit / Add Student Modal matching user screenshot */}
       {showForm && (
-        <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-slate-900/60 backdrop-blur-md p-3 sm:p-6 overflow-y-auto">
-          <div className="glass-panel w-full max-w-4xl rounded-3xl border border-slate-200 p-5 sm:p-7 shadow-2xl bg-white text-slate-900 my-4 sm:my-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-md p-4 sm:p-6 overflow-y-auto">
+          <div className="glass-panel w-full max-w-4xl rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-2xl bg-white text-slate-900 my-auto">
             {/* Modal Header */}
             <div className="flex items-center justify-between border-b border-slate-200 pb-4 mb-6">
               <h3 className="text-xl font-black text-slate-900 flex items-center space-x-2">

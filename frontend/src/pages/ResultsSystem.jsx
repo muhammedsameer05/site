@@ -213,8 +213,8 @@ export default function ResultsSystem() {
 
       {/* Official Certificate Modal */}
       {selectedCert && (
-        <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-slate-900/60 backdrop-blur-md p-3 sm:p-6 overflow-y-auto">
-          <div className="relative w-full max-w-4xl glass-panel rounded-3xl border-2 border-emerald-300 p-6 sm:p-8 bg-white text-slate-900 shadow-2xl my-4 sm:my-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-md p-4 sm:p-6 overflow-y-auto">
+          <div className="relative w-full max-w-4xl glass-panel rounded-3xl border-2 border-emerald-300 p-6 sm:p-8 bg-white text-slate-900 shadow-2xl my-auto">
             
             {/* Modal Top Control Bar */}
             <div className="flex items-center justify-between border-b border-slate-200 pb-3 mb-6 no-print">

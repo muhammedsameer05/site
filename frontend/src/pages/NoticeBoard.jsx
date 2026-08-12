@@ -139,8 +139,8 @@ export default function NoticeBoard() {
 
       {/* Post Announcement Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-slate-900/60 backdrop-blur-md p-3 sm:p-6 overflow-y-auto">
-          <div className="glass-panel w-full max-w-3xl rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-2xl relative bg-white text-slate-900 my-4 sm:my-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-md p-4 sm:p-6 overflow-y-auto">
+          <div className="glass-panel w-full max-w-3xl rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-2xl relative bg-white text-slate-900 my-auto">
             <button
               onClick={() => setShowModal(false)}
               className="absolute top-4 right-4 text-slate-400 hover:text-slate-700 p-1"
