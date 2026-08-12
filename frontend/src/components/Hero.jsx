@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Sparkles, Trophy, Calendar, ArrowRight } from 'lucide-react';
 import CountdownTimer from './CountdownTimer';
 import { useLanguage } from '../context/LanguageContext';
