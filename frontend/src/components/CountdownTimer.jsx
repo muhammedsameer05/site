@@ -1,3 +1,5 @@
+import React, { useState, useEffect } from 'react';
+
 function parseTargetDate(dateStr) {
   if (!dateStr) return new Date('2026-08-24T09:00:00').getTime();
   
