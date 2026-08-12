@@ -1,0 +1,100 @@
+{
+  "students": [],
+  "programs": [],
+  "program_participants": [],
+  "houses": [
+    {
+      "id": 1,
+      "code": "H-GRN",
+      "name": "Green House",
+      "color_hex": "#10B981",
+      "motto": "Courage and Devotion in Faith",
+      "captain_name": "Ahmad Bin Ziyad",
+      "total_points": 0,
+      "created_at": "2026-08-07 20:53:05"
+    },
+    {
+      "id": 2,
+      "code": "H-BLU",
+      "name": "Blue House",
+      "color_hex": "#3B82F6",
+      "motto": "Knowledge is Light and Guidance",
+      "captain_name": "Muhammed Fayaz",
+      "total_points": 0,
+      "created_at": "2026-08-07 20:53:05"
+    }
+  ],
+  "categories": [
+    {
+      "id": 1,
+      "name": "Kiddies",
+      "min_age": 5,
+      "max_age": 7,
+      "description": "Kiddies Category"
+    },
+    {
+      "id": 2,
+      "name": "Sub Junior",
+      "min_age": 8,
+      "max_age": 10,
+      "description": "Sub Junior Category"
+    },
+    {
+      "id": 3,
+      "name": "Junior",
+      "min_age": 11,
+      "max_age": 13,
+      "description": "Junior Category"
+    },
+    {
+      "id": 4,
+      "name": "Senior",
+      "min_age": 14,
+      "max_age": 16,
+      "description": "Senior Category"
+    },
+    {
+      "id": 5,
+      "name": "Super Senior",
+      "min_age": 17,
+      "max_age": 20,
+      "description": "Super Senior Category"
+    }
+  ],
+  "venues": [
+    {
+      "id": 1,
+      "name": "Auditorium Main Stage (Imam Bukhari Stage)",
+      "stage_number": 1,
+      "capacity": 500,
+      "location": "Main Building Ground Floor"
+    },
+    {
+      "id": 2,
+      "name": "Stage 2 (Imam Shafi Stage)",
+      "stage_number": 2,
+      "capacity": 200,
+      "location": "Academic Block 1st Floor"
+    },
+    {
+      "id": 3,
+      "name": "Stage 3 (Imam Ghazali Hall)",
+      "stage_number": 3,
+      "capacity": 150,
+      "location": "Library Extension Block"
+    },
+    {
+      "id": 4,
+      "name": "Open Air Stage (Syed Alavi Hall)",
+      "stage_number": 4,
+      "capacity": 300,
+      "location": "Madrasa Courtyard Area"
+    }
+  ],
+  "results": [],
+  "announcements": [],
+  "gallery": [],
+  "marks": [],
+  "audit_logs": [],
+  "last_synced": "2026-08-12T12:11:00.000Z"
+}

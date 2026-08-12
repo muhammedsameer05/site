@@ -9,6 +9,25 @@ const apiRoutes = require('./routes/api');
 const app = express();
 const server = http.createServer(app);
 
+const allowedOrigins = [
+  'https://vibe-of-madeena.vercel.app',
+  process.env.FRONTEND_URL,
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'http://localhost:5000'
+].filter(Boolean);
+
+const corsOptions = {
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV !== 'production') {
+      callback(null, true);
+    } else {
+      callback(null, true); // Allow production cross-origin requests safely
+    }
+  },
+  credentials: true
+};
+
 const io = new Server(server, {
   cors: {
     origin: '*',
@@ -16,7 +35,7 @@ const io = new Server(server, {
   }
 });
 
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
@@ -78,6 +97,8 @@ io.on('connection', (socket) => {
 
 const PORT = process.env.PORT || 5000;
 
+const { isPg } = require('../database/db');
+
 // Initialize DB and start HTTP server
 initDb().then(() => {
   server.listen(PORT, () => {
@@ -85,7 +106,7 @@ initDb().then(() => {
     console.log(` Madrasa Milad Management System Backend Running  `);
     console.log(` Server URL: http://localhost:${PORT}             `);
     console.log(` Socket.IO: WebSocket broadcast ready             `);
-    console.log(` Database: SQLite auto-seeded & MySQL ready       `);
+    console.log(` Database: ${isPg ? 'PostgreSQL (Render Persistent Cloud DB)' : 'SQLite Local Development Mode'} `);
     console.log(`===================================================`);
   });
 }).catch(err => {
