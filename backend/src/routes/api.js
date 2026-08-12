@@ -984,7 +984,11 @@ router.delete('/programs/:id', authenticate, requireAdmin, async (req, res) => {
 router.get('/categories', async (req, res) => {
   try {
     const categories = await all('SELECT * FROM categories');
-    res.json(categories);
+    const cleaned = (categories || []).map(c => {
+      if (c.name === 'Kids' || c.name === 'kids') return { ...c, name: 'Kiddies' };
+      return c;
+    });
+    res.json(cleaned);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

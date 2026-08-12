@@ -135,8 +135,12 @@ export default function ProgramManagement() {
 
     fetch('/api/categories', { cache: 'no-store' })
       .then(res => res.json())
-      .then(data => setCategories(Array.isArray(data) ? data : []))
-      .catch(() => {});
+      .then(data => {
+        const raw = Array.isArray(data) && data.length > 0 ? data : DEFAULT_CATEGORIES;
+        const cleaned = raw.map(c => (c.name === 'Kids' || c.name === 'kids') ? { ...c, name: 'Kiddies' } : c);
+        setCategories(cleaned);
+      })
+      .catch(() => setCategories(DEFAULT_CATEGORIES));
   };
 
   useEffect(() => {
@@ -773,7 +777,9 @@ export default function ProgramManagement() {
                       className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-slate-900 font-bold focus:border-emerald-500 focus:outline-none"
                     >
                       {(categories.length > 0 ? categories : DEFAULT_CATEGORIES).map(c => (
-                        <option key={c.id} value={c.id}>{c.name}</option>
+                        <option key={c.id} value={c.id}>
+                          {c.name === 'Kids' || c.name === 'kids' ? 'Kiddies' : c.name}
+                        </option>
                       ))}
                     </select>
                   </div>

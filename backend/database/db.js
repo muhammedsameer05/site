@@ -365,15 +365,21 @@ async function initDb() {
       (2, 'H-BLU', 'Blue House', '#3B82F6', 'Knowledge is Light and Guidance', 'Captain 2', 0)`);
   }
 
+  // Ensure standard categories exist and fix 'Kids' -> 'Kiddies'
+  try {
+    await run("UPDATE categories SET name = 'Kiddies' WHERE name = 'Kids' OR name = 'kids' OR id = 1");
+    await run("UPDATE students SET category_name = 'Kiddies' WHERE category_name = 'Kids' OR category_name = 'kids'");
+    await run("UPDATE programs SET age_group = 'Kiddies' WHERE age_group = 'Kids' OR age_group = 'kids'");
+  } catch (e) {}
+
   const categoryRows = await all('SELECT * FROM categories');
-  if (categoryRows.length < 5) {
+  if (!categoryRows || categoryRows.length === 0) {
     await run(`INSERT INTO categories (id, name, min_age, max_age, description) VALUES
       (1, 'Kiddies', 5, 7, 'Kiddies Category'),
       (2, 'Sub Junior', 8, 10, 'Sub Junior Category'),
       (3, 'Junior', 11, 13, 'Junior Category'),
       (4, 'Senior', 14, 16, 'Senior Category'),
-      (5, 'Super Senior', 17, 20, 'Super Senior Category')
-      ON CONFLICT DO NOTHING`);
+      (5, 'Super Senior', 17, 20, 'Super Senior Category')`);
   }
 
   const venueCount = await get('SELECT COUNT(*) as count FROM venues');
