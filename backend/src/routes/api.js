@@ -290,10 +290,14 @@ router.post('/students', authenticate, requireAdmin, async (req, res) => {
     const count = await get('SELECT COUNT(*) as c FROM students');
     const student_id = `STU-${1000 + (count?.c || 0) + 1}`;
 
+    try {
+      await run(`ALTER TABLE students ADD COLUMN category_name TEXT DEFAULT 'Sub Junior'`);
+    } catch (e) {}
+
     const result = await run(`
       INSERT INTO students (student_id, admission_no, name, category_name, arabic_name, photo, gender, dob, age, class_name, division, house_id, parent_name, phone, email, address, is_archived)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
-    `, [student_id, admission_no, name, category_name || 'Kids', arabic_name || '', photo || '', gender || 'male', dob, age || 10, class_name || 'Class 6', division || 'A', house_id || 1, parent_name || '', phone || '', email || '', address || '']);
+    `, [student_id, admission_no, name, category_name || 'Sub Junior', arabic_name || '', photo || '', gender || 'male', dob, age || 10, class_name || 'Class 6', division || 'A', house_id || 1, parent_name || '', phone || '', email || '', address || '']);
 
     const newStudentId = result.id;
 
@@ -320,11 +324,15 @@ router.put('/students/:id', authenticate, requireAdmin, async (req, res) => {
     const { name, category_name, arabic_name, photo, gender, dob, age, class_name, division, house_id, parent_name, phone, email, address, admission_no, registered_program_ids } = req.body;
     const targetId = req.params.id;
 
+    try {
+      await run(`ALTER TABLE students ADD COLUMN category_name TEXT DEFAULT 'Sub Junior'`);
+    } catch (e) {}
+
     await run(`
       UPDATE students 
       SET name = ?, category_name = ?, arabic_name = ?, photo = ?, gender = ?, dob = ?, age = ?, class_name = ?, division = ?, house_id = ?, parent_name = ?, phone = ?, email = ?, address = ?, admission_no = COALESCE(?, admission_no)
       WHERE id = ? OR CAST(id AS TEXT) = CAST(? AS TEXT)
-    `, [name, category_name || 'Kids', arabic_name || '', photo || '', gender || 'male', dob, age || 10, class_name || 'Class 6', division || 'A', house_id || 1, parent_name || '', phone || '', email || '', address || '', admission_no, targetId, targetId]);
+    `, [name, category_name || 'Sub Junior', arabic_name || '', photo || '', gender || 'male', dob, age || 10, class_name || 'Class 6', division || 'A', house_id || 1, parent_name || '', phone || '', email || '', address || '', admission_no, targetId, targetId]);
 
     if (Array.isArray(registered_program_ids)) {
       await run('DELETE FROM program_participants WHERE student_id = ? OR CAST(student_id AS TEXT) = CAST(? AS TEXT)', [targetId, targetId]);

@@ -189,9 +189,24 @@ async function initDb() {
       is_archived INTEGER DEFAULT 0,
       archived_at DATETIME,
       archived_by TEXT,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (house_id) REFERENCES houses(id)
     )`);
+
+    // Ensure category_name and other columns exist on pre-existing SQLite/Postgres tables
+    const studentCols = [
+      "category_name TEXT DEFAULT 'Kiddies'",
+      "is_archived INTEGER DEFAULT 0",
+      "archived_at DATETIME",
+      "archived_by TEXT",
+      "qr_code TEXT"
+    ];
+    for (const colDef of studentCols) {
+      try {
+        await run(`ALTER TABLE students ADD COLUMN ${colDef}`);
+      } catch (e) {
+        // Column already exists
+      }
+    }
 
     await run(`CREATE TABLE IF NOT EXISTS judges (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
