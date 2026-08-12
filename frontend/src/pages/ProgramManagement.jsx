@@ -711,35 +711,36 @@ export default function ProgramManagement() {
 
       {/* Create / Edit Program Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-md p-4 sm:p-6">
-          <div className="flex min-h-full items-center justify-center p-2 text-center sm:p-4">
-            <div className="relative transform rounded-3xl bg-white text-left shadow-2xl transition-all w-full max-w-4xl overflow-hidden my-auto border border-slate-200 text-slate-900 animate-fade-in-up">
-              
-              {/* Header Banner matching screenshot theme */}
-              <div className="bg-gradient-to-r from-emerald-600 to-teal-700 p-6 text-white flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center font-black text-xl border border-white/30">
-                    <Calendar className="w-6 h-6 text-amber-300" />
-                  </div>
-                  <div>
-                    <h2 className="text-2xl font-black text-white">
-                      {formData.id ? 'Edit Program Item' : 'Create New Program'}
-                    </h2>
-                    <p className="text-xs font-mono font-bold text-emerald-100">
-                      {formData.id ? `Code: #${formData.code || formData.id}` : 'Configure competition details, stage venue, and age category'}
-                    </p>
-                  </div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-900/60 backdrop-blur-md animate-fade-in">
+          <div className="relative w-full max-w-3xl bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[90vh] text-slate-900 animate-scale-up">
+            
+            {/* Header Banner matching screenshot theme */}
+            <div className="bg-gradient-to-r from-emerald-600 to-teal-700 p-6 text-white flex items-center justify-between shrink-0">
+              <div className="flex items-center space-x-3">
+                <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center font-black text-xl border border-white/30">
+                  <Calendar className="w-6 h-6 text-amber-300" />
                 </div>
-
-                <button 
-                  onClick={() => setShowModal(false)}
-                  className="w-9 h-9 rounded-full bg-black/20 hover:bg-black/40 flex items-center justify-center text-white transition"
-                >
-                  <X className="w-5 h-5" />
-                </button>
+                <div>
+                  <h2 className="text-2xl font-black text-white">
+                    {formData.id ? 'Edit Program Item' : 'Create New Program'}
+                  </h2>
+                  <p className="text-xs font-mono font-bold text-emerald-100">
+                    {formData.id ? `Code: #${formData.code || formData.id}` : 'Configure competition details, stage venue, and age category'}
+                  </p>
+                </div>
               </div>
 
-              <form onSubmit={handleSaveProgram} className="p-6 sm:p-8 space-y-5 text-xs font-semibold text-slate-700">
+              <button 
+                type="button"
+                onClick={() => setShowModal(false)}
+                className="w-9 h-9 rounded-full bg-black/20 hover:bg-black/40 flex items-center justify-center text-white transition"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveProgram} className="flex flex-col flex-1 overflow-hidden">
+              <div className="p-6 sm:p-8 space-y-5 text-xs font-semibold text-slate-700 overflow-y-auto flex-1">
                 
                 <div>
                   <label className="block mb-1 text-slate-900 font-bold">Program Code</label>
@@ -795,15 +796,47 @@ export default function ProgramManagement() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block mb-1 text-slate-900 font-bold">Type</label>
+                    <label className="block mb-1 text-slate-900 font-bold">Competition Type</label>
                     <select 
                       value={formData.type}
                       onChange={e => setFormData({ ...formData, type: e.target.value })}
                       className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-slate-900 font-bold focus:border-emerald-500 focus:outline-none"
                     >
-                      <option value="individual">Individual Item</option>
-                      <option value="group">Group Item</option>
+                      <option value="individual">Individual</option>
+                      <option value="group">Group / Team</option>
                     </select>
+                  </div>
+
+                  <div>
+                    <label className="block mb-1 text-slate-900 font-bold">Date</label>
+                    <input 
+                      type="date"
+                      value={formData.program_date}
+                      onChange={e => setFormData({ ...formData, program_date: e.target.value })}
+                      className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-slate-900 font-bold focus:border-emerald-500 focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block mb-1 text-slate-900 font-bold">Start Time</label>
+                    <input 
+                      type="time"
+                      value={formData.start_time}
+                      onChange={e => setFormData({ ...formData, start_time: e.target.value })}
+                      className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-slate-900 font-bold focus:border-emerald-500 focus:outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block mb-1 text-slate-900 font-bold">End Time</label>
+                    <input 
+                      type="time"
+                      value={formData.end_time}
+                      onChange={e => setFormData({ ...formData, end_time: e.target.value })}
+                      className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-slate-900 font-bold focus:border-emerald-500 focus:outline-none"
+                    />
                   </div>
 
                   <div>
@@ -817,25 +850,25 @@ export default function ProgramManagement() {
                   </div>
                 </div>
 
-                <div className="flex justify-end space-x-3 pt-4 border-t border-slate-200">
-                  <button
-                    type="button"
-                    onClick={() => setShowModal(false)}
-                    className="px-6 py-2.5 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 hover:bg-slate-200 font-extrabold transition"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-8 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold shadow-lg transition"
-                  >
-                    {formData.id ? 'Save Program Changes' : 'Create Program'}
-                  </button>
-                </div>
+              </div>
 
-              </form>
+              <div className="flex justify-end space-x-3 p-4 sm:p-6 border-t border-slate-200 bg-slate-50 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setShowModal(false)}
+                  className="px-6 py-2.5 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 hover:bg-slate-200 font-extrabold transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-8 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold shadow-lg transition"
+                >
+                  {formData.id ? 'Save Program Changes' : 'Create Program'}
+                </button>
+              </div>
+            </form>
 
-            </div>
           </div>
         </div>
       )}

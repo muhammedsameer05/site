@@ -300,35 +300,36 @@ export default function StudentManagement() {
 
       {/* Edit / Add Student Modal matching user screenshot */}
       {showForm && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-md p-4 sm:p-6">
-          <div className="flex min-h-full items-center justify-center p-2 text-center sm:p-4">
-            <div className="relative transform rounded-3xl bg-white text-left shadow-2xl transition-all w-full max-w-4xl overflow-hidden my-auto border border-slate-200 text-slate-900 animate-fade-in-up">
-              {/* Header Banner matching user screenshot */}
-              <div className="bg-gradient-to-r from-emerald-600 to-teal-700 p-6 text-white flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center font-black text-xl border border-white/30">
-                    <UserCheck className="w-6 h-6 text-amber-300" />
-                  </div>
-                  <div>
-                    <h2 className="text-2xl font-black text-white">
-                      {formData.id ? `Edit Student Profile` : 'Add New Student Profile'}
-                    </h2>
-                    <p className="text-xs font-mono font-bold text-emerald-100">
-                      {formData.id ? `Chest No: #${formData.admission_no || formData.id}` : 'Create a new student entry in Madrasa Milad Registry'}
-                    </p>
-                  </div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-900/60 backdrop-blur-md animate-fade-in">
+          <div className="relative w-full max-w-4xl bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[90vh] text-slate-900 animate-scale-up">
+            
+            {/* Header Banner matching user screenshot */}
+            <div className="bg-gradient-to-r from-emerald-600 to-teal-700 p-6 text-white flex items-center justify-between shrink-0">
+              <div className="flex items-center space-x-3">
+                <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center font-black text-xl border border-white/30">
+                  <UserCheck className="w-6 h-6 text-amber-300" />
                 </div>
-
-                <button
-                  type="button"
-                  onClick={() => setShowForm(false)}
-                  className="w-9 h-9 rounded-full bg-black/20 hover:bg-black/40 flex items-center justify-center text-white transition"
-                >
-                  <X className="w-5 h-5" />
-                </button>
+                <div>
+                  <h2 className="text-2xl font-black text-white">
+                    {formData.id ? `Edit Student Profile` : 'Add New Student Profile'}
+                  </h2>
+                  <p className="text-xs font-mono font-bold text-emerald-100">
+                    {formData.id ? `Chest No: #${formData.admission_no || formData.id}` : 'Create a new student entry in Madrasa Milad Registry'}
+                  </p>
+                </div>
               </div>
 
-              <form onSubmit={handleSave} className="p-6 sm:p-8 space-y-6 text-xs">
+              <button
+                type="button"
+                onClick={() => setShowForm(false)}
+                className="w-9 h-9 rounded-full bg-black/20 hover:bg-black/40 flex items-center justify-center text-white transition"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSave} className="flex flex-col flex-1 overflow-hidden">
+              <div className="p-6 sm:p-8 space-y-6 text-xs overflow-y-auto flex-1">
                 {/* Row 1: Chest No & Student Name */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
@@ -344,34 +345,22 @@ export default function StudentManagement() {
                   </div>
 
                   <div>
-                    <label className="block text-slate-700 font-bold mb-1.5">Student's Name (Student Name)</label>
+                    <label className="block text-slate-700 font-bold mb-1.5">Student Full Name</label>
                     <input
                       type="text"
                       required
                       value={formData.name}
                       onChange={e => setFormData({ ...formData, name: e.target.value })}
-                      placeholder="e.g. മുഹമ്മദ് അൻഷിദ് or Muhammed Anshid"
+                      placeholder="Muhammed Bilal"
                       className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-slate-900 font-bold text-sm focus:border-emerald-500 focus:outline-none"
                     />
                   </div>
                 </div>
 
-                {/* Row 2: Gender, Category, Class & House */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {/* Row 2: Category & House */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-slate-700 font-bold mb-1.5">Gender</label>
-                    <select
-                      value={formData.gender || 'male'}
-                      onChange={e => setFormData({ ...formData, gender: e.target.value })}
-                      className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-slate-900 font-bold focus:border-emerald-500 focus:outline-none"
-                    >
-                      <option value="male">Male (ആൺകുട്ടി)</option>
-                      <option value="female">Female (പെൺകുട്ടി)</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-slate-700 font-bold mb-1.5">Category</label>
+                    <label className="block text-slate-700 font-bold mb-1.5">Category (Age Division)</label>
                     <select
                       value={formData.category_name}
                       onChange={e => setFormData({ ...formData, category_name: e.target.value })}
@@ -384,22 +373,10 @@ export default function StudentManagement() {
                   </div>
 
                   <div>
-                    <label className="block text-slate-700 font-bold mb-1.5">Class</label>
-                    <input
-                      type="text"
-                      required
-                      value={formData.class_name}
-                      onChange={e => setFormData({ ...formData, class_name: e.target.value })}
-                      placeholder="Class 6"
-                      className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-slate-900 font-bold focus:border-emerald-500 focus:outline-none"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-slate-700 font-bold mb-1.5">House</label>
+                    <label className="block text-slate-700 font-bold mb-1.5">House / Team</label>
                     <select
                       value={formData.house_id}
-                      onChange={e => setFormData({ ...formData, house_id: e.target.value })}
+                      onChange={e => setFormData({ ...formData, house_id: parseInt(e.target.value, 10) })}
                       className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-slate-900 font-bold focus:border-emerald-500 focus:outline-none"
                     >
                       {houses.map(h => (
@@ -409,13 +386,38 @@ export default function StudentManagement() {
                   </div>
                 </div>
 
-                {/* Contest Items Participating (Registered Items) */}
+                {/* Row 3: Class & Parent Contact */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-slate-700 font-bold mb-1.5">Class / Standard</label>
+                    <input
+                      type="text"
+                      value={formData.class_name}
+                      onChange={e => setFormData({ ...formData, class_name: e.target.value })}
+                      placeholder="Class 5A"
+                      className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-slate-900 font-bold focus:border-emerald-500 focus:outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-slate-700 font-bold mb-1.5">Parent Contact Number</label>
+                    <input
+                      type="text"
+                      value={formData.parent_phone}
+                      onChange={e => setFormData({ ...formData, parent_phone: e.target.value })}
+                      placeholder="+91 98765 43210"
+                      className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-slate-900 font-bold focus:border-emerald-500 focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                {/* Program Selection Checkboxes filtered by Student Category */}
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <label className="block text-slate-800 font-extrabold text-xs uppercase tracking-wider">
-                      Contest Items Participating (Registered Items)
+                    <label className="block text-slate-900 font-black uppercase tracking-wider text-[11px]">
+                      Select Registered Programs (Filtered for {formData.category_name || 'Sub Junior'})
                     </label>
-                    <span className="text-[11px] font-bold text-amber-700 font-mono">
+                    <span className="text-[10px] text-slate-500 font-bold font-mono">
                       Category: {formData.category_name || 'Sub Junior'}
                     </span>
                   </div>
@@ -423,54 +425,49 @@ export default function StudentManagement() {
                   <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3 max-h-56 overflow-y-auto">
                     {(() => {
                       const studentCat = (formData.category_name || 'Sub Junior').toLowerCase().trim();
-                      const displayedPrograms = allPrograms.filter(prog => {
+                      const categoryPrograms = allPrograms.filter(prog => {
                         const progCat = (prog.category_name || prog.age_group || '').toLowerCase().trim();
-                        const isChecked = registeredProgramIds.includes(prog.id);
-                        return isChecked || progCat === studentCat;
+                        return !progCat || progCat === studentCat || studentCat.includes(progCat) || progCat.includes(studentCat);
                       });
 
-                      if (displayedPrograms.length === 0) {
+                      if (categoryPrograms.length === 0) {
                         return (
-                          <div className="text-slate-500 text-center py-6 font-mono text-xs">
+                          <div className="text-center py-4 text-slate-400 font-semibold text-xs">
                             <p>No programs available for category <span className="text-amber-700 font-bold">"{formData.category_name || 'Sub Junior'}"</span></p>
+                            <p className="text-[10px] mt-1 text-slate-400">Add programs for this category in Program Management</p>
                           </div>
                         );
                       }
 
                       return (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                          {displayedPrograms.map(prog => {
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          {categoryPrograms.map(prog => {
                             const isChecked = registeredProgramIds.includes(prog.id);
                             return (
-                              <label 
-                                key={prog.id} 
-                                className={`flex items-start space-x-3 p-3 rounded-xl border cursor-pointer transition ${
+                              <label
+                                key={prog.id}
+                                className={`flex items-center space-x-3 p-2.5 rounded-xl border transition cursor-pointer ${
                                   isChecked 
-                                    ? 'bg-emerald-50 border-emerald-500 text-emerald-950 font-bold shadow-sm' 
-                                    : 'bg-white border-slate-200 text-slate-700 hover:border-emerald-400'
+                                    ? 'bg-emerald-50 border-emerald-400 text-emerald-950 font-bold shadow-xs' 
+                                    : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'
                                 }`}
                               >
-                                <input 
+                                <input
                                   type="checkbox"
                                   checked={isChecked}
-                                  onChange={() => {
-                                    if (isChecked) {
-                                      setRegisteredProgramIds(prev => prev.filter(id => id !== prog.id));
-                                    } else {
+                                  onChange={e => {
+                                    if (e.target.checked) {
                                       setRegisteredProgramIds(prev => [...prev, prog.id]);
+                                    } else {
+                                      setRegisteredProgramIds(prev => prev.filter(id => id !== prog.id));
                                     }
                                   }}
-                                  className="mt-0.5 w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 accent-emerald-600"
+                                  className="w-4 h-4 text-emerald-600 rounded focus:ring-emerald-500"
                                 />
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-center justify-between gap-1">
-                                    <p className="font-bold text-xs leading-snug truncate text-slate-900">{prog.name}</p>
-                                    <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-300 whitespace-nowrap">
-                                      {prog.category_name || prog.age_group || formData.category_name}
-                                    </span>
-                                  </div>
-                                  <p className="text-[10px] text-slate-500 font-mono mt-0.5">
-                                    {prog.code || `PRG-${prog.id}`}
+                                <div className="min-w-0 flex-1">
+                                  <p className="text-xs font-bold truncate">{prog.name}</p>
+                                  <p className="text-[10px] text-slate-400 font-mono">
+                                    {prog.category_name || prog.age_group || formData.category_name}
                                   </p>
                                 </div>
                               </label>
@@ -482,24 +479,25 @@ export default function StudentManagement() {
                   </div>
                 </div>
 
-                {/* Modal Footer */}
-                <div className="flex justify-end space-x-3 pt-4 border-t border-slate-200">
-                  <button
-                    type="button"
-                    onClick={() => setShowForm(false)}
-                    className="px-6 py-2.5 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 hover:bg-slate-200 font-extrabold transition"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-8 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold shadow-lg transition"
-                  >
-                    Save Profile
-                  </button>
-                </div>
-              </form>
-            </div>
+              </div>
+
+              {/* Modal Footer */}
+              <div className="flex justify-end space-x-3 p-4 sm:p-6 border-t border-slate-200 bg-slate-50 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setShowForm(false)}
+                  className="px-6 py-2.5 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 hover:bg-slate-200 font-extrabold transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-8 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold shadow-lg transition"
+                >
+                  Save Profile
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
