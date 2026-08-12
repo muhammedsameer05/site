@@ -785,21 +785,6 @@ export default function ProgramManagement() {
                   </div>
 
                   <div>
-                    <label className="block mb-1 text-slate-900 font-bold">Stage / Venue</label>
-                    <select 
-                      value={formData.venue_id}
-                      onChange={e => setFormData({ ...formData, venue_id: e.target.value })}
-                      className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-slate-900 font-bold focus:border-emerald-500 focus:outline-none"
-                    >
-                      {DEFAULT_VENUES.map(v => (
-                        <option key={v.id} value={v.id}>{v.name}</option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
                     <label className="block mb-1 text-slate-900 font-bold">Competition Type</label>
                     <select 
                       value={formData.type}
@@ -810,48 +795,16 @@ export default function ProgramManagement() {
                       <option value="group">Group / Team</option>
                     </select>
                   </div>
-
-                  <div>
-                    <label className="block mb-1 text-slate-900 font-bold">Date</label>
-                    <input 
-                      type="date"
-                      value={formData.program_date}
-                      onChange={e => setFormData({ ...formData, program_date: e.target.value })}
-                      className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-slate-900 font-bold focus:border-emerald-500 focus:outline-none"
-                    />
-                  </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block mb-1 text-slate-900 font-bold">Start Time</label>
-                    <input 
-                      type="time"
-                      value={formData.start_time}
-                      onChange={e => setFormData({ ...formData, start_time: e.target.value })}
-                      className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-slate-900 font-bold focus:border-emerald-500 focus:outline-none"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block mb-1 text-slate-900 font-bold">End Time</label>
-                    <input 
-                      type="time"
-                      value={formData.end_time}
-                      onChange={e => setFormData({ ...formData, end_time: e.target.value })}
-                      className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-slate-900 font-bold focus:border-emerald-500 focus:outline-none"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block mb-1 text-slate-900 font-bold">Duration (Minutes)</label>
-                    <input 
-                      type="number"
-                      value={formData.duration_minutes}
-                      onChange={e => setFormData({ ...formData, duration_minutes: parseInt(e.target.value, 10) || 10 })}
-                      className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-slate-900 font-bold focus:border-emerald-500 focus:outline-none"
-                    />
-                  </div>
+                <div>
+                  <label className="block mb-1 text-slate-900 font-bold">Date</label>
+                  <input 
+                    type="date"
+                    value={formData.program_date}
+                    onChange={e => setFormData({ ...formData, program_date: e.target.value })}
+                    className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-slate-900 font-bold focus:border-emerald-500 focus:outline-none"
+                  />
                 </div>
 
               </div>
