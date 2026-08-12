@@ -442,10 +442,10 @@ export default function ProgramManagement() {
 
       {/* Assign 1st, 2nd, 3rd Winners Modal with Searchable Autocomplete Inputs */}
       {showWinnersModal && targetProgramForWinners && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center p-4 sm:p-6 pt-20 sm:pt-24 pb-12 bg-slate-900/60 backdrop-blur-md overflow-y-auto animate-fade-in">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-900/60 backdrop-blur-md animate-fade-in">
           <div 
             onClick={e => e.stopPropagation()}
-            className="relative transform rounded-3xl bg-white text-left shadow-2xl transition-all w-full max-w-4xl overflow-hidden border border-slate-200 text-slate-900 animate-scale-up"
+            className="relative transform rounded-3xl bg-white text-left shadow-2xl transition-all w-full max-w-4xl overflow-hidden border border-slate-200 text-slate-900 animate-scale-up max-h-[85vh] flex flex-col"
           >
               {/* Header Banner matching screenshot theme */}
               <div className="bg-gradient-to-r from-emerald-600 to-teal-700 p-6 text-white flex items-center justify-between">
@@ -709,8 +709,8 @@ export default function ProgramManagement() {
 
       {/* Create / Edit Program Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center p-4 sm:p-6 pt-20 sm:pt-24 pb-12 bg-slate-900/60 backdrop-blur-md overflow-y-auto animate-fade-in">
-          <div className="relative w-full max-w-3xl bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[85vh] text-slate-900 animate-scale-up">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-900/60 backdrop-blur-md animate-fade-in">
+          <div className="relative w-full max-w-3xl bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[85vh] sm:max-h-[88vh] text-slate-900 animate-scale-up">
             
             {/* Header Banner matching screenshot theme */}
             <div className="bg-gradient-to-r from-emerald-600 to-teal-700 p-6 text-white flex items-center justify-between shrink-0">
@@ -873,9 +873,8 @@ export default function ProgramManagement() {
 
       {/* Participating Students Modal */}
       {showParticipantsModal && selectedProgramForParticipants && (
-        <div className="fixed inset-0 z-[100] overflow-y-auto bg-slate-900/60 backdrop-blur-md p-4 sm:p-6">
-          <div className="flex min-h-full items-center justify-center p-2 text-center sm:p-4">
-            <div className="relative transform rounded-3xl bg-white text-left shadow-2xl transition-all w-full max-w-3xl p-6 sm:p-8 my-auto border border-slate-200 text-slate-900 space-y-4 animate-fade-in-up">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-slate-900/60 backdrop-blur-md animate-fade-in">
+          <div className="relative transform rounded-3xl bg-white text-left shadow-2xl transition-all w-full max-w-3xl p-6 sm:p-8 border border-slate-200 text-slate-900 space-y-4 animate-scale-up max-h-[85vh] flex flex-col overflow-hidden">
             <div className="flex items-center justify-between border-b border-slate-200 pb-3">
               <h3 className="text-base font-extrabold emerald-gradient-text flex items-center space-x-2">
                 <Users className="w-5 h-5 text-blue-600" />
@@ -987,7 +986,6 @@ export default function ProgramManagement() {
             </div>
           </div>
         </div>
-      </div>
       )}
 
     </div>

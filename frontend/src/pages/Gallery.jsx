@@ -251,8 +251,8 @@ export default function Gallery() {
 
       {/* Edit Image Modal */}
       {showEditModal && (
-        <div className="fixed inset-0 z-[100] flex items-start justify-center p-4 sm:p-6 pt-20 sm:pt-24 pb-12 bg-slate-900/60 backdrop-blur-md overflow-y-auto animate-fade-in">
-          <div className="relative transform rounded-3xl bg-white text-left shadow-2xl transition-all w-full max-w-3xl overflow-hidden border border-slate-200 text-slate-900 animate-scale-up">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-slate-900/60 backdrop-blur-md animate-fade-in">
+          <div className="relative transform rounded-3xl bg-white text-left shadow-2xl transition-all w-full max-w-3xl overflow-hidden border border-slate-200 text-slate-900 animate-scale-up max-h-[85vh] sm:max-h-[88vh] flex flex-col">
               {/* Header Banner matching screenshot theme */}
               <div className="bg-gradient-to-r from-emerald-600 to-teal-700 p-6 text-white flex items-center justify-between">
                 <div className="flex items-center space-x-3">
@@ -343,8 +343,8 @@ export default function Gallery() {
 
       {/* Admin Upload Modal */}
       {showUploadModal && (
-        <div className="fixed inset-0 z-[100] flex items-start justify-center p-4 sm:p-6 pt-20 sm:pt-24 pb-12 bg-slate-900/60 backdrop-blur-md overflow-y-auto animate-fade-in">
-          <div className="relative transform rounded-3xl bg-white text-left shadow-2xl transition-all w-full max-w-3xl overflow-hidden border border-slate-200 text-slate-900 animate-scale-up">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-slate-900/60 backdrop-blur-md animate-fade-in">
+          <div className="relative transform rounded-3xl bg-white text-left shadow-2xl transition-all w-full max-w-3xl overflow-hidden border border-slate-200 text-slate-900 animate-scale-up max-h-[85vh] sm:max-h-[88vh] flex flex-col">
               {/* Header Banner matching screenshot theme */}
               <div className="bg-gradient-to-r from-emerald-600 to-teal-700 p-6 text-white flex items-center justify-between">
                 <div className="flex items-center space-x-3">
