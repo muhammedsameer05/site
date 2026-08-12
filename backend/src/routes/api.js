@@ -205,8 +205,7 @@ router.get('/reports/dashboard-stats', async (req, res) => {
     const completedPrograms = await get("SELECT COUNT(*) as count FROM programs WHERE status = 'completed'");
     const pendingPrograms = await get("SELECT COUNT(*) as count FROM programs WHERE status = 'pending'");
     
-    const totalParticipants = await get('SELECT COUNT(*) as count FROM program_participants');
-
+    await recalculateAllHousePoints();
     const houses = await all('SELECT * FROM houses ORDER BY total_points DESC');
     const categoryStats = await all(`
       SELECT c.name as category_name, COUNT(p.id) as program_count 
@@ -405,9 +404,13 @@ router.delete('/students/:id', authenticate, requireAdmin, async (req, res) => {
 
 async function recalculateAllHousePoints() {
   try {
+    // Reset all houses to 0 points first
+    await run("UPDATE houses SET total_points = 0");
+
     const allResults = await all(`
       SELECT r.points_awarded, r.prize, r.student_id, s.house_id 
       FROM results r 
+      JOIN programs p ON (r.program_id = p.id OR r.program_id = p.code OR CAST(r.program_id AS TEXT) = CAST(p.id AS TEXT))
       LEFT JOIN students s ON (
         CAST(r.student_id AS TEXT) = CAST(s.id AS TEXT) OR 
         r.student_id = s.student_id OR 
@@ -415,18 +418,18 @@ async function recalculateAllHousePoints() {
         LOWER(TRIM(s.name)) = LOWER(TRIM(r.student_id))
       )
       WHERE r.prize IN ('1st', '2nd', '3rd')
+        AND (p.is_archived = 0 OR p.is_archived IS NULL)
     `);
 
-    // If there are results in the system, sum points per house
+    // Sum points per house
     if (allResults && allResults.length > 0) {
-      const housePointTotals = { '1': 0, '2': 0 };
+      const housePointTotals = {};
 
       for (const r of allResults) {
         const pts = r.prize === '1st' ? 10 : r.prize === '2nd' ? 7 : r.prize === '3rd' ? 5 : Number(r.points_awarded) || 0;
         let targetHouseId = r.house_id;
 
         if (!targetHouseId) {
-          // Fallback lookup by student name/id
           const stu = await get(`
             SELECT house_id FROM students 
             WHERE id = ? OR student_id = ? OR admission_no = ? OR LOWER(TRIM(name)) = LOWER(TRIM(?))
@@ -434,9 +437,6 @@ async function recalculateAllHousePoints() {
 
           if (stu) {
             targetHouseId = stu.house_id;
-          } else {
-            // Default 1st & 3rd to House 1 (Green), 2nd to House 2 (Blue)
-            targetHouseId = (r.prize === '1st' || r.prize === '3rd') ? 1 : 2;
           }
         }
 
@@ -936,6 +936,14 @@ router.put('/programs/:id/archive', authenticate, requireAdmin, async (req, res)
       WHERE id = ? OR CAST(id AS TEXT) = CAST(? AS TEXT)
     `, [req.user?.name || 'Admin', targetId, targetId]);
 
+    await recalculateAllHousePoints();
+
+    const io = req.app.get('io');
+    if (io) {
+      io.emit('score_updated', {});
+      io.emit('results_published', {});
+    }
+
     await logAuditAction(req.user?.name || 'Admin', 'Archive Program', `Archived program ID: ${targetId}`);
     triggerPersistenceSync();
     res.json({ success: true, message: 'Program archived successfully' });
@@ -952,6 +960,14 @@ router.put('/programs/:id/restore', authenticate, requireAdmin, async (req, res)
       SET is_archived = 0, archived_at = NULL, archived_by = NULL 
       WHERE id = ? OR CAST(id AS TEXT) = CAST(? AS TEXT)
     `, [targetId, targetId]);
+
+    await recalculateAllHousePoints();
+
+    const io = req.app.get('io');
+    if (io) {
+      io.emit('score_updated', {});
+      io.emit('results_published', {});
+    }
 
     await logAuditAction(req.user?.name || 'Admin', 'Restore Program', `Restored program ID: ${targetId}`);
     triggerPersistenceSync();
@@ -971,7 +987,16 @@ router.delete('/programs/:id', authenticate, requireAdmin, async (req, res) => {
       WHERE id = ? OR CAST(id AS TEXT) = CAST(? AS TEXT)
     `, [req.user?.name || 'Admin', targetId, targetId]);
 
+    await recalculateAllHousePoints();
+
+    const io = req.app.get('io');
+    if (io) {
+      io.emit('score_updated', {});
+      io.emit('results_published', {});
+    }
+
     await logAuditAction(req.user?.name || 'Admin', 'Archive Program (Delete Request)', `Archived program ID: ${targetId}`);
+    triggerPersistenceSync();
     res.json({ success: true, message: 'Program archived successfully' });
   } catch (err) {
     res.status(500).json({ error: err.message });
