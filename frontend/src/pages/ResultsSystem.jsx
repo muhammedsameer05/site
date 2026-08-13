@@ -135,20 +135,6 @@ export default function ResultsSystem() {
         </button>
       </div>
 
-      {/* Point Rules Card */}
-      <div className="grid grid-cols-3 gap-2 sm:gap-3 text-center">
-        {[
-          { prize: '1st Prize', pts: '10 Pts', bg: 'border-amber-300 bg-amber-50 text-amber-900' },
-          { prize: '2nd Prize', pts: '7 Pts', bg: 'border-slate-300 bg-slate-100 text-slate-800' },
-          { prize: '3rd Prize', pts: '5 Pts', bg: 'border-amber-400 bg-amber-100 text-amber-950' }
-        ].map((item, idx) => (
-          <div key={idx} className={`p-2.5 sm:p-3 rounded-xl border ${item.bg} text-xs font-bold shadow-xs`}>
-            <span className="block text-[9px] sm:text-[10px] uppercase font-bold opacity-80 tracking-tight">{item.prize}</span>
-            <span className="text-xs sm:text-base font-mono font-black block whitespace-nowrap">{item.pts}</span>
-          </div>
-        ))}
-      </div>
-
       {/* Results Table */}
       <div className="glass-panel rounded-2xl border border-slate-200 overflow-hidden shadow-sm bg-white">
         <div className="p-3.5 sm:p-4 bg-slate-50 border-b border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1.5">
@@ -164,15 +150,14 @@ export default function ResultsSystem() {
                 <th className="p-3 sm:p-4">Student Name</th>
                 <th className="p-3 sm:p-4">Class</th>
                 <th className="p-3 sm:p-4">House</th>
-                <th className="p-3 sm:p-4 text-right">House Points</th>
                 {isAdmin && <th className="p-3 sm:p-4 text-center">Action / Certificate</th>}
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {loading ? (
-                <tr><td colSpan={isAdmin ? "6" : "5"} className="p-8 text-center text-emerald-700 font-mono font-bold">Loading Results...</td></tr>
+                <tr><td colSpan={isAdmin ? "5" : "4"} className="p-8 text-center text-emerald-700 font-mono font-bold">Loading Results...</td></tr>
               ) : results.length === 0 ? (
-                <tr><td colSpan={isAdmin ? "6" : "5"} className="p-8 text-center text-slate-500 font-medium">No results calculated yet for this program.</td></tr>
+                <tr><td colSpan={isAdmin ? "5" : "4"} className="p-8 text-center text-slate-500 font-medium">No results calculated yet for this program.</td></tr>
               ) : (
                 results.map((r) => (
                   <tr key={r.id} className="hover:bg-emerald-50/30 transition">
@@ -198,7 +183,6 @@ export default function ResultsSystem() {
                         {r.house_name}
                       </span>
                     </td>
-                    <td className="p-3 sm:p-4 text-right font-black font-mono text-emerald-700 text-sm sm:text-base whitespace-nowrap">+{r.points_awarded} Pts</td>
                     {isAdmin && (
                       <td className="p-3 sm:p-4 text-center whitespace-nowrap">
                         <button
