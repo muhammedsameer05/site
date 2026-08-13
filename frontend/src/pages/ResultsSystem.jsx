@@ -136,36 +136,36 @@ export default function ResultsSystem() {
       </div>
 
       {/* Point Rules Card */}
-      <div className="grid grid-cols-3 gap-3 text-center">
+      <div className="grid grid-cols-3 gap-2 sm:gap-3 text-center">
         {[
-          { prize: '1st Prize', pts: '10 Points', bg: 'border-amber-300 bg-amber-50 text-amber-900' },
-          { prize: '2nd Prize', pts: '7 Points', bg: 'border-slate-300 bg-slate-100 text-slate-800' },
-          { prize: '3rd Prize', pts: '5 Points', bg: 'border-amber-400 bg-amber-100 text-amber-950' }
+          { prize: '1st Prize', pts: '10 Pts', bg: 'border-amber-300 bg-amber-50 text-amber-900' },
+          { prize: '2nd Prize', pts: '7 Pts', bg: 'border-slate-300 bg-slate-100 text-slate-800' },
+          { prize: '3rd Prize', pts: '5 Pts', bg: 'border-amber-400 bg-amber-100 text-amber-950' }
         ].map((item, idx) => (
-          <div key={idx} className={`p-3 rounded-xl border ${item.bg} text-xs font-bold shadow-xs`}>
-            <span className="block text-[10px] uppercase font-bold opacity-80">{item.prize}</span>
-            <span className="text-base font-mono font-black">{item.pts}</span>
+          <div key={idx} className={`p-2.5 sm:p-3 rounded-xl border ${item.bg} text-xs font-bold shadow-xs`}>
+            <span className="block text-[9px] sm:text-[10px] uppercase font-bold opacity-80 tracking-tight">{item.prize}</span>
+            <span className="text-xs sm:text-base font-mono font-black block whitespace-nowrap">{item.pts}</span>
           </div>
         ))}
       </div>
 
       {/* Results Table */}
       <div className="glass-panel rounded-2xl border border-slate-200 overflow-hidden shadow-sm bg-white">
-        <div className="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
-          <h3 className="text-sm font-bold text-emerald-950">Official Result Sheet</h3>
-          <span className="text-xs text-slate-500 font-mono font-bold">Tie breaking: Presentation → Pronunciation → Admin</span>
+        <div className="p-3.5 sm:p-4 bg-slate-50 border-b border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1.5">
+          <h3 className="text-xs sm:text-sm font-bold text-emerald-950">Official Result Sheet</h3>
+          <span className="text-[10px] sm:text-xs text-slate-500 font-mono font-bold">Tie breaking: Presentation → Pronunciation → Admin</span>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs text-slate-700">
-            <thead className="bg-emerald-50/80 text-emerald-950 uppercase font-mono border-b border-emerald-100 font-bold">
+          <table className="w-full text-left text-xs text-slate-700 min-w-[580px]">
+            <thead className="bg-emerald-50/80 text-emerald-950 uppercase font-mono border-b border-emerald-100 font-bold whitespace-nowrap">
               <tr>
-                <th className="p-4">Rank / Prize</th>
-                <th className="p-4">Student Name</th>
-                <th className="p-4">Class</th>
-                <th className="p-4">House</th>
-                <th className="p-4 text-right">House Points</th>
-                {isAdmin && <th className="p-4 text-center">Action / Certificate</th>}
+                <th className="p-3 sm:p-4">Rank / Prize</th>
+                <th className="p-3 sm:p-4">Student Name</th>
+                <th className="p-3 sm:p-4">Class</th>
+                <th className="p-3 sm:p-4">House</th>
+                <th className="p-3 sm:p-4 text-right">House Points</th>
+                {isAdmin && <th className="p-3 sm:p-4 text-center">Action / Certificate</th>}
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -176,8 +176,8 @@ export default function ResultsSystem() {
               ) : (
                 results.map((r) => (
                   <tr key={r.id} className="hover:bg-emerald-50/30 transition">
-                    <td className="p-4">
-                      <span className={`px-3 py-1 rounded-full text-xs font-extrabold font-mono ${
+                    <td className="p-3 sm:p-4 whitespace-nowrap">
+                      <span className={`px-2.5 py-1 rounded-full text-[11px] sm:text-xs font-extrabold font-mono inline-block ${
                         r.prize === '1st' ? 'bg-amber-400 text-slate-950' :
                         r.prize === '2nd' ? 'bg-slate-200 text-slate-950' :
                         r.prize === '3rd' ? 'bg-amber-700 text-white' : 'bg-slate-100 text-slate-700'
@@ -185,27 +185,27 @@ export default function ResultsSystem() {
                         {r.prize === '1st' ? '🥇 1st Prize' : r.prize === '2nd' ? '🥈 2nd Prize' : r.prize === '3rd' ? '🥉 3rd Prize' : 'Participation'}
                       </span>
                     </td>
-                    <td className="p-4">
-                      <div className="font-bold text-slate-900 text-sm">{r.student_name}</div>
-                      {r.arabic_name && <div className="text-xs font-serif text-emerald-800">{r.arabic_name}</div>}
+                    <td className="p-3 sm:p-4">
+                      <div className="font-bold text-slate-900 text-xs sm:text-sm">{r.student_name}</div>
+                      {r.arabic_name && <div className="text-[11px] font-serif text-emerald-800">{r.arabic_name}</div>}
                     </td>
-                    <td className="p-4 font-mono font-bold text-slate-700">{r.class_name}</td>
-                    <td className="p-4">
+                    <td className="p-3 sm:p-4 font-mono font-bold text-slate-700 whitespace-nowrap">{r.class_name || '-'}</td>
+                    <td className="p-3 sm:p-4 whitespace-nowrap">
                       <span 
-                        className="px-2.5 py-0.5 rounded text-[10px] font-bold uppercase"
+                        className="px-2.5 py-0.5 rounded text-[10px] font-bold uppercase whitespace-nowrap inline-block"
                         style={{ color: r.house_color || '#10b981' }}
                       >
                         {r.house_name}
                       </span>
                     </td>
-                    <td className="p-4 text-right font-black font-mono text-emerald-700 text-base">+{r.points_awarded} Pts</td>
+                    <td className="p-3 sm:p-4 text-right font-black font-mono text-emerald-700 text-sm sm:text-base whitespace-nowrap">+{r.points_awarded} Pts</td>
                     {isAdmin && (
-                      <td className="p-4 text-center">
+                      <td className="p-3 sm:p-4 text-center whitespace-nowrap">
                         <button
                           onClick={() => setSelectedCert({ ...r, program_name: selectedProgram?.name || 'Competition' })}
-                          className="px-3 py-1.5 rounded-lg bg-emerald-100 hover:bg-emerald-200 border border-emerald-300 text-emerald-900 font-bold text-xs inline-flex items-center space-x-1.5 transition"
+                          className="px-3 py-1.5 rounded-lg bg-emerald-100 hover:bg-emerald-200 border border-emerald-300 text-emerald-900 font-bold text-[11px] sm:text-xs inline-flex items-center space-x-1.5 transition"
                         >
-                          <Award className="w-3.5 h-3.5 text-emerald-600" />
+                          <Award className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                           <span>Print / Download Certificate</span>
                         </button>
                       </td>

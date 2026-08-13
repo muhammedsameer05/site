@@ -103,33 +103,33 @@ export default function HouseBreakdownModal({ house, houseId, onClose }) {
         <div className="p-6 overflow-y-auto space-y-6 flex-1 bg-slate-50/50">
           
           {/* Summary Stats Grid */}
-          <div className="grid grid-cols-4 gap-3 text-center">
-            <div className="p-3 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 shadow-xs">
-              <span className="text-[10px] font-black uppercase block">1st Places</span>
-              <span className="text-xl font-black font-mono">🥇 {count1st}</span>
-              <span className="text-[10px] block font-bold text-amber-700">({count1st * 10} Pts)</span>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 text-center">
+            <div className="p-2.5 sm:p-3 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 shadow-xs">
+              <span className="text-[9px] sm:text-[10px] font-black uppercase block tracking-tight">1st Places</span>
+              <span className="text-lg sm:text-xl font-black font-mono">🥇 {count1st}</span>
+              <span className="text-[9px] sm:text-[10px] block font-bold text-amber-700">({count1st * 10} Pts)</span>
             </div>
-            <div className="p-3 rounded-2xl bg-slate-100 border border-slate-300 text-slate-900 shadow-xs">
-              <span className="text-[10px] font-black uppercase block">2nd Places</span>
-              <span className="text-xl font-black font-mono">🥈 {count2nd}</span>
-              <span className="text-[10px] block font-bold text-slate-600">({count2nd * 7} Pts)</span>
+            <div className="p-2.5 sm:p-3 rounded-2xl bg-slate-100 border border-slate-300 text-slate-900 shadow-xs">
+              <span className="text-[9px] sm:text-[10px] font-black uppercase block tracking-tight">2nd Places</span>
+              <span className="text-lg sm:text-xl font-black font-mono">🥈 {count2nd}</span>
+              <span className="text-[9px] sm:text-[10px] block font-bold text-slate-600">({count2nd * 7} Pts)</span>
             </div>
-            <div className="p-3 rounded-2xl bg-amber-100/60 border border-amber-300 text-amber-950 shadow-xs">
-              <span className="text-[10px] font-black uppercase block">3rd Places</span>
-              <span className="text-xl font-black font-mono">🥉 {count3rd}</span>
-              <span className="text-[10px] block font-bold text-amber-800">({count3rd * 5} Pts)</span>
+            <div className="p-2.5 sm:p-3 rounded-2xl bg-amber-100/60 border border-amber-300 text-amber-950 shadow-xs">
+              <span className="text-[9px] sm:text-[10px] font-black uppercase block tracking-tight">3rd Places</span>
+              <span className="text-lg sm:text-xl font-black font-mono">🥉 {count3rd}</span>
+              <span className="text-[9px] sm:text-[10px] block font-bold text-amber-800">({count3rd * 5} Pts)</span>
             </div>
-            <div className="p-3 rounded-2xl bg-emerald-600 text-white shadow-md">
-              <span className="text-[10px] font-black uppercase block opacity-80">Total Points</span>
-              <span className="text-2xl font-black font-mono block">{housePoints}</span>
-              <span className="text-[9px] block font-extrabold uppercase">Calculated Live</span>
+            <div className="p-2.5 sm:p-3 rounded-2xl bg-emerald-600 text-white shadow-md">
+              <span className="text-[9px] sm:text-[10px] font-black uppercase block opacity-80 tracking-tight">Total Points</span>
+              <span className="text-xl sm:text-2xl font-black font-mono block leading-tight">{housePoints}</span>
+              <span className="text-[8px] sm:text-[9px] block font-extrabold uppercase tracking-tight opacity-90">Calculated Live</span>
             </div>
           </div>
 
           {/* Point Allocation breakdown list */}
           <div className="space-y-3">
-            <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider flex items-center space-x-1.5">
-              <Award className="w-4 h-4 text-emerald-600" />
+            <h3 className="text-xs sm:text-sm font-black text-slate-900 uppercase tracking-wider flex items-center space-x-1.5">
+              <Award className="w-4 h-4 text-emerald-600 shrink-0" />
               <span>Competition Result Point Breakdown ({results.length} Wins)</span>
             </h3>
 
@@ -149,31 +149,31 @@ export default function HouseBreakdownModal({ house, houseId, onClose }) {
                   return (
                     <div 
                       key={r.id || idx}
-                      className="p-3.5 bg-white rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between hover:border-emerald-300 transition"
+                      className="p-3 sm:p-3.5 bg-white rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between gap-2.5 hover:border-emerald-300 transition min-w-0"
                     >
-                      <div className="flex items-center space-x-3">
-                        <span className="text-2xl">
+                      <div className="flex items-center space-x-2.5 min-w-0">
+                        <span className="text-xl sm:text-2xl shrink-0">
                           {r.prize === '1st' ? '🥇' : r.prize === '2nd' ? '🥈' : '🥉'}
                         </span>
-                        <div>
-                          <div className="flex items-center space-x-2">
-                            <h4 className="text-sm font-black text-slate-900">{r.program_name || 'Competition Item'}</h4>
-                            <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-[10px] font-mono font-bold">
+                        <div className="min-w-0">
+                          <div className="flex items-center space-x-1.5 flex-wrap">
+                            <h4 className="text-xs sm:text-sm font-black text-slate-900 truncate">{r.program_name || 'Competition Item'}</h4>
+                            <span className="px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-600 text-[9px] font-mono font-bold shrink-0">
                               #{r.program_code || r.program_id}
                             </span>
                           </div>
-                          <p className="text-xs font-bold text-slate-600 mt-0.5">
+                          <p className="text-[11px] sm:text-xs font-bold text-slate-600 mt-0.5 truncate">
                             Winner: <span className="text-emerald-700 font-extrabold">{r.student_name || 'Student'}</span> {r.chest_no ? `(Chest #${r.chest_no})` : ''}
                           </p>
                         </div>
                       </div>
 
-                      <div className="text-right">
-                        <span className="px-3 py-1 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 font-mono font-black text-sm">
+                      <div className="text-right shrink-0">
+                        <span className="px-2.5 py-1 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 font-mono font-black text-xs sm:text-sm block whitespace-nowrap">
                           +{pts} Pts
                         </span>
-                        <span className="text-[10px] text-slate-400 block font-mono mt-0.5">
-                          {r.prize === '1st' ? '1st Place Winner' : r.prize === '2nd' ? '2nd Place Winner' : '3rd Place Winner'}
+                        <span className="text-[9px] sm:text-[10px] text-slate-400 block font-mono mt-0.5 whitespace-nowrap">
+                          {r.prize === '1st' ? '1st Place' : r.prize === '2nd' ? '2nd Place' : '3rd Place'}
                         </span>
                       </div>
                     </div>
