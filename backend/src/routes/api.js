@@ -862,9 +862,9 @@ router.get('/programs/:id', async (req, res) => {
 router.post('/programs', authenticate, requireAdmin, async (req, res) => {
   try {
     let { code, name, category_id, age_group, type, gender_category, stage_type, venue_id, program_date, start_time, end_time, max_participants, status } = req.body;
-    const finalStageType = stage_type || code || 'On Stage';
-    if (!code || !code.trim()) {
-      code = finalStageType;
+    const finalStageType = stage_type || 'On Stage';
+    if (!code || !code.trim() || code === 'On Stage' || code === 'Off Stage') {
+      code = `PRG-${Math.floor(1000 + Math.random() * 9000)}`;
     }
 
     try {
@@ -916,8 +916,11 @@ router.put('/programs/:id/status', authenticate, requireAdmin, async (req, res) 
 router.put('/programs/:id', authenticate, requireAdmin, async (req, res) => {
   try {
     const { code, name, category_id, age_group, type, gender_category, stage_type, venue_id, program_date, start_time, end_time, max_participants, status } = req.body;
-    const finalStageType = stage_type || code || 'On Stage';
-    const finalCode = code || finalStageType;
+    const finalStageType = stage_type || 'On Stage';
+    let finalCode = code;
+    if (!finalCode || !finalCode.trim() || finalCode === 'On Stage' || finalCode === 'Off Stage') {
+      finalCode = `PRG-${req.params.id}`;
+    }
     await run(`
       UPDATE programs 
       SET code = ?, name = ?, category_id = ?, age_group = ?, type = ?, gender_category = ?, stage_type = ?, venue_id = ?, program_date = ?, start_time = ?, end_time = ?, max_participants = ?, status = ?

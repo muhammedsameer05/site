@@ -829,8 +829,8 @@ export default function ProgramManagement() {
                 <div>
                   <label className="block mb-1 text-slate-900 font-bold">Stage Type / Execution Mode</label>
                   <select 
-                    value={formData.stage_type || formData.code || 'On Stage'}
-                    onChange={e => setFormData({ ...formData, stage_type: e.target.value, code: e.target.value })}
+                    value={formData.stage_type || 'On Stage'}
+                    onChange={e => setFormData({ ...formData, stage_type: e.target.value })}
                     className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-slate-900 font-bold focus:border-emerald-500 focus:outline-none"
                   >
                     <option value="On Stage">🎭 On Stage (ഓൺ സ്റ്റേജ്)</option>
