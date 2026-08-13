@@ -28,7 +28,8 @@ export default function ProgramManagement() {
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({
     id: null,
-    code: '',
+    code: 'On Stage',
+    stage_type: 'On Stage',
     name: '',
     category_id: 1,
     type: 'individual',
@@ -383,7 +384,8 @@ export default function ProgramManagement() {
             onClick={() => {
               setFormData({
                 id: null,
-                code: `PRG-${Date.now().toString().slice(-4)}`,
+                code: 'On Stage',
+                stage_type: 'On Stage',
                 name: '',
                 category_id: 1,
                 type: 'individual',
@@ -414,11 +416,14 @@ export default function ProgramManagement() {
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center space-x-1.5 flex-wrap gap-y-1">
-                    {p.code && (
-                      <span className="text-[10px] font-black font-mono tracking-wider px-2 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-300 shadow-xs">
-                        {p.code}
-                      </span>
-                    )}
+                    <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded border shadow-xs ${
+                      (p.stage_type || p.code || '').toLowerCase().includes('off')
+                        ? 'bg-slate-100 text-slate-800 border-slate-300'
+                        : 'bg-purple-100 text-purple-900 border-purple-300'
+                    }`}>
+                      {(p.stage_type || p.code || '').toLowerCase().includes('off') ? '📝 OFF STAGE' : '🎭 ON STAGE'}
+                    </span>
+
                     <span className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-100 text-emerald-900 border border-emerald-300">
                       {p.category_name || 'Category'} • {p.type || 'individual'} • {p.gender_category === 'Female' ? '👧 Female' : p.gender_category === 'General' ? '👫 General' : '👦 Male'}
                     </span>
@@ -430,7 +435,8 @@ export default function ProgramManagement() {
                         onClick={() => {
                           setFormData({
                             id: p.id,
-                            code: p.code || '',
+                            code: p.code || p.stage_type || 'On Stage',
+                            stage_type: p.stage_type || p.code || 'On Stage',
                             name: p.name,
                             category_id: p.category_id || 1,
                             type: p.type || 'individual',
@@ -821,15 +827,15 @@ export default function ProgramManagement() {
               <div className="p-5 sm:p-6 space-y-4 text-xs font-semibold text-slate-700 overflow-y-auto flex-1">
                 
                 <div>
-                  <label className="block mb-1 text-slate-900 font-bold">Program Code</label>
-                  <input 
-                    type="text"
-                    required
-                    value={formData.code}
-                    onChange={e => setFormData({ ...formData, code: e.target.value })}
-                    placeholder="e.g. QIR-01"
+                  <label className="block mb-1 text-slate-900 font-bold">Stage Type / Execution Mode</label>
+                  <select 
+                    value={formData.stage_type || formData.code || 'On Stage'}
+                    onChange={e => setFormData({ ...formData, stage_type: e.target.value, code: e.target.value })}
                     className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-slate-900 font-bold focus:border-emerald-500 focus:outline-none"
-                  />
+                  >
+                    <option value="On Stage">🎭 On Stage (ഓൺ സ്റ്റേജ്)</option>
+                    <option value="Off Stage">📝 Off Stage (ഓഫ് സ്റ്റേജ്)</option>
+                  </select>
                 </div>
 
                 <div>

@@ -861,9 +861,10 @@ router.get('/programs/:id', async (req, res) => {
 
 router.post('/programs', authenticate, requireAdmin, async (req, res) => {
   try {
-    let { code, name, category_id, age_group, type, gender_category, venue_id, program_date, start_time, end_time, max_participants, status } = req.body;
+    let { code, name, category_id, age_group, type, gender_category, stage_type, venue_id, program_date, start_time, end_time, max_participants, status } = req.body;
+    const finalStageType = stage_type || code || 'On Stage';
     if (!code || !code.trim()) {
-      code = `PRG-${Math.floor(100 + Math.random() * 900)}`;
+      code = finalStageType;
     }
 
     try {
@@ -878,11 +879,14 @@ router.post('/programs', authenticate, requireAdmin, async (req, res) => {
     try {
       await run(`ALTER TABLE programs ADD COLUMN gender_category TEXT DEFAULT 'Male'`);
     } catch (e) {}
+    try {
+      await run(`ALTER TABLE programs ADD COLUMN stage_type TEXT DEFAULT 'On Stage'`);
+    } catch (e) {}
 
     const result = await run(`
-      INSERT INTO programs (code, name, category_id, age_group, type, gender_category, venue_id, program_date, start_time, end_time, max_participants, status, is_archived)
+      INSERT INTO programs (code, name, category_id, age_group, type, gender_category, stage_type, venue_id, program_date, start_time, end_time, max_participants, status, is_archived)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
-    `, [code, name, category_id || 1, age_group || 'Sub Junior', type || 'individual', gender_category || 'Male', venue_id || 1, program_date || '2026-08-15', start_time || '09:00', end_time || '10:30', max_participants || 20, status || 'pending']);
+    `, [code, name, category_id || 1, age_group || 'Sub Junior', type || 'individual', gender_category || 'Male', finalStageType, venue_id || 1, program_date || '2026-08-15', start_time || '09:00', end_time || '10:30', max_participants || 20, status || 'pending']);
 
     await logAuditAction(req.user?.name || 'Admin', 'Create Program', `Created program ${name} (${code})`);
     triggerPersistenceSync();
@@ -911,12 +915,14 @@ router.put('/programs/:id/status', authenticate, requireAdmin, async (req, res) 
 
 router.put('/programs/:id', authenticate, requireAdmin, async (req, res) => {
   try {
-    const { code, name, category_id, age_group, type, gender_category, venue_id, program_date, start_time, end_time, max_participants, status } = req.body;
+    const { code, name, category_id, age_group, type, gender_category, stage_type, venue_id, program_date, start_time, end_time, max_participants, status } = req.body;
+    const finalStageType = stage_type || code || 'On Stage';
+    const finalCode = code || finalStageType;
     await run(`
       UPDATE programs 
-      SET code = ?, name = ?, category_id = ?, age_group = ?, type = ?, gender_category = ?, venue_id = ?, program_date = ?, start_time = ?, end_time = ?, max_participants = ?, status = ?
+      SET code = ?, name = ?, category_id = ?, age_group = ?, type = ?, gender_category = ?, stage_type = ?, venue_id = ?, program_date = ?, start_time = ?, end_time = ?, max_participants = ?, status = ?
       WHERE id = ?
-    `, [code, name, category_id, age_group, type, gender_category || 'Male', venue_id, program_date, start_time, end_time, max_participants, status, req.params.id]);
+    `, [finalCode, name, category_id, age_group, type, gender_category || 'Male', finalStageType, venue_id, program_date, start_time, end_time, max_participants, status, req.params.id]);
     
     const io = req.app.get('io');
     if (status === 'completed') {
@@ -1689,9 +1695,9 @@ router.post('/database/import', authenticate, requireAdmin, async (req, res) => 
     if (Array.isArray(snapshot.programs)) {
       for (const p of snapshot.programs) {
         await run(`
-          INSERT OR REPLACE INTO programs (id, code, name, category_id, age_group, type, gender_category, venue_id, program_date, start_time, end_time, max_participants, status, duration_minutes, is_archived, archived_at, archived_by, created_at)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `, [p.id, p.code, p.name, p.category_id, p.age_group, p.type || 'individual', p.gender_category || 'Male', p.venue_id || 1, p.program_date, p.start_time, p.end_time, p.max_participants || 20, p.status || 'pending', p.duration_minutes || 10, p.is_archived || 0, p.archived_at, p.archived_by, p.created_at || new Date().toISOString()]);
+          INSERT OR REPLACE INTO programs (id, code, name, category_id, age_group, type, gender_category, stage_type, venue_id, program_date, start_time, end_time, max_participants, status, duration_minutes, is_archived, archived_at, archived_by, created_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `, [p.id, p.code || p.stage_type || 'On Stage', p.name, p.category_id, p.age_group, p.type || 'individual', p.gender_category || 'Male', p.stage_type || p.code || 'On Stage', p.venue_id || 1, p.program_date, p.start_time, p.end_time, p.max_participants || 20, p.status || 'pending', p.duration_minutes || 10, p.is_archived || 0, p.archived_at, p.archived_by, p.created_at || new Date().toISOString()]);
       }
     }
 
