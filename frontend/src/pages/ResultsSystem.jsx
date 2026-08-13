@@ -121,7 +121,7 @@ export default function ResultsSystem() {
             className="w-full sm:w-96 bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 focus:border-emerald-500"
           >
             {programs.map(p => (
-              <option key={p.id} value={p.id}>{p.name} ({p.status})</option>
+              <option key={p.id} value={p.id}>{p.name}</option>
             ))}
           </select>
         </div>
