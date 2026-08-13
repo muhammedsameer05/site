@@ -527,17 +527,46 @@ router.get('/houses', async (req, res) => {
       }
     }
 
-    const housesWithMedals = houses.map(h => {
+    // Fetch active students to calculate student_count per house accurately
+    const allStudents = await all(`
+      SELECT house_id FROM students 
+      WHERE (is_archived = 0 OR is_archived IS NULL)
+    `);
+
+    const studentCounts = {};
+    if (allStudents && allStudents.length > 0) {
+      for (const s of allStudents) {
+        if (s.house_id !== undefined && s.house_id !== null) {
+          const k = String(s.house_id).trim().toLowerCase();
+          studentCounts[k] = (studentCounts[k] || 0) + 1;
+        }
+      }
+    }
+
+    const housesWithDetails = houses.map(h => {
       const medals = houseMedals[String(h.id)] || { gold: 0, silver: 0, bronze: 0 };
+      
+      const idKey = String(h.id).trim().toLowerCase();
+      const codeKey = h.code ? String(h.code).trim().toLowerCase() : '';
+      const nameKey = h.name ? String(h.name).trim().toLowerCase() : '';
+
+      let count = 0;
+      for (const [k, c] of Object.entries(studentCounts)) {
+        if (k === idKey || (codeKey && k === codeKey) || (nameKey && k === nameKey) || (nameKey && (nameKey.includes(k) || k.includes(nameKey)))) {
+          count += c;
+        }
+      }
+
       return {
         ...h,
+        student_count: count,
         gold: medals.gold,
         silver: medals.silver,
         bronze: medals.bronze
       };
     });
 
-    res.json(housesWithMedals);
+    res.json(housesWithDetails);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
