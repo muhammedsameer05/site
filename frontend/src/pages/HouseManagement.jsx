@@ -58,7 +58,7 @@ export default function HouseManagement() {
 
   const openCreateModal = () => {
     setEditingHouseId(null);
-    setFormData({ code: `H-${Date.now().toString().slice(-3)}`, name: '', color_hex: '#10B981', motto: '', captain_name: '' });
+    setFormData({ code: `H-${Date.now().toString().slice(-3)}`, name: '', color_hex: '#10B981', motto: '', captain_name: '', total_points: 0 });
     setShowModal(true);
   };
 
@@ -69,7 +69,8 @@ export default function HouseManagement() {
       name: house.name,
       color_hex: house.color_hex || '#10B981',
       motto: house.motto || '',
-      captain_name: house.captain_name || ''
+      captain_name: house.captain_name || '',
+      total_points: house.total_points !== undefined ? house.total_points : 0
     });
     setShowModal(true);
   };
@@ -147,7 +148,7 @@ export default function HouseManagement() {
                     className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-900 hover:bg-emerald-100 text-xs font-bold transition shadow-xs"
                   >
                     <Edit className="w-3.5 h-3.5 text-emerald-600" />
-                    <span>Edit House Name</span>
+                    <span>Edit House & Points</span>
                   </button>
                 )}
               </div>
@@ -187,7 +188,22 @@ export default function HouseManagement() {
               </div>
 
               <div className="flex items-center justify-between border-t border-slate-200 pt-3 mb-2">
-                <span className="text-xs font-bold text-slate-600">Total Championship Points</span>
+                <div className="flex items-center space-x-2">
+                  <span className="text-xs font-bold text-slate-600">Total Championship Points</span>
+                  {isAdmin && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openEditModal(house);
+                      }}
+                      className="p-1 px-2 rounded bg-amber-100 text-amber-900 hover:bg-amber-200 transition text-[10px] font-extrabold border border-amber-300 flex items-center space-x-1 shadow-xs"
+                      title="Edit Points"
+                    >
+                      <Edit className="w-3 h-3 text-amber-700" />
+                      <span>Edit Points</span>
+                    </button>
+                  )}
+                </div>
                 <span className="text-4xl font-black emerald-gradient-text font-mono">{house.total_points || 0}</span>
               </div>
 
@@ -217,7 +233,7 @@ export default function HouseManagement() {
                   </div>
                   <div>
                     <h2 className="text-2xl font-black text-white">
-                      {editingHouseId ? 'Edit House Details' : 'Create New House'}
+                      {editingHouseId ? 'Edit House Details & Points' : 'Create New House'}
                     </h2>
                     <p className="text-xs font-mono font-bold text-white/80">
                       {editingHouseId ? `Code: #${formData.code || editingHouseId}` : 'Create a main competition team house'}
@@ -244,6 +260,24 @@ export default function HouseManagement() {
                     placeholder="e.g. Abu Bakr House / Green House"
                     className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-slate-900 font-bold text-sm focus:outline-none focus:border-emerald-500"
                   />
+                </div>
+
+                <div>
+                  <label className="block text-slate-900 font-bold mb-1">
+                    🏆 Total Championship Points (Admin Edit)
+                  </label>
+                  <input
+                    type="number"
+                    required
+                    min="0"
+                    value={formData.total_points !== undefined ? formData.total_points : 0}
+                    onChange={e => setFormData({ ...formData, total_points: parseInt(e.target.value) || 0 })}
+                    placeholder="e.g. 15"
+                    className="w-full bg-amber-50/70 border border-amber-300 rounded-xl p-3 text-slate-900 font-black text-lg focus:outline-none focus:border-amber-500 shadow-xs"
+                  />
+                  <p className="text-[11px] text-slate-500 mt-1">
+                    Admins can directly edit or adjust this house's total championship points score.
+                  </p>
                 </div>
 
                 <div>
