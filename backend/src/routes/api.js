@@ -404,8 +404,15 @@ router.delete('/students/:id', authenticate, requireAdmin, async (req, res) => {
 
 async function recalculateAllHousePoints() {
   try {
-    // Reset all houses to 0 points first
-    await run("UPDATE houses SET total_points = 0");
+    try {
+      await run(`ALTER TABLE houses ADD COLUMN bonus_points INTEGER DEFAULT 0`);
+    } catch (e) {}
+
+    const houses = await all('SELECT * FROM houses');
+    const houseTotals = {};
+    for (const h of houses) {
+      houseTotals[String(h.id)] = Number(h.bonus_points) || 0;
+    }
 
     // Automatically purge old orphan results belonging to deleted students or deleted programs
     try {
@@ -436,8 +443,6 @@ async function recalculateAllHousePoints() {
 
     // Sum points per house
     if (allResults && allResults.length > 0) {
-      const housePointTotals = {};
-
       for (const r of allResults) {
         const pts = r.prize === '1st' ? 10 : r.prize === '2nd' ? 7 : r.prize === '3rd' ? 5 : Number(r.points_awarded) || 0;
         let targetHouseId = r.house_id;
@@ -455,17 +460,17 @@ async function recalculateAllHousePoints() {
 
         if (targetHouseId) {
           const hKey = String(targetHouseId);
-          housePointTotals[hKey] = (housePointTotals[hKey] || 0) + pts;
+          houseTotals[hKey] = (houseTotals[hKey] || 0) + pts;
         }
       }
+    }
 
-      for (const [hId, totalPts] of Object.entries(housePointTotals)) {
-        await run(`
-          UPDATE houses 
-          SET total_points = ? 
-          WHERE id = ? OR CAST(id AS TEXT) = CAST(? AS TEXT) OR code = ?
-        `, [totalPts, hId, hId, hId]);
-      }
+    for (const [hId, totalPts] of Object.entries(houseTotals)) {
+      await run(`
+        UPDATE houses 
+        SET total_points = ? 
+        WHERE id = ? OR CAST(id AS TEXT) = CAST(? AS TEXT) OR code = ?
+      `, [totalPts, hId, hId, hId]);
     }
   } catch (err) {
     console.error('[HOUSE RECALC ERROR]', err.message);
@@ -653,13 +658,40 @@ router.put('/houses/:id', async (req, res) => {
     const updatedColor = (color_hex !== undefined && color_hex !== null) ? color_hex : existing.color_hex;
     const updatedMotto = (motto !== undefined && motto !== null) ? motto : existing.motto;
     const updatedCaptain = (captain_name !== undefined && captain_name !== null) ? captain_name : existing.captain_name;
-    const updatedPoints = (total_points !== undefined && total_points !== null) ? Number(total_points) : existing.total_points;
+
+    let updatedBonusPoints = existing.bonus_points || 0;
+    let updatedPoints = existing.total_points;
+
+    if (total_points !== undefined && total_points !== null) {
+      const newTotal = Number(total_points);
+      // Calculate points earned from competition results
+      const resCount = await get(`
+        SELECT SUM(CASE WHEN r.prize = '1st' THEN 10 WHEN r.prize = '2nd' THEN 7 WHEN r.prize = '3rd' THEN 5 ELSE 0 END) as result_pts
+        FROM results r
+        JOIN students s ON (
+          CAST(r.student_id AS TEXT) = CAST(s.id AS TEXT) OR 
+          r.student_id = s.student_id OR 
+          r.student_id = s.admission_no OR
+          LOWER(TRIM(s.name)) = LOWER(TRIM(r.student_id))
+        )
+        JOIN programs p ON (r.program_id = p.id OR r.program_id = p.code OR CAST(r.program_id AS TEXT) = CAST(p.id AS TEXT))
+        WHERE (s.house_id = ? OR CAST(s.house_id AS TEXT) = CAST(? AS TEXT)) AND r.prize IN ('1st', '2nd', '3rd') AND (p.is_archived = 0 OR p.is_archived IS NULL)
+      `, [req.params.id, req.params.id]);
+
+      const earnedPts = Number(resCount?.result_pts) || 0;
+      updatedBonusPoints = newTotal - earnedPts;
+      updatedPoints = newTotal;
+    }
+
+    try {
+      await run(`ALTER TABLE houses ADD COLUMN bonus_points INTEGER DEFAULT 0`);
+    } catch (e) {}
 
     await run(`
       UPDATE houses 
-      SET name = ?, code = ?, color_hex = ?, motto = ?, captain_name = ?, total_points = ?
+      SET name = ?, code = ?, color_hex = ?, motto = ?, captain_name = ?, total_points = ?, bonus_points = ?
       WHERE id = ? OR CAST(id AS TEXT) = CAST(? AS TEXT)
-    `, [updatedName, updatedCode, updatedColor, updatedMotto, updatedCaptain, updatedPoints, req.params.id, req.params.id]);
+    `, [updatedName, updatedCode, updatedColor, updatedMotto, updatedCaptain, updatedPoints, updatedBonusPoints, req.params.id, req.params.id]);
 
     const io = req.app.get('io');
     if (io) {
@@ -681,7 +713,11 @@ router.post('/houses/:id/adjust-points', async (req, res) => {
     const houseId = req.params.id;
     const pts = Number(points) || 0;
 
-    await run('UPDATE houses SET total_points = MAX(0, total_points + ?) WHERE id = ?', [pts, houseId]);
+    try {
+      await run(`ALTER TABLE houses ADD COLUMN bonus_points INTEGER DEFAULT 0`);
+    } catch (e) {}
+
+    await run('UPDATE houses SET bonus_points = bonus_points + ?, total_points = MAX(0, total_points + ?) WHERE id = ? OR CAST(id AS TEXT) = CAST(? AS TEXT)', [pts, pts, houseId, houseId]);
 
     // Record audit action
     await logAuditAction(req.user?.name || 'Admin', 'House Live Point Adjustment', `Adjusted House ID ${houseId} by ${pts > 0 ? '+' : ''}${pts} pts. Reason: ${reason || 'Live Admin Scoring'}`);
@@ -1658,9 +1694,9 @@ router.post('/database/import', authenticate, requireAdmin, async (req, res) => 
     if (Array.isArray(snapshot.houses)) {
       for (const h of snapshot.houses) {
         await run(`
-          INSERT OR REPLACE INTO houses (id, code, name, color_hex, motto, captain_name, total_points, created_at)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        `, [h.id, h.code, h.name, h.color_hex, h.motto, h.captain_name, h.total_points || 0, h.created_at || new Date().toISOString()]);
+          INSERT OR REPLACE INTO houses (id, code, name, color_hex, motto, captain_name, total_points, bonus_points, created_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `, [h.id, h.code, h.name, h.color_hex, h.motto, h.captain_name, h.total_points || 0, h.bonus_points || 0, h.created_at || new Date().toISOString()]);
       }
     }
 

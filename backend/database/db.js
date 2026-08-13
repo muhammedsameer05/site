@@ -148,8 +148,13 @@ async function initDb() {
       motto TEXT,
       captain_name TEXT,
       total_points INTEGER DEFAULT 0,
+      bonus_points INTEGER DEFAULT 0,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )`);
+
+    try {
+      await run(`ALTER TABLE houses ADD COLUMN bonus_points INTEGER DEFAULT 0`);
+    } catch (e) {}
 
     await run(`CREATE TABLE IF NOT EXISTS categories (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
