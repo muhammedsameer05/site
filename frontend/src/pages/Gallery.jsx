@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Sparkles, Plus, X, Trash2, Edit, Save, Upload, Image as ImageIcon, Loader2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -434,8 +435,8 @@ export default function Gallery() {
         </div>
       )}
 
-      {/* Lightbox Preview Modal */}
-      {lightbox && (
+      {/* Lightbox Preview Modal via React Portal */}
+      {lightbox && createPortal(
         <div 
           className="fixed inset-0 w-screen h-screen z-[99999] flex flex-col justify-between bg-black/95 backdrop-blur-2xl p-3 sm:p-6 overflow-hidden animate-fade-in" 
           onClick={() => setLightbox(null)}
@@ -486,7 +487,8 @@ export default function Gallery() {
               Tap anywhere outside to close
             </p>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
     </div>
