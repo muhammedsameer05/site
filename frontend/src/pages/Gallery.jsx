@@ -437,14 +437,14 @@ export default function Gallery() {
       {/* Lightbox Preview Modal */}
       {lightbox && (
         <div 
-          className="fixed inset-0 z-[200] flex flex-col justify-between bg-black/95 backdrop-blur-2xl p-4 sm:p-6 overflow-y-auto animate-fade-in" 
+          className="fixed inset-0 w-screen h-screen z-[99999] flex flex-col justify-between bg-black/95 backdrop-blur-2xl p-3 sm:p-6 overflow-hidden animate-fade-in" 
           onClick={() => setLightbox(null)}
         >
-          {/* Top Bar Header */}
-          <div className="flex items-center justify-between w-full max-w-5xl mx-auto mb-2 shrink-0 z-30">
-            <div className="flex items-center space-x-2 text-white/80 text-xs font-mono font-bold bg-white/10 px-3.5 py-1.5 rounded-full border border-white/15">
-              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-              <span className="truncate max-w-[180px] sm:max-w-xs">{lightbox.title || 'Photo Preview'}</span>
+          {/* Top Header Bar */}
+          <div className="flex items-center justify-between w-full max-w-5xl mx-auto mb-2 shrink-0 z-[100000]">
+            <div className="flex items-center space-x-2 text-white/90 text-xs font-mono font-bold bg-white/10 px-3.5 py-1.5 rounded-full border border-white/20 shadow-md">
+              <Sparkles className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+              <span className="truncate max-w-[150px] sm:max-w-xs">{lightbox.title || 'Photo Preview'}</span>
             </div>
 
             <button 
@@ -452,7 +452,7 @@ export default function Gallery() {
                 e.stopPropagation();
                 setLightbox(null);
               }}
-              className="flex items-center space-x-1.5 px-4 py-2 rounded-full bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs shadow-xl border border-white/20 transition hover:scale-105"
+              className="flex items-center space-x-1.5 px-4 py-2 rounded-full bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs shadow-2xl border border-white/30 transition hover:scale-105 cursor-pointer"
             >
               <X className="w-4 h-4" />
               <span>Close Preview</span>
@@ -461,28 +461,28 @@ export default function Gallery() {
 
           {/* Center Image Box */}
           <div 
-            className="flex-1 flex items-center justify-center my-auto py-2 min-h-0 w-full max-w-5xl mx-auto"
+            className="flex-1 w-full max-w-5xl mx-auto flex items-center justify-center min-h-0 my-auto py-2"
             onClick={e => e.stopPropagation()}
           >
             <img 
               src={lightbox.url} 
               alt={lightbox.title}
-              className="max-h-[60vh] sm:max-h-[70vh] max-w-full w-auto object-contain rounded-2xl shadow-2xl border border-white/15 transition-all" 
+              className="max-h-[60vh] sm:max-h-[70vh] max-w-full w-auto object-contain rounded-2xl shadow-2xl border border-white/20" 
             />
           </div>
 
-          {/* Bottom Details Bar */}
+          {/* Bottom Caption Box */}
           <div 
-            className="w-full max-w-3xl mx-auto mt-2 p-4 sm:p-5 rounded-2xl bg-slate-900/90 backdrop-blur-xl border border-white/15 text-center shadow-2xl shrink-0"
+            className="w-full max-w-2xl mx-auto p-4 sm:p-5 rounded-2xl bg-slate-900/95 backdrop-blur-2xl border border-white/20 text-center shadow-2xl shrink-0 z-[100000]"
             onClick={e => e.stopPropagation()}
           >
             <h3 className="text-sm sm:text-base font-extrabold text-white tracking-wide">{lightbox.title}</h3>
             {lightbox.caption && (
-              <p className="text-xs sm:text-sm text-slate-300 mt-1.5 max-h-32 overflow-y-auto leading-relaxed font-sans px-2">
+              <p className="text-xs sm:text-sm text-slate-200 mt-2 max-h-28 overflow-y-auto leading-relaxed font-sans px-2">
                 {lightbox.caption}
               </p>
             )}
-            <p className="text-[10px] text-slate-500 mt-2 font-mono uppercase tracking-widest">
+            <p className="text-[10px] text-slate-400 mt-2 font-mono uppercase tracking-widest">
               Tap anywhere outside to close
             </p>
           </div>
