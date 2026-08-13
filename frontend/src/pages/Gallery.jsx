@@ -437,42 +437,54 @@ export default function Gallery() {
       {/* Lightbox Preview Modal */}
       {lightbox && (
         <div 
-          className="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-slate-950/90 backdrop-blur-xl p-4 sm:p-8 animate-fade-in" 
+          className="fixed inset-0 z-[200] flex flex-col justify-between bg-black/95 backdrop-blur-2xl p-4 sm:p-6 overflow-y-auto animate-fade-in" 
           onClick={() => setLightbox(null)}
         >
-          {/* Top Fixed Screen Close Button */}
-          <button 
-            onClick={() => setLightbox(null)}
-            className="fixed top-4 right-4 sm:top-6 sm:right-6 z-[220] flex items-center space-x-2 px-4 py-2.5 rounded-full bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs sm:text-sm shadow-2xl border border-white/30 transition-transform duration-200 hover:scale-105 cursor-pointer"
-            title="Close Preview (or press Esc / click anywhere)"
+          {/* Top Bar Header */}
+          <div className="flex items-center justify-between w-full max-w-5xl mx-auto mb-2 shrink-0 z-30">
+            <div className="flex items-center space-x-2 text-white/80 text-xs font-mono font-bold bg-white/10 px-3.5 py-1.5 rounded-full border border-white/15">
+              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+              <span className="truncate max-w-[180px] sm:max-w-xs">{lightbox.title || 'Photo Preview'}</span>
+            </div>
+
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                setLightbox(null);
+              }}
+              className="flex items-center space-x-1.5 px-4 py-2 rounded-full bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs shadow-xl border border-white/20 transition hover:scale-105"
+            >
+              <X className="w-4 h-4" />
+              <span>Close Preview</span>
+            </button>
+          </div>
+
+          {/* Center Image Box */}
+          <div 
+            className="flex-1 flex items-center justify-center my-auto py-2 min-h-0 w-full max-w-5xl mx-auto"
+            onClick={e => e.stopPropagation()}
           >
-            <X className="w-5 h-5" />
-            <span>Close Preview</span>
-          </button>
+            <img 
+              src={lightbox.url} 
+              alt={lightbox.title}
+              className="max-h-[60vh] sm:max-h-[70vh] max-w-full w-auto object-contain rounded-2xl shadow-2xl border border-white/15 transition-all" 
+            />
+          </div>
 
-          <div className="relative max-w-4xl w-full max-h-[80vh] flex flex-col items-center justify-center" onClick={e => e.stopPropagation()}>
-            <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-white/20 bg-slate-900/50">
-              {/* Inner Card Close Icon */}
-              <button 
-                onClick={() => setLightbox(null)}
-                className="absolute top-3 right-3 z-30 p-2 rounded-full bg-black/60 hover:bg-rose-600 text-white shadow-lg backdrop-blur-md transition border border-white/20"
-                title="Close"
-              >
-                <X className="w-5 h-5" />
-              </button>
-
-              <img 
-                src={lightbox.url} 
-                alt={lightbox.title}
-                className="max-h-[60vh] sm:max-h-[68vh] w-auto max-w-full object-contain block mx-auto" 
-              />
-            </div>
-
-            <div className="mt-4 text-center max-w-2xl px-5 py-3 rounded-2xl bg-slate-900/90 backdrop-blur-md border border-white/10 shadow-xl">
-              <h3 className="text-base sm:text-lg font-extrabold text-white">{lightbox.title}</h3>
-              {lightbox.caption && <p className="text-xs text-slate-300 mt-1">{lightbox.caption}</p>}
-              <p className="text-[10px] text-slate-400 mt-2 font-mono uppercase tracking-wider">Click anywhere outside to close</p>
-            </div>
+          {/* Bottom Details Bar */}
+          <div 
+            className="w-full max-w-3xl mx-auto mt-2 p-4 sm:p-5 rounded-2xl bg-slate-900/90 backdrop-blur-xl border border-white/15 text-center shadow-2xl shrink-0"
+            onClick={e => e.stopPropagation()}
+          >
+            <h3 className="text-sm sm:text-base font-extrabold text-white tracking-wide">{lightbox.title}</h3>
+            {lightbox.caption && (
+              <p className="text-xs sm:text-sm text-slate-300 mt-1.5 max-h-32 overflow-y-auto leading-relaxed font-sans px-2">
+                {lightbox.caption}
+              </p>
+            )}
+            <p className="text-[10px] text-slate-500 mt-2 font-mono uppercase tracking-widest">
+              Tap anywhere outside to close
+            </p>
           </div>
         </div>
       )}
