@@ -215,6 +215,48 @@ async function restoreFromDatabaseSnapshot(dbHelpers) {
       }
     } catch (e) {}
 
+    // Restore Judges
+    try {
+      if (Array.isArray(snapshot.judges) && snapshot.judges.length > 0) {
+        for (const j of snapshot.judges) {
+          try {
+            await run(`
+              INSERT OR REPLACE INTO judges (id, judge_code, name, qualification, phone, email, specialization, user_id)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            `, [j.id, j.judge_code || `JDG-${j.id}`, j.name, j.qualification, j.phone, j.email, j.specialization, j.user_id]);
+          } catch (e) {}
+        }
+      }
+    } catch (e) {}
+
+    // Restore Program Judges
+    try {
+      if (Array.isArray(snapshot.program_judges) && snapshot.program_judges.length > 0) {
+        for (const pj of snapshot.program_judges) {
+          try {
+            await run(`
+              INSERT OR REPLACE INTO program_judges (program_id, judge_id)
+              VALUES (?, ?)
+            `, [pj.program_id, pj.judge_id]);
+          } catch (e) {}
+        }
+      }
+    } catch (e) {}
+
+    // Restore Marks
+    try {
+      if (Array.isArray(snapshot.marks) && snapshot.marks.length > 0) {
+        for (const m of snapshot.marks) {
+          try {
+            await run(`
+              INSERT OR REPLACE INTO marks (id, program_id, student_id, judge_id, total_mark, total_score, criteria_scores, remarks, status, submitted_at, updated_at)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `, [m.id, m.program_id, m.student_id, m.judge_id || 1, m.total_mark || 0, m.total_score || m.total_mark || 0, typeof m.criteria_scores === 'object' ? JSON.stringify(m.criteria_scores) : m.criteria_scores || '{}', m.remarks || '', m.status || 'draft', m.submitted_at || new Date().toISOString(), m.updated_at || new Date().toISOString()]);
+          } catch (e) {}
+        }
+      }
+    } catch (e) {}
+
     // Restore Results
     try {
       if (Array.isArray(snapshot.results) && snapshot.results.length > 0) {

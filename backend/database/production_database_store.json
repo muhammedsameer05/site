@@ -1,64 +1,440 @@
 {
-  "students": [],
-  "programs": [],
-  "program_participants": [],
-  "houses": [
+  "programs": [
     {
       "id": 1,
-      "code": "H-GRN",
-      "name": "Green House",
-      "color_hex": "#10B981",
-      "motto": "Courage and Devotion in Faith",
-      "captain_name": "Ahmad Bin Ziyad",
-      "total_points": 0,
+      "code": "PRG-101",
+      "name": "Quran Recitation (Tilawat)",
+      "category_id": 3,
+      "age_group": "Junior",
+      "type": "individual",
+      "venue_id": 1,
+      "program_date": "2026-08-15",
+      "start_time": "09:00",
+      "end_time": "10:30",
+      "max_participants": 10,
+      "status": "running",
+      "duration_minutes": 90,
       "created_at": "2026-08-07 20:53:05"
     },
     {
       "id": 2,
-      "code": "H-BLU",
-      "name": "Blue House",
-      "color_hex": "#3B82F6",
-      "motto": "Knowledge is Light and Guidance",
-      "captain_name": "Muhammed Fayaz",
-      "total_points": 0,
+      "code": "PRG-102",
+      "name": "Hifz Competition (Juz 30)",
+      "category_id": 2,
+      "age_group": "Sub Junior",
+      "type": "individual",
+      "venue_id": 2,
+      "program_date": "2026-08-15",
+      "start_time": "09:30",
+      "end_time": "11:00",
+      "max_participants": 8,
+      "status": "pending",
+      "duration_minutes": 90,
       "created_at": "2026-08-07 20:53:05"
-    }
-  ],
-  "categories": [
-    {
-      "id": 1,
-      "name": "Kiddies",
-      "min_age": 5,
-      "max_age": 7,
-      "description": "Kiddies Category"
-    },
-    {
-      "id": 2,
-      "name": "Sub Junior",
-      "min_age": 8,
-      "max_age": 10,
-      "description": "Sub Junior Category"
     },
     {
       "id": 3,
-      "name": "Junior",
-      "min_age": 11,
-      "max_age": 13,
-      "description": "Junior Category"
+      "code": "PRG-103",
+      "name": "Arabic Elocution (Speech)",
+      "category_id": 4,
+      "age_group": "Senior",
+      "type": "individual",
+      "venue_id": 1,
+      "program_date": "2026-08-15",
+      "start_time": "11:00",
+      "end_time": "12:30",
+      "max_participants": 12,
+      "status": "pending",
+      "duration_minutes": 90,
+      "created_at": "2026-08-07 20:53:05"
     },
     {
       "id": 4,
-      "name": "Senior",
-      "min_age": 14,
-      "max_age": 16,
-      "description": "Senior Category"
+      "code": "PRG-104",
+      "name": "Malayalam Speech",
+      "category_id": 3,
+      "age_group": "Junior",
+      "type": "individual",
+      "venue_id": 3,
+      "program_date": "2026-08-15",
+      "start_time": "10:00",
+      "end_time": "11:30",
+      "max_participants": 10,
+      "status": "completed",
+      "duration_minutes": 90,
+      "created_at": "2026-08-07 20:53:05"
     },
     {
       "id": 5,
-      "name": "Super Senior",
-      "min_age": 17,
-      "max_age": 20,
-      "description": "Super Senior Category"
+      "code": "PRG-105",
+      "name": "Nasheed (Islamic Song)",
+      "category_id": 3,
+      "age_group": "Junior",
+      "type": "individual",
+      "venue_id": 4,
+      "program_date": "2026-08-15",
+      "start_time": "11:30",
+      "end_time": "13:00",
+      "max_participants": 15,
+      "status": "pending",
+      "duration_minutes": 90,
+      "created_at": "2026-08-07 20:53:05"
+    },
+    {
+      "id": 6,
+      "code": "PRG-106",
+      "name": "Duff Performance (Group)",
+      "category_id": 4,
+      "age_group": "Senior",
+      "type": "group",
+      "venue_id": 1,
+      "program_date": "2026-08-15",
+      "start_time": "14:00",
+      "end_time": "16:00",
+      "max_participants": 6,
+      "status": "pending",
+      "duration_minutes": 120,
+      "created_at": "2026-08-07 20:53:05"
+    },
+    {
+      "id": 7,
+      "code": "PRG-107",
+      "name": "Islamic Quiz",
+      "category_id": 3,
+      "age_group": "Junior",
+      "type": "group",
+      "venue_id": 2,
+      "program_date": "2026-08-15",
+      "start_time": "14:00",
+      "end_time": "15:30",
+      "max_participants": 8,
+      "status": "pending",
+      "duration_minutes": 90,
+      "created_at": "2026-08-07 20:53:05"
+    },
+    {
+      "id": 8,
+      "code": "PRG-108",
+      "name": "Arabic Calligraphy",
+      "category_id": 4,
+      "age_group": "Senior",
+      "type": "individual",
+      "venue_id": 3,
+      "program_date": "2026-08-15",
+      "start_time": "14:00",
+      "end_time": "16:00",
+      "max_participants": 15,
+      "status": "pending",
+      "duration_minutes": 120,
+      "created_at": "2026-08-07 20:53:05"
+    }
+  ],
+  "students": [
+    {
+      "id": 1,
+      "student_id": "STU-1001",
+      "admission_no": "ADM-2024-01",
+      "name": "Muhammed Danish",
+      "arabic_name": "محمد دانش",
+      "photo": null,
+      "gender": "male",
+      "dob": "2012-05-14",
+      "age": 14,
+      "class_name": "Class 8",
+      "division": "A",
+      "house_id": 1,
+      "parent_name": "Ibrahim K.T.",
+      "phone": "+91 9123456789",
+      "email": "danish@mail.com",
+      "address": "Green Villa, Calicut Road",
+      "qr_code": null,
+      "created_at": "2026-08-07 20:53:05"
+    },
+    {
+      "id": 2,
+      "student_id": "STU-1002",
+      "admission_no": "ADM-2024-02",
+      "name": "Ahmad Zayan",
+      "arabic_name": "أحمد زيان",
+      "photo": null,
+      "gender": "male",
+      "dob": "2013-08-20",
+      "age": 13,
+      "class_name": "Class 7",
+      "division": "B",
+      "house_id": 2,
+      "parent_name": "Kassim Ali",
+      "phone": "+91 9123456790",
+      "email": "zayan@mail.com",
+      "address": "Noor Manzil, Madrasa Nagar",
+      "qr_code": null,
+      "created_at": "2026-08-07 20:53:05"
+    },
+    {
+      "id": 3,
+      "student_id": "STU-1003",
+      "admission_no": "ADM-2024-03",
+      "name": "Fathima Zahra",
+      "arabic_name": "فاطمة الزهراء",
+      "photo": null,
+      "gender": "female",
+      "dob": "2014-02-10",
+      "age": 12,
+      "class_name": "Class 6",
+      "division": "A",
+      "house_id": 1,
+      "parent_name": "Muhammed Shareef",
+      "phone": "+91 9123456791",
+      "email": "zahra@mail.com",
+      "address": "Rose Garden, Beach Road",
+      "qr_code": null,
+      "created_at": "2026-08-07 20:53:05"
+    },
+    {
+      "id": 4,
+      "student_id": "STU-1004",
+      "admission_no": "ADM-2024-04",
+      "name": "Aisha Raihana",
+      "arabic_name": "عائشة ريحانة",
+      "photo": null,
+      "gender": "female",
+      "dob": "2011-11-05",
+      "age": 15,
+      "class_name": "Class 9",
+      "division": "A",
+      "house_id": 1,
+      "parent_name": "Abdul Latheef",
+      "phone": "+91 9123456792",
+      "email": "aisha@mail.com",
+      "address": "Baitul Noor, Market Street",
+      "qr_code": null,
+      "created_at": "2026-08-07 20:53:05"
+    },
+    {
+      "id": 5,
+      "student_id": "STU-1005",
+      "admission_no": "ADM-2024-05",
+      "name": "Omar Abdullah",
+      "arabic_name": "عمر عبد الله",
+      "photo": null,
+      "gender": "male",
+      "dob": "2015-09-12",
+      "age": 11,
+      "class_name": "Class 5",
+      "division": "B",
+      "house_id": 1,
+      "parent_name": "Abdullah K.",
+      "phone": "+91 9123456793",
+      "email": "omar@mail.com",
+      "address": "Al-Madina House, Town Hall",
+      "qr_code": null,
+      "created_at": "2026-08-07 20:53:05"
+    }
+  ],
+  "program_judges": [
+    {
+      "program_id": 1,
+      "judge_id": 1
+    },
+    {
+      "program_id": 1,
+      "judge_id": 2
+    },
+    {
+      "program_id": 2,
+      "judge_id": 1
+    },
+    {
+      "program_id": 2,
+      "judge_id": 3
+    },
+    {
+      "program_id": 3,
+      "judge_id": 2
+    },
+    {
+      "program_id": 3,
+      "judge_id": 3
+    },
+    {
+      "program_id": 4,
+      "judge_id": 2
+    }
+  ],
+  "marks": [
+    {
+      "id": 1,
+      "program_id": 4,
+      "student_id": 1,
+      "judge_id": 2,
+      "presentation": 14,
+      "pronunciation": 14.5,
+      "confidence": 13,
+      "voice": 13.5,
+      "content": 14,
+      "memorization": 10,
+      "time_management": 9.5,
+      "overall_impression": 9,
+      "total_mark": 97.5,
+      "status": "final",
+      "submitted_at": "2026-08-07 20:53:05"
+    },
+    {
+      "id": 2,
+      "program_id": 4,
+      "student_id": 2,
+      "judge_id": 2,
+      "presentation": 13,
+      "pronunciation": 13,
+      "confidence": 12.5,
+      "voice": 12,
+      "content": 13,
+      "memorization": 9,
+      "time_management": 9,
+      "overall_impression": 8.5,
+      "total_mark": 90,
+      "status": "final",
+      "submitted_at": "2026-08-07 20:53:05"
+    },
+    {
+      "id": 3,
+      "program_id": 4,
+      "student_id": 3,
+      "judge_id": 2,
+      "presentation": 12,
+      "pronunciation": 12.5,
+      "confidence": 11.5,
+      "voice": 11,
+      "content": 12,
+      "memorization": 8.5,
+      "time_management": 8,
+      "overall_impression": 8,
+      "total_mark": 83.5,
+      "status": "final",
+      "submitted_at": "2026-08-07 20:53:05"
+    }
+  ],
+  "results": [
+    {
+      "id": 1,
+      "program_id": 4,
+      "student_id": 1,
+      "total_score": 97.5,
+      "prize": "1st",
+      "points_awarded": 10,
+      "tie_breaker_note": null,
+      "published_at": "2026-08-07 20:53:05"
+    },
+    {
+      "id": 2,
+      "program_id": 4,
+      "student_id": 2,
+      "total_score": 90,
+      "prize": "2nd",
+      "points_awarded": 7,
+      "tie_breaker_note": null,
+      "published_at": "2026-08-07 20:53:05"
+    },
+    {
+      "id": 3,
+      "program_id": 4,
+      "student_id": 3,
+      "total_score": 83.5,
+      "prize": "3rd",
+      "points_awarded": 5,
+      "tie_breaker_note": null,
+      "published_at": "2026-08-07 20:53:05"
+    }
+  ],
+  "certificates": [],
+  "announcements": [
+    {
+      "id": 1,
+      "title": "Welcome to Milad-un-Nabi Festival 2026",
+      "content": "We are delighted to announce the grand inauguration of Madrasa Milad Festival 2026. All programs start at 9:00 AM sharp at Stage 1.",
+      "priority": "high",
+      "posted_by": "Madrasa Committee",
+      "created_at": "2026-08-07 20:53:05"
+    },
+    {
+      "id": 2,
+      "title": "Live Leaderboard Active",
+      "content": "Parents and guests can watch live real-time scores and house standings on the digital screens or on our official website portal.",
+      "priority": "normal",
+      "posted_by": "IT Cell",
+      "created_at": "2026-08-07 20:53:05"
+    }
+  ],
+  "gallery": [
+    {
+      "id": 1,
+      "album_name": "Milad 2026 Highlights",
+      "title": "Opening Ceremony & Qiraat Recitation",
+      "media_type": "photo",
+      "url": "https://images.unsplash.com/photo-1542816417-0983c9c9ad53?auto=format&fit=crop&w=800&q=80",
+      "caption": "Inaugural prayer session led by Principal Usthad",
+      "uploaded_at": "2026-08-07 20:53:05"
+    },
+    {
+      "id": 2,
+      "album_name": "Stage 1 Events",
+      "title": "Duff Group Performance",
+      "media_type": "photo",
+      "url": "https://images.unsplash.com/photo-1584551246679-0daf3d275d0f?auto=format&fit=crop&w=800&q=80",
+      "caption": "Senior students presenting traditional Duff song",
+      "uploaded_at": "2026-08-07 20:53:05"
+    }
+  ],
+  "users": [
+    {
+      "id": 1,
+      "username": "superadmin",
+      "email": "superadmin@madrasa.org",
+      "password": "$2a$10$e8w8S5P0dK0xG9Jv8sJ6Ue2xXyY.7m3v5Z8m3v5Z8m3v5Z8m3v5Z8",
+      "name": "Usthad Sayyid Muhammed",
+      "role": "super_admin",
+      "avatar": null,
+      "created_at": "2026-08-07 20:53:05"
+    },
+    {
+      "id": 2,
+      "username": "admin",
+      "email": "admin@madrasa.org",
+      "password": "$2a$10$e8w8S5P0dK0xG9Jv8sJ6Ue2xXyY.7m3v5Z8m3v5Z8m3v5Z8m3v5Z8",
+      "name": "Usthad Abdul Rahman",
+      "role": "admin",
+      "avatar": null,
+      "created_at": "2026-08-07 20:53:05"
+    },
+    {
+      "id": 3,
+      "username": "judge1",
+      "email": "judge1@madrasa.org",
+      "password": "$2a$10$e8w8S5P0dK0xG9Jv8sJ6Ue2xXyY.7m3v5Z8m3v5Z8m3v5Z8m3v5Z8",
+      "name": "Qari Zakariya Al-Hafiz",
+      "role": "judge",
+      "avatar": null,
+      "created_at": "2026-08-07 20:53:05"
+    },
+    {
+      "id": 4,
+      "username": "judge2",
+      "email": "judge2@madrasa.org",
+      "password": "$2a$10$e8w8S5P0dK0xG9Jv8sJ6Ue2xXyY.7m3v5Z8m3v5Z8m3v5Z8m3v5Z8",
+      "name": "Dr. Luqman Hakeem",
+      "role": "judge",
+      "avatar": null,
+      "created_at": "2026-08-07 20:53:05"
+    },
+    {
+      "id": 5,
+      "username": "coordinator1",
+      "email": "stage1@madrasa.org",
+      "password": "$2a$10$e8w8S5P0dK0xG9Jv8sJ6Ue2xXyY.7m3v5Z8m3v5Z8m3v5Z8m3v5Z8",
+      "name": "Umer Farooq",
+      "role": "stage_coordinator",
+      "avatar": null,
+      "created_at": "2026-08-07 20:53:05"
     }
   ],
   "venues": [
@@ -91,10 +467,181 @@
       "location": "Madrasa Courtyard Area"
     }
   ],
-  "results": [],
-  "announcements": [],
-  "gallery": [],
-  "marks": [],
-  "audit_logs": [],
-  "last_synced": "2026-08-12T12:11:00.000Z"
+  "houses": [
+    {
+      "id": 1,
+      "code": "H-GRN",
+      "name": "Green House",
+      "color_hex": "#10B981",
+      "motto": "Courage and Devotion in Faith",
+      "captain_name": "Ahmad Bin Ziyad",
+      "total_points": 145,
+      "created_at": "2026-08-07 20:53:05"
+    },
+    {
+      "id": 2,
+      "code": "H-BLU",
+      "name": "Blue House",
+      "color_hex": "#3B82F6",
+      "motto": "Knowledge is Light and Guidance",
+      "captain_name": "Muhammed Fayaz",
+      "total_points": 132,
+      "created_at": "2026-08-07 20:53:05"
+    }
+  ],
+  "categories": [
+    {
+      "id": 1,
+      "name": "Kids",
+      "min_age": 5,
+      "max_age": 8,
+      "description": "Class 1 to Class 3"
+    },
+    {
+      "id": 2,
+      "name": "Sub Junior",
+      "min_age": 9,
+      "max_age": 11,
+      "description": "Class 4 to Class 6"
+    },
+    {
+      "id": 3,
+      "name": "Junior",
+      "min_age": 12,
+      "max_age": 14,
+      "description": "Class 7 to Class 9"
+    },
+    {
+      "id": 4,
+      "name": "Senior",
+      "min_age": 15,
+      "max_age": 18,
+      "description": "Class 10 to Higher Secondary"
+    }
+  ],
+  "program_participants": [
+    {
+      "id": 1,
+      "program_id": 1,
+      "student_id": 1,
+      "chest_no": 101,
+      "attendance": "present"
+    },
+    {
+      "id": 2,
+      "program_id": 1,
+      "student_id": 2,
+      "chest_no": 102,
+      "attendance": "present"
+    },
+    {
+      "id": 3,
+      "program_id": 1,
+      "student_id": 3,
+      "chest_no": 103,
+      "attendance": "present"
+    },
+    {
+      "id": 4,
+      "program_id": 1,
+      "student_id": 4,
+      "chest_no": 104,
+      "attendance": "present"
+    },
+    {
+      "id": 5,
+      "program_id": 1,
+      "student_id": 5,
+      "chest_no": 105,
+      "attendance": "present"
+    },
+    {
+      "id": 6,
+      "program_id": 4,
+      "student_id": 1,
+      "chest_no": 201,
+      "attendance": "present"
+    },
+    {
+      "id": 7,
+      "program_id": 4,
+      "student_id": 2,
+      "chest_no": 202,
+      "attendance": "present"
+    },
+    {
+      "id": 8,
+      "program_id": 4,
+      "student_id": 3,
+      "chest_no": 203,
+      "attendance": "present"
+    }
+  ],
+  "judges": [
+    {
+      "id": 1,
+      "judge_code": "JDG-001",
+      "name": "Qari Zakariya Al-Hafiz",
+      "qualification": "M.A. Islamic Studies",
+      "phone": "+91 9876543210",
+      "email": "judge1@madrasa.org",
+      "specialization": "Tajweed & Quran Recitation",
+      "user_id": 3
+    },
+    {
+      "id": 2,
+      "judge_code": "JDG-002",
+      "name": "Dr. Luqman Hakeem",
+      "qualification": "Ph.D. Arabic Literature",
+      "phone": "+91 9876543211",
+      "email": "judge2@madrasa.org",
+      "specialization": "Arabic & Malayalam Eloquence",
+      "user_id": 4
+    },
+    {
+      "id": 3,
+      "judge_code": "JDG-003",
+      "name": "Usthad Zainul Abideen",
+      "qualification": "Fazil Baqavi",
+      "phone": "+91 9876543212",
+      "email": "zain@madrasa.org",
+      "specialization": "Nasheed & Voice Culture",
+      "user_id": null
+    }
+  ],
+  "settings": [
+    {
+      "key_name": "school_name",
+      "value": "Madrasat-ul-Huda Islamic Academy"
+    },
+    {
+      "key_name": "milad_title",
+      "value": "Grand Milad-un-Nabi Fest 2026"
+    },
+    {
+      "key_name": "academic_year",
+      "value": "2026-2027"
+    },
+    {
+      "key_name": "point_1st",
+      "value": "10"
+    },
+    {
+      "key_name": "point_2nd",
+      "value": "7"
+    },
+    {
+      "key_name": "point_3rd",
+      "value": "5"
+    },
+    {
+      "key_name": "point_participation",
+      "value": "3"
+    },
+    {
+      "key_name": "theme_primary",
+      "value": "#065F46"
+    }
+  ],
+  "last_synced": "2026-08-14T13:20:52.219Z"
 }
