@@ -481,17 +481,12 @@ async function initDb() {
       ON CONFLICT DO NOTHING`);
   }
 
-  // Restore from production snapshot if tables are empty
+  // Restore from production snapshot unconditionally
   const persistence = require('./persistence');
+  await persistence.restoreFromDatabaseSnapshot({ run, get, all });
   if (!isPg) {
-    await persistence.restoreFromDatabaseSnapshot({ run, get, all });
     await persistence.syncDatabaseSnapshot({ run, get, all });
   } else {
-    const studentCount = await get('SELECT COUNT(*) as count FROM students');
-    if (!studentCount || parseInt(studentCount.count, 10) === 0) {
-      console.log('[DB] PostgreSQL student table is empty. Restoring baseline data from snapshot...');
-      await persistence.restoreFromDatabaseSnapshot({ run, get, all });
-    }
     await syncPgSequences();
   }
 
