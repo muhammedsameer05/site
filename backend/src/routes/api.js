@@ -671,6 +671,11 @@ router.post('/houses', async (req, res) => {
       code = `H-${Math.floor(100 + Math.random() * 899)}`;
     }
 
+    const existingCode = await get('SELECT id FROM houses WHERE code = ? OR LOWER(code) = LOWER(?)', [code, code]);
+    if (existingCode) {
+      code = `${code}-${Math.floor(10 + Math.random() * 90)}`;
+    }
+
     try {
       await run(`ALTER TABLE houses ADD COLUMN bonus_points INTEGER DEFAULT 0`);
     } catch (e) {}
@@ -682,7 +687,7 @@ router.post('/houses', async (req, res) => {
 
     await recalculateAllHousePoints();
     triggerPersistenceSync();
-    res.json({ success: true, id: result.id });
+    res.json({ success: true, id: result.id, code });
   } catch (err) {
     console.error('[CREATE HOUSE ERROR]', err);
     res.status(500).json({ error: err.message });
@@ -950,6 +955,11 @@ router.post('/programs', async (req, res) => {
       code = `PRG-${Math.floor(1000 + Math.random() * 9000)}`;
     }
 
+    const existingCode = await get('SELECT id FROM programs WHERE code = ? OR LOWER(code) = LOWER(?)', [code, code]);
+    if (existingCode) {
+      code = `${code}-${Math.floor(10 + Math.random() * 90)}`;
+    }
+
     try {
       await run(`ALTER TABLE programs ADD COLUMN is_archived INTEGER DEFAULT 0`);
     } catch (e) {}
@@ -973,7 +983,7 @@ router.post('/programs', async (req, res) => {
 
     await logAuditAction(req.user?.name || 'Admin', 'Create Program', `Created program ${name} (${code})`);
     triggerPersistenceSync();
-    res.json({ success: true, id: result.id });
+    res.json({ success: true, id: result.id, code });
   } catch (err) {
     console.error('[CREATE PROGRAM ERROR]', err);
     res.status(500).json({ error: err.message });
