@@ -936,7 +936,7 @@ router.post('/programs', authenticate, requireAdmin, async (req, res) => {
       await run(`ALTER TABLE programs ADD COLUMN is_archived INTEGER DEFAULT 0`);
     } catch (e) {}
     try {
-      await run(`ALTER TABLE programs ADD COLUMN archived_at DATETIME`);
+      await run(`ALTER TABLE programs ADD COLUMN archived_at TIMESTAMP WITH TIME ZONE`);
     } catch (e) {}
     try {
       await run(`ALTER TABLE programs ADD COLUMN archived_by TEXT`);
@@ -1012,7 +1012,7 @@ router.put('/programs/:id/archive', authenticate, requireAdmin, async (req, res)
       await run(`ALTER TABLE programs ADD COLUMN is_archived INTEGER DEFAULT 0`);
     } catch (e) {}
     try {
-      await run(`ALTER TABLE programs ADD COLUMN archived_at DATETIME`);
+      await run(`ALTER TABLE programs ADD COLUMN archived_at TIMESTAMP WITH TIME ZONE`);
     } catch (e) {}
     try {
       await run(`ALTER TABLE programs ADD COLUMN archived_by TEXT`);
@@ -1801,7 +1801,7 @@ router.post('/database/import', authenticate, requireAdmin, async (req, res) => 
         await run("ALTER TABLE marks ADD COLUMN remarks TEXT");
       } catch (e) {}
       try {
-        await run("ALTER TABLE marks ADD COLUMN updated_at DATETIME");
+        await run("ALTER TABLE marks ADD COLUMN updated_at TIMESTAMP WITH TIME ZONE");
       } catch (e) {}
 
       for (const m of snapshot.marks) {

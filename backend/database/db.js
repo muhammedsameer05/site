@@ -36,6 +36,18 @@ function translateQuery(sql, params = []) {
   let paramIndex = 1;
   let pgSql = sql.replace(/\?/g, () => `$${paramIndex++}`);
 
+  // Replace SQLite DATETIME with PostgreSQL TIMESTAMP WITH TIME ZONE
+  pgSql = pgSql.replace(/\bDATETIME\b/gi, 'TIMESTAMP WITH TIME ZONE');
+
+  // Replace SQLite AUTOINCREMENT syntax
+  pgSql = pgSql.replace(/\bINTEGER PRIMARY KEY AUTOINCREMENT\b/gi, 'SERIAL PRIMARY KEY');
+  pgSql = pgSql.replace(/\bAUTOINCREMENT\b/gi, '');
+
+  // Ensure ALTER TABLE ADD COLUMN includes IF NOT EXISTS for PostgreSQL compatibility
+  if (/^\s*ALTER\s+TABLE\s+[\w"]+\s+ADD\s+COLUMN\s+(?!IF\s+NOT\s+EXISTS)/i.test(pgSql)) {
+    pgSql = pgSql.replace(/ADD\s+COLUMN\s+/i, 'ADD COLUMN IF NOT EXISTS ');
+  }
+
   // Handle SQLite INSERT OR REPLACE FOR PostgreSQL
   if (pgSql.includes('INSERT OR REPLACE INTO')) {
     if (pgSql.includes('INSERT OR REPLACE INTO settings')) {
@@ -404,7 +416,7 @@ async function initDb() {
     await run("ALTER TABLE marks ADD COLUMN remarks TEXT");
   } catch (e) {}
   try {
-    await run("ALTER TABLE marks ADD COLUMN updated_at DATETIME");
+    await run(isPg ? "ALTER TABLE marks ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITH TIME ZONE" : "ALTER TABLE marks ADD COLUMN updated_at DATETIME");
   } catch (e) {}
 
   // Ensure default seeds exist if empty
