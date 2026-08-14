@@ -47,8 +47,8 @@ async function calculateProgramResults(programId, io) {
       // Resolve exact student record from database
       const studentObj = await get(`
         SELECT id FROM students 
-        WHERE id = ? OR student_id = ? OR admission_no = ? OR CAST(id AS TEXT) = CAST(? AS TEXT)
-      `, [sScore.student_id, sScore.student_id, sScore.student_id, sScore.student_id]);
+        WHERE CAST(id AS TEXT) = CAST(? AS TEXT) OR student_id = ? OR admission_no = ?
+      `, [sScore.student_id, sScore.student_id, sScore.student_id]);
 
       const targetStudentDbId = studentObj ? studentObj.id : sScore.student_id;
 
@@ -60,7 +60,7 @@ async function calculateProgramResults(programId, io) {
 
     // Reset and recalculate house total points across all results
     await run('UPDATE houses SET total_points = 0');
-    const allResults = await all('SELECT r.points_awarded, s.house_id FROM results r JOIN students s ON (r.student_id = s.id OR r.student_id = s.student_id OR CAST(r.student_id AS TEXT) = CAST(s.id AS TEXT))');
+    const allResults = await all('SELECT r.points_awarded, s.house_id FROM results r JOIN students s ON (CAST(r.student_id AS TEXT) = CAST(s.id AS TEXT) OR CAST(r.student_id AS TEXT) = CAST(s.student_id AS TEXT) OR CAST(r.student_id AS TEXT) = CAST(s.admission_no AS TEXT))');
     for (let r of allResults) {
       if (r.house_id) {
         await run('UPDATE houses SET total_points = total_points + ? WHERE id = ?', [r.points_awarded, r.house_id]);
@@ -191,50 +191,6 @@ router.get('/auth/me', authenticate, async (req, res) => {
 });
 
 // -------------------------------------------------------------
-// DASHBOARD STATS
-// -------------------------------------------------------------
-router.get('/reports/dashboard-stats', async (req, res) => {
-  try {
-    const totalStudents = await get('SELECT COUNT(*) as count FROM students');
-    const totalPrograms = await get('SELECT COUNT(*) as count FROM programs');
-    const totalJudges = await get('SELECT COUNT(*) as count FROM judges');
-    const totalHouses = await get('SELECT COUNT(*) as count FROM houses');
-    const totalCategories = await get('SELECT COUNT(*) as count FROM categories');
-    
-    const runningPrograms = await get("SELECT COUNT(*) as count FROM programs WHERE status = 'running'");
-    const completedPrograms = await get("SELECT COUNT(*) as count FROM programs WHERE status = 'completed'");
-    const pendingPrograms = await get("SELECT COUNT(*) as count FROM programs WHERE status = 'pending'");
-    
-    await recalculateAllHousePoints();
-    const houses = await all('SELECT * FROM houses ORDER BY total_points DESC');
-    const categoryStats = await all(`
-      SELECT c.name as category_name, COUNT(p.id) as program_count 
-      FROM categories c 
-      LEFT JOIN programs p ON p.category_id = c.id 
-      GROUP BY c.id
-    `);
-
-    res.json({
-      cards: {
-        totalStudents: totalStudents.count,
-        totalPrograms: totalPrograms.count,
-        totalJudges: totalJudges.count,
-        totalHouses: totalHouses.count,
-        totalCategories: totalCategories.count,
-        runningPrograms: runningPrograms.count,
-        completedPrograms: completedPrograms.count,
-        pendingPrograms: pendingPrograms.count,
-        totalParticipants: totalParticipants.count
-      },
-      houses,
-      categoryStats
-    });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// -------------------------------------------------------------
 // STUDENTS MANAGEMENT
 // -------------------------------------------------------------
 router.get('/students', async (req, res) => {
@@ -330,11 +286,11 @@ router.put('/students/:id', authenticate, requireAdmin, async (req, res) => {
     await run(`
       UPDATE students 
       SET name = ?, category_name = ?, arabic_name = ?, photo = ?, gender = ?, dob = ?, age = ?, class_name = ?, division = ?, house_id = ?, parent_name = ?, phone = ?, email = ?, address = ?, admission_no = COALESCE(?, admission_no)
-      WHERE id = ? OR CAST(id AS TEXT) = CAST(? AS TEXT)
-    `, [name, category_name || 'Sub Junior', arabic_name || '', photo || '', gender || 'male', dob, age || 10, class_name || 'Class 6', division || 'A', house_id || 1, parent_name || '', phone || '', email || '', address || '', admission_no, targetId, targetId]);
+      WHERE CAST(id AS TEXT) = CAST(? AS TEXT)
+    `, [name, category_name || 'Sub Junior', arabic_name || '', photo || '', gender || 'male', dob, age || 10, class_name || 'Class 6', division || 'A', house_id || 1, parent_name || '', phone || '', email || '', address || '', admission_no, targetId]);
 
     if (Array.isArray(registered_program_ids)) {
-      await run('DELETE FROM program_participants WHERE student_id = ? OR CAST(student_id AS TEXT) = CAST(? AS TEXT)', [targetId, targetId]);
+      await run('DELETE FROM program_participants WHERE CAST(student_id AS TEXT) = CAST(? AS TEXT)', [targetId]);
       for (const progId of registered_program_ids) {
         await run(`
           INSERT INTO program_participants (program_id, student_id, chest_no, attendance)
@@ -357,8 +313,8 @@ router.put('/students/:id/archive', authenticate, requireAdmin, async (req, res)
     await run(`
       UPDATE students 
       SET is_archived = 1, archived_at = CURRENT_TIMESTAMP, archived_by = ? 
-      WHERE id = ? OR CAST(id AS TEXT) = CAST(? AS TEXT)
-    `, [req.user?.name || 'Admin', targetId, targetId]);
+      WHERE CAST(id AS TEXT) = CAST(? AS TEXT)
+    `, [req.user?.name || 'Admin', targetId]);
 
     await logAuditAction(req.user?.name || 'Admin', 'Archive Student', `Archived student ID: ${targetId}`);
     triggerPersistenceSync();
@@ -374,8 +330,8 @@ router.put('/students/:id/restore', authenticate, requireAdmin, async (req, res)
     await run(`
       UPDATE students 
       SET is_archived = 0, archived_at = NULL, archived_by = NULL 
-      WHERE id = ? OR CAST(id AS TEXT) = CAST(? AS TEXT)
-    `, [targetId, targetId]);
+      WHERE CAST(id AS TEXT) = CAST(? AS TEXT)
+    `, [targetId]);
 
     await logAuditAction(req.user?.name || 'Admin', 'Restore Student', `Restored student ID: ${targetId}`);
     triggerPersistenceSync();
@@ -392,8 +348,8 @@ router.delete('/students/:id', authenticate, requireAdmin, async (req, res) => {
     await run(`
       UPDATE students 
       SET is_archived = 1, archived_at = CURRENT_TIMESTAMP, archived_by = ? 
-      WHERE id = ? OR CAST(id AS TEXT) = CAST(? AS TEXT)
-    `, [req.user?.name || 'Admin', targetId, targetId]);
+      WHERE CAST(id AS TEXT) = CAST(? AS TEXT)
+    `, [req.user?.name || 'Admin', targetId]);
 
     await logAuditAction(req.user?.name || 'Admin', 'Archive Student (Delete Request)', `Archived student ID: ${targetId}`);
     res.json({ success: true, message: 'Student archived successfully' });
@@ -433,9 +389,9 @@ async function recalculateAllHousePoints() {
       JOIN programs p ON CAST(r.program_id AS TEXT) = CAST(p.id AS TEXT)
       LEFT JOIN students s ON (
         CAST(r.student_id AS TEXT) = CAST(s.id AS TEXT) OR 
-        r.student_id = s.student_id OR 
-        r.student_id = s.admission_no OR
-        LOWER(TRIM(s.name)) = LOWER(TRIM(r.student_id))
+        CAST(r.student_id AS TEXT) = CAST(s.student_id AS TEXT) OR 
+        CAST(r.student_id AS TEXT) = CAST(s.admission_no AS TEXT) OR
+        LOWER(TRIM(s.name)) = LOWER(TRIM(CAST(r.student_id AS TEXT)))
       )
       WHERE r.prize IN ('1st', '2nd', '3rd')
         AND (p.is_archived = 0 OR p.is_archived IS NULL)
@@ -451,7 +407,7 @@ async function recalculateAllHousePoints() {
           const stu = await get(`
             SELECT house_id FROM students 
             WHERE CAST(id AS TEXT) = CAST(? AS TEXT) OR student_id = ? OR admission_no = ? OR LOWER(TRIM(name)) = LOWER(TRIM(?))
-          `, [r.student_id, r.student_id, r.student_id, r.student_id]);
+          `, [r.student_id, String(r.student_id), String(r.student_id), String(r.student_id)]);
 
           if (stu) {
             targetHouseId = stu.house_id;
@@ -492,9 +448,9 @@ router.get('/houses', async (req, res) => {
       JOIN programs p ON CAST(r.program_id AS TEXT) = CAST(p.id AS TEXT)
       LEFT JOIN students s ON (
         CAST(r.student_id AS TEXT) = CAST(s.id AS TEXT) OR 
-        r.student_id = s.student_id OR 
-        r.student_id = s.admission_no OR
-        LOWER(TRIM(s.name)) = LOWER(TRIM(r.student_id))
+        CAST(r.student_id AS TEXT) = CAST(s.student_id AS TEXT) OR 
+        CAST(r.student_id AS TEXT) = CAST(s.admission_no AS TEXT) OR
+        LOWER(TRIM(s.name)) = LOWER(TRIM(CAST(r.student_id AS TEXT)))
       )
       WHERE r.prize IN ('1st', '2nd', '3rd')
         AND (p.is_archived = 0 OR p.is_archived IS NULL)
@@ -511,7 +467,7 @@ router.get('/houses', async (req, res) => {
         const stu = await get(`
           SELECT house_id FROM students 
           WHERE CAST(id AS TEXT) = CAST(? AS TEXT) OR student_id = ? OR admission_no = ? OR LOWER(TRIM(name)) = LOWER(TRIM(?))
-        `, [r.student_id, r.student_id, r.student_id, r.student_id]);
+        `, [r.student_id, String(r.student_id), String(r.student_id), String(r.student_id)]);
         if (stu) targetHouseId = stu.house_id;
       }
 
@@ -588,7 +544,7 @@ router.get('/houses/:id/breakdown', async (req, res) => {
       SELECT r.*, 
              s.name as s_name, 
              s.student_id as s_code, 
-             s.chest_no, 
+             s.admission_no,
              s.class_name,
              s.house_id as s_house_id,
              p.name as program_name, 
@@ -598,11 +554,11 @@ router.get('/houses/:id/breakdown', async (req, res) => {
       JOIN programs p ON CAST(r.program_id AS TEXT) = CAST(p.id AS TEXT)
       LEFT JOIN students s ON (
         CAST(r.student_id AS TEXT) = CAST(s.id AS TEXT) OR 
-        r.student_id = s.student_id OR 
-        r.student_id = s.admission_no OR
-        LOWER(TRIM(s.name)) = LOWER(TRIM(r.student_id))
+        CAST(r.student_id AS TEXT) = CAST(s.student_id AS TEXT) OR 
+        CAST(r.student_id AS TEXT) = CAST(s.admission_no AS TEXT) OR
+        LOWER(TRIM(s.name)) = LOWER(TRIM(CAST(r.student_id AS TEXT)))
       )
-      LEFT JOIN categories c ON (CAST(p.category_id AS TEXT) = CAST(c.id AS TEXT) OR p.category_id = c.name)
+      LEFT JOIN categories c ON (CAST(p.category_id AS TEXT) = CAST(c.id AS TEXT) OR CAST(p.category_id AS TEXT) = CAST(c.name AS TEXT))
       WHERE r.prize IN ('1st', '2nd', '3rd')
         AND (p.is_archived = 0 OR p.is_archived IS NULL)
       ORDER BY r.id DESC
@@ -621,7 +577,7 @@ router.get('/houses/:id/breakdown', async (req, res) => {
         const stu = await get(`
           SELECT house_id FROM students 
           WHERE CAST(id AS TEXT) = CAST(? AS TEXT) OR student_id = ? OR admission_no = ? OR LOWER(TRIM(name)) = LOWER(TRIM(?))
-        `, [r.student_id, r.student_id, r.student_id, r.student_id]);
+        `, [r.student_id, String(r.student_id), String(r.student_id), String(r.student_id)]);
 
         if (stu && (String(stu.house_id) === String(houseId) || String(stu.house_id).toUpperCase() === String(house.code).toUpperCase())) {
           isMatch = true;
@@ -703,7 +659,7 @@ router.post('/houses', async (req, res) => {
 router.put('/houses/:id', async (req, res) => {
   try {
     const { name, code, color_hex, motto, captain_name, total_points } = req.body;
-    const existing = await get('SELECT * FROM houses WHERE id = ? OR CAST(id AS TEXT) = CAST(? AS TEXT)', [req.params.id, req.params.id]);
+    const existing = await get('SELECT * FROM houses WHERE CAST(id AS TEXT) = CAST(? AS TEXT)', [req.params.id]);
     if (!existing) {
       return res.status(404).json({ error: 'House not found' });
     }
@@ -725,13 +681,13 @@ router.put('/houses/:id', async (req, res) => {
         FROM results r
         JOIN students s ON (
           CAST(r.student_id AS TEXT) = CAST(s.id AS TEXT) OR 
-          r.student_id = s.student_id OR 
-          r.student_id = s.admission_no OR
-          LOWER(TRIM(s.name)) = LOWER(TRIM(r.student_id))
+          CAST(r.student_id AS TEXT) = CAST(s.student_id AS TEXT) OR 
+          CAST(r.student_id AS TEXT) = CAST(s.admission_no AS TEXT) OR
+          LOWER(TRIM(s.name)) = LOWER(TRIM(CAST(r.student_id AS TEXT)))
         )
-        JOIN programs p ON (r.program_id = p.id OR r.program_id = p.code OR CAST(r.program_id AS TEXT) = CAST(p.id AS TEXT))
-        WHERE (s.house_id = ? OR CAST(s.house_id AS TEXT) = CAST(? AS TEXT)) AND r.prize IN ('1st', '2nd', '3rd') AND (p.is_archived = 0 OR p.is_archived IS NULL)
-      `, [req.params.id, req.params.id]);
+        JOIN programs p ON (CAST(r.program_id AS TEXT) = CAST(p.id AS TEXT) OR CAST(r.program_id AS TEXT) = CAST(p.code AS TEXT))
+        WHERE (CAST(s.house_id AS TEXT) = CAST(? AS TEXT)) AND r.prize IN ('1st', '2nd', '3rd') AND (p.is_archived = 0 OR p.is_archived IS NULL)
+      `, [req.params.id]);
 
       const earnedPts = Number(resCount?.result_pts) || 0;
       updatedBonusPoints = newTotal - earnedPts;
@@ -745,8 +701,8 @@ router.put('/houses/:id', async (req, res) => {
     await run(`
       UPDATE houses 
       SET name = ?, code = ?, color_hex = ?, motto = ?, captain_name = ?, total_points = ?, bonus_points = ?
-      WHERE id = ? OR CAST(id AS TEXT) = CAST(? AS TEXT)
-    `, [updatedName, updatedCode, updatedColor, updatedMotto, updatedCaptain, updatedPoints, updatedBonusPoints, req.params.id, req.params.id]);
+      WHERE CAST(id AS TEXT) = CAST(? AS TEXT)
+    `, [updatedName, updatedCode, updatedColor, updatedMotto, updatedCaptain, updatedPoints, updatedBonusPoints, req.params.id]);
 
     const io = req.app.get('io');
     if (io) {
@@ -772,7 +728,7 @@ router.post('/houses/:id/adjust-points', async (req, res) => {
       await run(`ALTER TABLE houses ADD COLUMN bonus_points INTEGER DEFAULT 0`);
     } catch (e) {}
 
-    await run('UPDATE houses SET bonus_points = bonus_points + ?, total_points = MAX(0, total_points + ?) WHERE id = ? OR CAST(id AS TEXT) = CAST(? AS TEXT)', [pts, pts, houseId, houseId]);
+    await run('UPDATE houses SET bonus_points = bonus_points + ?, total_points = MAX(0, total_points + ?) WHERE CAST(id AS TEXT) = CAST(? AS TEXT)', [pts, pts, houseId]);
 
     // Record audit action
     await logAuditAction(req.user?.name || 'Admin', 'House Live Point Adjustment', `Adjusted House ID ${houseId} by ${pts > 0 ? '+' : ''}${pts} pts. Reason: ${reason || 'Live Admin Scoring'}`);
@@ -798,8 +754,8 @@ router.get('/programs', async (req, res) => {
     const programs = await all(`
       SELECT p.*, c.name as category_name, v.name as venue_name, v.stage_number
       FROM programs p
-      LEFT JOIN categories c ON (CAST(p.category_id AS TEXT) = CAST(c.id AS TEXT) OR p.category_id = c.name)
-      LEFT JOIN venues v ON (CAST(p.venue_id AS TEXT) = CAST(v.id AS TEXT) OR p.venue_id = v.name)
+      LEFT JOIN categories c ON (CAST(p.category_id AS TEXT) = CAST(c.id AS TEXT) OR CAST(p.category_id AS TEXT) = CAST(c.name AS TEXT))
+      LEFT JOIN venues v ON (CAST(p.venue_id AS TEXT) = CAST(v.id AS TEXT) OR CAST(p.venue_id AS TEXT) = CAST(v.name AS TEXT))
       WHERE (p.is_archived = 0 OR p.is_archived IS NULL)
       ORDER BY p.id ASC
     `);
@@ -816,8 +772,15 @@ router.get('/programs', async (req, res) => {
       let winners = await all(`
         SELECT r.prize, r.total_score, r.points_awarded, s.name as student_name, s.admission_no, h.name as house_name, h.color_hex as house_color
         FROM results r
-        JOIN students s ON (CAST(r.student_id AS TEXT) = CAST(s.id AS TEXT) OR r.student_id = s.student_id OR r.student_id = s.admission_no)
-        LEFT JOIN houses h ON (CAST(s.house_id AS TEXT) = CAST(h.id AS TEXT) OR s.house_id = h.code)
+        JOIN students s ON (
+          CAST(r.student_id AS TEXT) = CAST(s.id AS TEXT) OR 
+          CAST(r.student_id AS TEXT) = CAST(s.student_id AS TEXT) OR 
+          CAST(r.student_id AS TEXT) = CAST(s.admission_no AS TEXT)
+        )
+        LEFT JOIN houses h ON (
+          CAST(s.house_id AS TEXT) = CAST(h.id AS TEXT) OR 
+          CAST(s.house_id AS TEXT) = CAST(h.code AS TEXT)
+        )
         WHERE (CAST(r.program_id AS TEXT) = CAST(? AS TEXT))
         ORDER BY r.total_score DESC
         LIMIT 3
@@ -830,16 +793,23 @@ router.get('/programs', async (req, res) => {
       const participants = await all(`
         SELECT pp.id as participant_id, pp.chest_no, s.id as student_id, s.name as student_name, s.admission_no, s.class_name, h.name as house_name, h.color_hex as house_color
         FROM program_participants pp
-        JOIN students s ON (CAST(pp.student_id AS TEXT) = CAST(s.id AS TEXT) OR pp.student_id = s.student_id OR pp.student_id = s.admission_no)
-        LEFT JOIN houses h ON (CAST(s.house_id AS TEXT) = CAST(h.id AS TEXT) OR s.house_id = h.code)
+        JOIN students s ON (
+          CAST(pp.student_id AS TEXT) = CAST(s.id AS TEXT) OR 
+          CAST(pp.student_id AS TEXT) = CAST(s.student_id AS TEXT) OR 
+          CAST(pp.student_id AS TEXT) = CAST(s.admission_no AS TEXT)
+        )
+        LEFT JOIN houses h ON (
+          CAST(s.house_id AS TEXT) = CAST(h.id AS TEXT) OR 
+          CAST(s.house_id AS TEXT) = CAST(h.code AS TEXT)
+        )
         WHERE (CAST(pp.program_id AS TEXT) = CAST(? AS TEXT))
         ORDER BY pp.chest_no ASC, s.name ASC
       `, [p.id]);
 
-      p.assigned_judges = judges;
-      p.participant_count = (participants && participants.length > 0) ? participants.length : participantCount.count;
+      p.assigned_judges = judges || [];
+      p.participant_count = (participants && participants.length > 0) ? participants.length : (Number(participantCount?.count) || 0);
       p.participants = participants || [];
-      p.winners = winners;
+      p.winners = winners || [];
     }
 
     res.json(programs);
@@ -901,28 +871,28 @@ router.get('/programs/:id', async (req, res) => {
     const program = await get(`
       SELECT p.*, c.name as category_name, v.name as venue_name, v.stage_number
       FROM programs p
-      LEFT JOIN categories c ON p.category_id = c.id
-      LEFT JOIN venues v ON p.venue_id = v.id
-      WHERE p.id = ?
-    `, [req.params.id]);
+      LEFT JOIN categories c ON (CAST(p.category_id AS TEXT) = CAST(c.id AS TEXT) OR CAST(p.category_id AS TEXT) = CAST(c.name AS TEXT))
+      LEFT JOIN venues v ON (CAST(p.venue_id AS TEXT) = CAST(v.id AS TEXT) OR CAST(p.venue_id AS TEXT) = CAST(v.name AS TEXT))
+      WHERE p.id = ? OR CAST(p.id AS TEXT) = CAST(? AS TEXT)
+    `, [req.params.id, req.params.id]);
 
     if (!program) return res.status(404).json({ error: 'Program not found' });
 
     let participants = await all(`
       SELECT pp.*, s.name as student_name, s.student_id as student_code, s.admission_no, s.arabic_name, s.class_name, h.name as house_name, h.color_hex as house_color
       FROM program_participants pp
-      JOIN students s ON pp.student_id = s.id
-      LEFT JOIN houses h ON s.house_id = h.id
-      WHERE pp.program_id = ?
+      JOIN students s ON (CAST(pp.student_id AS TEXT) = CAST(s.id AS TEXT) OR CAST(pp.student_id AS TEXT) = CAST(s.student_id AS TEXT) OR CAST(pp.student_id AS TEXT) = CAST(s.admission_no AS TEXT))
+      LEFT JOIN houses h ON (CAST(s.house_id AS TEXT) = CAST(h.id AS TEXT) OR CAST(s.house_id AS TEXT) = CAST(h.code AS TEXT))
+      WHERE pp.program_id = ? OR CAST(pp.program_id AS TEXT) = CAST(? AS TEXT)
       ORDER BY pp.chest_no ASC
-    `, [req.params.id]);
+    `, [req.params.id, req.params.id]);
 
     // Fallback: If no participants registered yet, return all students as participants so judges can grade any student!
     if (!participants || participants.length === 0) {
       const allStudents = await all(`
         SELECT s.id as student_id, s.name as student_name, s.student_id as student_code, s.admission_no, s.class_name, h.name as house_name, h.color_hex as house_color
         FROM students s
-        LEFT JOIN houses h ON s.house_id = h.id
+        LEFT JOIN houses h ON (CAST(s.house_id AS TEXT) = CAST(h.id AS TEXT) OR CAST(s.house_id AS TEXT) = CAST(h.code AS TEXT))
         WHERE (s.is_archived = 0 OR s.is_archived IS NULL)
         ORDER BY s.id ASC
       `);
@@ -931,9 +901,9 @@ router.get('/programs/:id', async (req, res) => {
 
     const judges = await all(`
       SELECT j.* FROM judges j
-      JOIN program_judges pj ON pj.judge_id = j.id
-      WHERE pj.program_id = ?
-    `, [req.params.id]);
+      JOIN program_judges pj ON (CAST(pj.judge_id AS TEXT) = CAST(j.id AS TEXT))
+      WHERE (pj.program_id = ? OR CAST(pj.program_id AS TEXT) = CAST(? AS TEXT))
+    `, [req.params.id, req.params.id]);
 
     res.json({ program, participants, judges });
   } catch (err) {
@@ -1001,7 +971,7 @@ router.post('/programs', async (req, res) => {
 router.put('/programs/:id/status', authenticate, requireAdmin, async (req, res) => {
   try {
     const { status } = req.body;
-    await run('UPDATE programs SET status = ? WHERE id = ? OR CAST(id AS TEXT) = CAST(? AS TEXT)', [status, req.params.id, req.params.id]);
+    await run('UPDATE programs SET status = ? WHERE CAST(id AS TEXT) = CAST(? AS TEXT)', [status, req.params.id]);
     const io = req.app.get('io');
     if (status === 'completed') {
       await recalculateAllHousePoints();
@@ -1026,8 +996,8 @@ router.put('/programs/:id', authenticate, requireAdmin, async (req, res) => {
     await run(`
       UPDATE programs 
       SET code = ?, name = ?, category_id = ?, age_group = ?, type = ?, gender_category = ?, stage_type = ?, venue_id = ?, program_date = ?, start_time = ?, end_time = ?, max_participants = ?, status = ?
-      WHERE id = ? OR CAST(id AS TEXT) = CAST(? AS TEXT)
-    `, [finalCode, name, category_id, age_group, type, gender_category || 'Male', finalStageType, venue_id, program_date, start_time, end_time, max_participants, status, req.params.id, req.params.id]);
+      WHERE CAST(id AS TEXT) = CAST(? AS TEXT)
+    `, [finalCode, name, category_id, age_group, type, gender_category || 'Male', finalStageType, venue_id, program_date, start_time, end_time, max_participants, status, req.params.id]);
     
     const io = req.app.get('io');
     if (status === 'completed') {
@@ -1058,11 +1028,11 @@ router.put('/programs/:id/archive', authenticate, requireAdmin, async (req, res)
     await run(`
       UPDATE programs 
       SET is_archived = 1, archived_at = CURRENT_TIMESTAMP, archived_by = ? 
-      WHERE id = ? OR CAST(id AS TEXT) = CAST(? AS TEXT)
-    `, [req.user?.name || 'Admin', targetId, targetId]);
+      WHERE CAST(id AS TEXT) = CAST(? AS TEXT)
+    `, [req.user?.name || 'Admin', targetId]);
 
     try {
-      await run(`DELETE FROM results WHERE program_id = ? OR CAST(program_id AS TEXT) = CAST(? AS TEXT)`, [targetId, targetId]);
+      await run(`DELETE FROM results WHERE CAST(program_id AS TEXT) = CAST(? AS TEXT)`, [targetId]);
     } catch (e) {}
 
     await recalculateAllHousePoints();
@@ -1087,8 +1057,8 @@ router.put('/programs/:id/restore', authenticate, requireAdmin, async (req, res)
     await run(`
       UPDATE programs 
       SET is_archived = 0, archived_at = NULL, archived_by = NULL 
-      WHERE id = ? OR CAST(id AS TEXT) = CAST(? AS TEXT)
-    `, [targetId, targetId]);
+      WHERE CAST(id AS TEXT) = CAST(? AS TEXT)
+    `, [targetId]);
 
     await recalculateAllHousePoints();
 
@@ -1113,11 +1083,11 @@ router.delete('/programs/:id', authenticate, requireAdmin, async (req, res) => {
     await run(`
       UPDATE programs 
       SET is_archived = 1, archived_at = CURRENT_TIMESTAMP, archived_by = ? 
-      WHERE id = ? OR CAST(id AS TEXT) = CAST(? AS TEXT)
-    `, [req.user?.name || 'Admin', targetId, targetId]);
+      WHERE CAST(id AS TEXT) = CAST(? AS TEXT)
+    `, [req.user?.name || 'Admin', targetId]);
 
     try {
-      await run(`DELETE FROM results WHERE program_id = ? OR CAST(program_id AS TEXT) = CAST(? AS TEXT)`, [targetId, targetId]);
+      await run(`DELETE FROM results WHERE CAST(program_id AS TEXT) = CAST(? AS TEXT)`, [targetId]);
     } catch (e) {}
 
     await recalculateAllHousePoints();
@@ -1187,8 +1157,9 @@ router.get('/marks/judge/:judgeId', async (req, res) => {
     const allPrograms = await all(`
       SELECT p.*, c.name as category_name, v.name as venue_name
       FROM programs p
-      LEFT JOIN categories c ON p.category_id = c.id
-      LEFT JOIN venues v ON p.venue_id = v.id
+      LEFT JOIN categories c ON (CAST(p.category_id AS TEXT) = CAST(c.id AS TEXT) OR CAST(p.category_id AS TEXT) = CAST(c.name AS TEXT))
+      LEFT JOIN venues v ON (CAST(p.venue_id AS TEXT) = CAST(v.id AS TEXT) OR CAST(p.venue_id AS TEXT) = CAST(v.name AS TEXT))
+      WHERE (p.is_archived = 0 OR p.is_archived IS NULL)
       ORDER BY p.id ASC
     `);
 
@@ -1288,8 +1259,8 @@ router.post('/results/manual/:programId', async (req, res) => {
 
       let studentObj = await get(`
         SELECT id FROM students 
-        WHERE id = ? OR student_id = ? OR admission_no = ? OR name LIKE ? OR CAST(id AS TEXT) = CAST(? AS TEXT)
-      `, [w.studentId, w.studentId, w.studentId, w.studentId, w.studentId]);
+        WHERE CAST(id AS TEXT) = CAST(? AS TEXT) OR student_id = ? OR admission_no = ? OR name LIKE ?
+      `, [w.studentId, w.studentId, w.studentId, w.studentId]);
 
       if (!studentObj && typeof w.studentId === 'string' && w.studentId.trim().length > 0 && isNaN(Number(w.studentId))) {
         const cleanName = w.studentId.trim();
@@ -1316,7 +1287,7 @@ router.post('/results/manual/:programId', async (req, res) => {
     // Reset and recalculate house total points across all results
     await recalculateAllHousePoints();
 
-    await run("UPDATE programs SET status = 'completed' WHERE (id = ? OR CAST(id AS TEXT) = CAST(? AS TEXT))", [programId, programId]);
+    await run("UPDATE programs SET status = 'completed' WHERE CAST(id AS TEXT) = CAST(? AS TEXT)", [programId]);
 
     const io = req.app.get('io');
     if (io) {
@@ -1347,14 +1318,14 @@ router.get('/results', async (req, res) => {
       FROM results r
       LEFT JOIN students s ON (
         CAST(r.student_id AS TEXT) = CAST(s.id AS TEXT) OR 
-        r.student_id = s.student_id OR 
-        r.student_id = s.admission_no OR
-        s.name LIKE r.student_id
+        CAST(r.student_id AS TEXT) = CAST(s.student_id AS TEXT) OR 
+        CAST(r.student_id AS TEXT) = CAST(s.admission_no AS TEXT) OR
+        LOWER(TRIM(s.name)) = LOWER(TRIM(CAST(r.student_id AS TEXT)))
       )
-      LEFT JOIN houses h ON s.house_id = h.id
+      LEFT JOIN houses h ON (CAST(s.house_id AS TEXT) = CAST(h.id AS TEXT) OR CAST(s.house_id AS TEXT) = CAST(h.code AS TEXT))
       LEFT JOIN programs p ON (
         CAST(r.program_id AS TEXT) = CAST(p.id AS TEXT) OR 
-        r.program_id = p.code
+        CAST(r.program_id AS TEXT) = CAST(p.code AS TEXT)
       )
       ORDER BY r.id DESC
     `);
@@ -1369,22 +1340,22 @@ router.get('/results/program/:programId', async (req, res) => {
     let results = await all(`
       SELECT r.*, s.name as student_name, s.student_id as student_code, s.arabic_name, s.class_name, h.name as house_name, h.color_hex as house_color
       FROM results r
-      JOIN students s ON (r.student_id = s.id OR r.student_id = s.student_id)
-      LEFT JOIN houses h ON s.house_id = h.id
-      WHERE r.program_id = ?
+      JOIN students s ON (CAST(r.student_id AS TEXT) = CAST(s.id AS TEXT) OR CAST(r.student_id AS TEXT) = CAST(s.student_id AS TEXT) OR CAST(r.student_id AS TEXT) = CAST(s.admission_no AS TEXT))
+      LEFT JOIN houses h ON (CAST(s.house_id AS TEXT) = CAST(h.id AS TEXT) OR CAST(s.house_id AS TEXT) = CAST(h.code AS TEXT))
+      WHERE (r.program_id = ? OR CAST(r.program_id AS TEXT) = CAST(? AS TEXT))
       ORDER BY r.total_score DESC
-    `, [req.params.programId]);
+    `, [req.params.programId, req.params.programId]);
 
     if (!results || results.length === 0) {
       await calculateProgramResults(req.params.programId);
       results = await all(`
         SELECT r.*, s.name as student_name, s.student_id as student_code, s.arabic_name, s.class_name, h.name as house_name, h.color_hex as house_color
         FROM results r
-        JOIN students s ON (r.student_id = s.id OR r.student_id = s.student_id)
-        LEFT JOIN houses h ON s.house_id = h.id
-        WHERE r.program_id = ?
+        JOIN students s ON (CAST(r.student_id AS TEXT) = CAST(s.id AS TEXT) OR CAST(r.student_id AS TEXT) = CAST(s.student_id AS TEXT) OR CAST(r.student_id AS TEXT) = CAST(s.admission_no AS TEXT))
+        LEFT JOIN houses h ON (CAST(s.house_id AS TEXT) = CAST(h.id AS TEXT) OR CAST(s.house_id AS TEXT) = CAST(h.code AS TEXT))
+        WHERE (r.program_id = ? OR CAST(r.program_id AS TEXT) = CAST(? AS TEXT))
         ORDER BY r.total_score DESC
-      `, [req.params.programId]);
+      `, [req.params.programId, req.params.programId]);
     }
 
     res.json(results || []);
@@ -1429,86 +1400,6 @@ router.post('/announcements', async (req, res) => {
 });
 
 // -------------------------------------------------------------
-// GALLERY MANAGEMENT
-// -------------------------------------------------------------
-router.get('/gallery', async (req, res) => {
-  try {
-    const items = await all('SELECT * FROM gallery ORDER BY id DESC');
-    res.json(items);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-router.post('/gallery', async (req, res) => {
-  try {
-    const { album_name, title, media_type, url, caption } = req.body;
-    const result = await run(`
-      INSERT INTO gallery (album_name, title, media_type, url, caption)
-      VALUES (?, ?, ?, ?, ?)
-    `, [album_name || 'Milad 2026', title, media_type || 'photo', url, caption || '']);
-    triggerPersistenceSync();
-    res.json({ success: true, id: result.id });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-router.delete('/gallery/:id', async (req, res) => {
-  try {
-    await run('DELETE FROM gallery WHERE id = ?', [req.params.id]);
-    triggerPersistenceSync();
-    res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// -------------------------------------------------------------
-// DASHBOARD STATS
-// -------------------------------------------------------------
-router.get('/reports/dashboard-stats', async (req, res) => {
-  try {
-    const totalStudentsRes = await get('SELECT COUNT(*) as count FROM students');
-    const totalProgramsRes = await get('SELECT COUNT(*) as count FROM programs');
-    const totalJudgesRes = await get('SELECT COUNT(*) as count FROM judges');
-    const totalHousesRes = await get('SELECT COUNT(*) as count FROM houses');
-    const totalCategoriesRes = await get('SELECT COUNT(*) as count FROM categories');
-    const runningProgramsRes = await get("SELECT COUNT(*) as count FROM programs WHERE status='running'");
-    const completedProgramsRes = await get("SELECT COUNT(*) as count FROM programs WHERE status='completed'");
-    const pendingProgramsRes = await get("SELECT COUNT(*) as count FROM programs WHERE status='scheduled'");
-    const totalParticipantsRes = await get('SELECT COUNT(*) as count FROM program_participants');
-
-    const houses = await all('SELECT * FROM houses ORDER BY total_points DESC');
-    const categoryStats = await all(`
-      SELECT c.name as category_name, COUNT(p.id) as program_count
-      FROM categories c
-      LEFT JOIN programs p ON p.category_id = c.id
-      GROUP BY c.id
-    `);
-
-    res.json({
-      cards: {
-        totalStudents: totalStudentsRes?.count || 0,
-        totalPrograms: totalProgramsRes?.count || 0,
-        totalJudges: totalJudgesRes?.count || 0,
-        totalHouses: totalHousesRes?.count || 0,
-        totalCategories: totalCategoriesRes?.count || 0,
-        runningPrograms: runningProgramsRes?.count || 0,
-        completedPrograms: completedProgramsRes?.count || 0,
-        pendingPrograms: pendingProgramsRes?.count || 0,
-        totalParticipants: totalParticipantsRes?.count || 0
-      },
-      houses: houses || [],
-      categoryStats: categoryStats || []
-    });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// -------------------------------------------------------------
-// -------------------------------------------------------------
 // REPORTS & DASHBOARD STATS
 // -------------------------------------------------------------
 router.get('/reports/dashboard-stats', async (req, res) => {
@@ -1542,22 +1433,22 @@ router.get('/reports/dashboard-stats', async (req, res) => {
     const categoryStats = await all(`
       SELECT c.id, c.name, COUNT(p.id) as program_count
       FROM categories c
-      LEFT JOIN programs p ON (CAST(p.category_id AS TEXT) = CAST(c.id AS TEXT) OR p.category_id = c.name) AND (p.is_archived = 0 OR p.is_archived IS NULL)
+      LEFT JOIN programs p ON (CAST(p.category_id AS TEXT) = CAST(c.id AS TEXT) OR CAST(p.category_id AS TEXT) = CAST(c.name AS TEXT)) AND (p.is_archived = 0 OR p.is_archived IS NULL)
       GROUP BY c.id, c.name
       ORDER BY c.id ASC
     `);
 
     res.json({
       cards: {
-        totalStudents: studentsCount?.count || 0,
-        totalPrograms: programsCount?.count || 0,
-        totalJudges: judgesCount?.count || 0,
-        totalHouses: housesCount?.count || 0,
-        totalCategories: categoriesCount?.count || 0,
-        runningPrograms: runningCount?.count || 0,
-        completedPrograms: completedCount?.count || 0,
-        pendingPrograms: pendingCount?.count || 0,
-        totalParticipants: participantsCount?.count || 0
+        totalStudents: Number(studentsCount?.count) || 0,
+        totalPrograms: Number(programsCount?.count) || 0,
+        totalJudges: Number(judgesCount?.count) || 0,
+        totalHouses: Number(housesCount?.count) || 0,
+        totalCategories: Number(categoriesCount?.count) || 0,
+        runningPrograms: Number(runningCount?.count) || 0,
+        completedPrograms: Number(completedCount?.count) || 0,
+        pendingPrograms: Number(pendingCount?.count) || 0,
+        totalParticipants: Number(participantsCount?.count) || 0
       },
       houses: houses || [],
       categoryStats: categoryStats || []
@@ -1567,7 +1458,8 @@ router.get('/reports/dashboard-stats', async (req, res) => {
   }
 });
 
-// GALLERY ENDPOINTS
+// -------------------------------------------------------------
+// GALLERY MANAGEMENT
 // -------------------------------------------------------------
 router.get('/gallery', async (req, res) => {
   try {
@@ -1600,8 +1492,8 @@ router.put('/gallery/:id', async (req, res) => {
     await run(`
       UPDATE gallery 
       SET title = ?, album_name = ?, url = ?, caption = ?
-      WHERE id = ? OR CAST(id AS TEXT) = CAST(? AS TEXT)
-    `, [title || 'Milad Festival Photo', album_name || 'Milad 2026', url, caption || '', req.params.id, req.params.id]);
+      WHERE CAST(id AS TEXT) = CAST(? AS TEXT)
+    `, [title || 'Milad Festival Photo', album_name || 'Milad 2026', url, caption || '', req.params.id]);
 
     res.json({ success: true });
   } catch (err) {
@@ -1614,8 +1506,8 @@ router.delete('/gallery/:id', async (req, res) => {
     const { id } = req.params;
     await run(`
       DELETE FROM gallery 
-      WHERE id = ? OR CAST(id AS TEXT) = CAST(? AS TEXT) OR title = ? OR url = ?
-    `, [id, id, id, id]);
+      WHERE CAST(id AS TEXT) = CAST(? AS TEXT) OR title = ? OR url = ?
+    `, [id, id, id]);
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
