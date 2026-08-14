@@ -5,11 +5,11 @@
 -- 1. Users Table (Authentication & Roles)
 CREATE TABLE IF NOT EXISTS users (
   id SERIAL PRIMARY KEY,
-  username VARCHAR(100) UNIQUE NOT NULL,
-  email VARCHAR(150) UNIQUE NOT NULL,
-  password VARCHAR(255) NOT NULL,
-  name VARCHAR(150) NOT NULL,
-  role VARCHAR(50) NOT NULL DEFAULT 'public',
+  username TEXT UNIQUE NOT NULL,
+  email TEXT UNIQUE NOT NULL,
+  password TEXT NOT NULL,
+  name TEXT NOT NULL,
+  role TEXT NOT NULL DEFAULT 'public',
   avatar TEXT,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -17,11 +17,11 @@ CREATE TABLE IF NOT EXISTS users (
 -- 2. Houses Table
 CREATE TABLE IF NOT EXISTS houses (
   id SERIAL PRIMARY KEY,
-  code VARCHAR(50) UNIQUE NOT NULL,
-  name VARCHAR(100) NOT NULL,
-  color_hex VARCHAR(20) NOT NULL DEFAULT '#10B981',
+  code TEXT UNIQUE NOT NULL,
+  name TEXT NOT NULL,
+  color_hex TEXT NOT NULL DEFAULT '#10B981',
   motto TEXT,
-  captain_name VARCHAR(150),
+  captain_name TEXT,
   total_points INT DEFAULT 0,
   bonus_points INT DEFAULT 0,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS houses (
 -- 3. Categories Table
 CREATE TABLE IF NOT EXISTS categories (
   id SERIAL PRIMARY KEY,
-  name VARCHAR(100) UNIQUE NOT NULL,
+  name TEXT UNIQUE NOT NULL,
   min_age INT DEFAULT 5,
   max_age INT DEFAULT 20,
   description TEXT
@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS categories (
 -- 4. Venues Table (Stages)
 CREATE TABLE IF NOT EXISTS venues (
   id SERIAL PRIMARY KEY,
-  name VARCHAR(150) UNIQUE NOT NULL,
+  name TEXT UNIQUE NOT NULL,
   stage_number INT NOT NULL,
   capacity INT DEFAULT 100,
   location TEXT
@@ -48,37 +48,37 @@ CREATE TABLE IF NOT EXISTS venues (
 -- 5. Students Table
 CREATE TABLE IF NOT EXISTS students (
   id SERIAL PRIMARY KEY,
-  student_id VARCHAR(50) UNIQUE NOT NULL,
-  admission_no VARCHAR(50) UNIQUE NOT NULL,
-  name VARCHAR(200) NOT NULL,
-  category_name VARCHAR(100) DEFAULT 'Kiddies',
-  arabic_name VARCHAR(200),
+  student_id TEXT UNIQUE NOT NULL,
+  admission_no TEXT UNIQUE NOT NULL,
+  name TEXT NOT NULL,
+  category_name TEXT DEFAULT 'Kiddies',
+  arabic_name TEXT,
   photo TEXT,
-  gender VARCHAR(20) DEFAULT 'male',
+  gender TEXT DEFAULT 'male',
   dob DATE,
   age INT DEFAULT 10,
-  class_name VARCHAR(50) NOT NULL,
-  division VARCHAR(20) NOT NULL DEFAULT 'A',
+  class_name TEXT NOT NULL,
+  division TEXT NOT NULL DEFAULT 'A',
   house_id INT REFERENCES houses(id) ON DELETE SET NULL,
-  parent_name VARCHAR(200),
-  phone VARCHAR(50),
-  email VARCHAR(150),
+  parent_name TEXT,
+  phone TEXT,
+  email TEXT,
   address TEXT,
   qr_code TEXT,
   is_archived INT DEFAULT 0,
   archived_at TIMESTAMP,
-  archived_by VARCHAR(100),
+  archived_by TEXT,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- 6. Judges Table
 CREATE TABLE IF NOT EXISTS judges (
   id SERIAL PRIMARY KEY,
-  judge_code VARCHAR(50) UNIQUE NOT NULL,
-  name VARCHAR(200) NOT NULL,
-  qualification VARCHAR(200),
-  phone VARCHAR(50),
-  email VARCHAR(150),
+  judge_code TEXT UNIQUE NOT NULL,
+  name TEXT NOT NULL,
+  qualification TEXT,
+  phone TEXT,
+  email TEXT,
   specialization TEXT,
   user_id INT REFERENCES users(id) ON DELETE SET NULL
 );
@@ -86,23 +86,23 @@ CREATE TABLE IF NOT EXISTS judges (
 -- 7. Programs Table (Competitions)
 CREATE TABLE IF NOT EXISTS programs (
   id SERIAL PRIMARY KEY,
-  code VARCHAR(50) UNIQUE NOT NULL,
-  name VARCHAR(200) NOT NULL,
+  code TEXT UNIQUE NOT NULL,
+  name TEXT NOT NULL,
   category_id INT REFERENCES categories(id) ON DELETE SET NULL,
-  age_group VARCHAR(100) DEFAULT 'Sub Junior',
-  type VARCHAR(50) DEFAULT 'individual',
-  gender_category VARCHAR(50) DEFAULT 'Male',
-  stage_type VARCHAR(50) DEFAULT 'On Stage',
+  age_group TEXT DEFAULT 'Sub Junior',
+  type TEXT DEFAULT 'individual',
+  gender_category TEXT DEFAULT 'Male',
+  stage_type TEXT DEFAULT 'On Stage',
   venue_id INT REFERENCES venues(id) ON DELETE SET NULL,
   program_date DATE,
   start_time TIME,
   end_time TIME,
   max_participants INT DEFAULT 20,
-  status VARCHAR(50) DEFAULT 'pending',
+  status TEXT DEFAULT 'pending',
   duration_minutes INT DEFAULT 10,
   is_archived INT DEFAULT 0,
   archived_at TIMESTAMP,
-  archived_by VARCHAR(100),
+  archived_by TEXT,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -119,7 +119,7 @@ CREATE TABLE IF NOT EXISTS program_participants (
   program_id INT REFERENCES programs(id) ON DELETE CASCADE,
   student_id INT REFERENCES students(id) ON DELETE CASCADE,
   chest_no INT NOT NULL,
-  attendance VARCHAR(50) DEFAULT 'pending',
+  attendance TEXT DEFAULT 'pending',
   UNIQUE (program_id, student_id)
 );
 
@@ -141,10 +141,10 @@ CREATE TABLE IF NOT EXISTS marks (
   total_score NUMERIC(6, 2) DEFAULT 0,
   criteria_scores TEXT,
   remarks TEXT,
-  status VARCHAR(50) DEFAULT 'draft',
+  status TEXT DEFAULT 'draft',
   is_archived INT DEFAULT 0,
   archived_at TIMESTAMP,
-  archived_by VARCHAR(100),
+  archived_by TEXT,
   submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP,
   UNIQUE (program_id, student_id, judge_id)
@@ -156,24 +156,24 @@ CREATE TABLE IF NOT EXISTS results (
   program_id INT REFERENCES programs(id) ON DELETE CASCADE,
   student_id INT REFERENCES students(id) ON DELETE CASCADE,
   total_score NUMERIC(6, 2) NOT NULL,
-  prize VARCHAR(50) NOT NULL,
+  prize TEXT NOT NULL,
   points_awarded INT NOT NULL DEFAULT 0,
   tie_breaker_note TEXT,
   is_archived INT DEFAULT 0,
   archived_at TIMESTAMP,
-  archived_by VARCHAR(100),
+  archived_by TEXT,
   published_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- 12. Certificates Table
 CREATE TABLE IF NOT EXISTS certificates (
   id SERIAL PRIMARY KEY,
-  certificate_no VARCHAR(100),
-  certificate_code VARCHAR(100),
+  certificate_no TEXT,
+  certificate_code TEXT,
   student_id INT REFERENCES students(id) ON DELETE SET NULL,
   program_id INT REFERENCES programs(id) ON DELETE SET NULL,
-  type VARCHAR(50) NOT NULL,
-  recipient_name VARCHAR(200),
+  type TEXT NOT NULL,
+  recipient_name TEXT,
   issue_date DATE,
   pdf_url TEXT,
   download_url TEXT,
@@ -183,52 +183,59 @@ CREATE TABLE IF NOT EXISTS certificates (
 -- 13. Announcements Table
 CREATE TABLE IF NOT EXISTS announcements (
   id SERIAL PRIMARY KEY,
-  title VARCHAR(255) NOT NULL,
+  title TEXT NOT NULL,
   content TEXT NOT NULL,
-  priority VARCHAR(50) DEFAULT 'normal',
-  posted_by VARCHAR(100) DEFAULT 'Admin',
+  priority TEXT DEFAULT 'normal',
+  posted_by TEXT DEFAULT 'Admin',
   is_archived INT DEFAULT 0,
   archived_at TIMESTAMP,
-  archived_by VARCHAR(100),
+  archived_by TEXT,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- 14. Gallery Table
 CREATE TABLE IF NOT EXISTS gallery (
   id SERIAL PRIMARY KEY,
-  album_name VARCHAR(100) NOT NULL DEFAULT 'Milad 2026',
-  title VARCHAR(255) NOT NULL,
-  media_type VARCHAR(50) DEFAULT 'photo',
+  album_name TEXT NOT NULL DEFAULT 'Milad 2026',
+  title TEXT NOT NULL,
+  media_type TEXT DEFAULT 'photo',
   url TEXT NOT NULL,
-  caption VARCHAR(255),
+  caption TEXT,
   uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- 15. Settings Table
 CREATE TABLE IF NOT EXISTS settings (
-  key_name VARCHAR(100) PRIMARY KEY,
+  key_name TEXT PRIMARY KEY,
   value TEXT NOT NULL
 );
 
 -- 16. Audit Logs Table
 CREATE TABLE IF NOT EXISTS audit_logs (
   id SERIAL PRIMARY KEY,
-  user_name VARCHAR(100) NOT NULL,
-  action VARCHAR(255) NOT NULL,
+  user_name TEXT NOT NULL,
+  action TEXT NOT NULL,
   details TEXT,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Safe Column Additions for Existing PostgreSQL Databases
 ALTER TABLE houses ADD COLUMN IF NOT EXISTS bonus_points INT DEFAULT 0;
-ALTER TABLE programs ADD COLUMN IF NOT EXISTS gender_category VARCHAR(50) DEFAULT 'Male';
-ALTER TABLE programs ADD COLUMN IF NOT EXISTS stage_type VARCHAR(50) DEFAULT 'On Stage';
+ALTER TABLE programs ADD COLUMN IF NOT EXISTS gender_category TEXT DEFAULT 'Male';
+ALTER TABLE programs ADD COLUMN IF NOT EXISTS stage_type TEXT DEFAULT 'On Stage';
 ALTER TABLE marks ADD COLUMN IF NOT EXISTS total_score NUMERIC(6, 2) DEFAULT 0;
 ALTER TABLE marks ADD COLUMN IF NOT EXISTS criteria_scores TEXT;
 ALTER TABLE marks ADD COLUMN IF NOT EXISTS remarks TEXT;
 ALTER TABLE marks ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP;
-ALTER TABLE certificates ADD COLUMN IF NOT EXISTS certificate_code VARCHAR(100);
+ALTER TABLE certificates ADD COLUMN IF NOT EXISTS certificate_code TEXT;
 ALTER TABLE certificates ADD COLUMN IF NOT EXISTS download_url TEXT;
+
+-- Migration to change existing VARCHAR fields to TEXT so long strings never throw length errors
+ALTER TABLE gallery ALTER COLUMN caption TYPE TEXT;
+ALTER TABLE gallery ALTER COLUMN title TYPE TEXT;
+ALTER TABLE gallery ALTER COLUMN album_name TYPE TEXT;
+ALTER TABLE announcements ALTER COLUMN title TYPE TEXT;
+ALTER TABLE audit_logs ALTER COLUMN action TYPE TEXT;
 
 -- Performance Indexes
 CREATE INDEX IF NOT EXISTS idx_students_house_id ON students(house_id);
