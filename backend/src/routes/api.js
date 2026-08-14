@@ -576,8 +576,8 @@ router.get('/houses/:id/breakdown', async (req, res) => {
     const houseParam = req.params.id;
     const house = await get(`
       SELECT * FROM houses 
-      WHERE id = ? OR CAST(id AS TEXT) = CAST(? AS TEXT) OR code LIKE ? OR name LIKE ?
-    `, [houseParam, houseParam, houseParam, `%${houseParam}%`]);
+      WHERE CAST(id AS TEXT) = CAST(? AS TEXT) OR code LIKE ? OR name LIKE ?
+    `, [houseParam, houseParam, `%${houseParam}%`]);
 
     if (!house) return res.status(404).json({ error: 'House not found' });
 
@@ -595,17 +595,14 @@ router.get('/houses/:id/breakdown', async (req, res) => {
              p.code as program_code,
              c.name as category_name
       FROM results r
-      JOIN programs p ON (
-        CAST(r.program_id AS TEXT) = CAST(p.id AS TEXT) OR 
-        r.program_id = p.code
-      )
+      JOIN programs p ON CAST(r.program_id AS TEXT) = CAST(p.id AS TEXT)
       LEFT JOIN students s ON (
         CAST(r.student_id AS TEXT) = CAST(s.id AS TEXT) OR 
         r.student_id = s.student_id OR 
         r.student_id = s.admission_no OR
         LOWER(TRIM(s.name)) = LOWER(TRIM(r.student_id))
       )
-      LEFT JOIN categories c ON p.category_id = c.id
+      LEFT JOIN categories c ON (CAST(p.category_id AS TEXT) = CAST(c.id AS TEXT) OR p.category_id = c.name)
       WHERE r.prize IN ('1st', '2nd', '3rd')
         AND (p.is_archived = 0 OR p.is_archived IS NULL)
       ORDER BY r.id DESC
@@ -623,7 +620,7 @@ router.get('/houses/:id/breakdown', async (req, res) => {
         // Fallback: look up student by student_id or name if student row was not joined
         const stu = await get(`
           SELECT house_id FROM students 
-          WHERE id = ? OR student_id = ? OR admission_no = ? OR LOWER(TRIM(name)) = LOWER(TRIM(?))
+          WHERE CAST(id AS TEXT) = CAST(? AS TEXT) OR student_id = ? OR admission_no = ? OR LOWER(TRIM(name)) = LOWER(TRIM(?))
         `, [r.student_id, r.student_id, r.student_id, r.student_id]);
 
         if (stu && (String(stu.house_id) === String(houseId) || String(stu.house_id).toUpperCase() === String(house.code).toUpperCase())) {
