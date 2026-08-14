@@ -2,12 +2,12 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const { run, get, all, syncSnapshot } = require('../../database/db');
+const { run, get, all, syncSnapshot, isPg } = require('../../database/db');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'madrasa_milad_secret_key_2026';
 
 function triggerPersistenceSync() {
-  if (typeof syncSnapshot === 'function') {
+  if (!isPg && typeof syncSnapshot === 'function') {
     syncSnapshot().catch(err => console.error('[SYNC ERROR]', err));
   }
 }
@@ -1399,6 +1399,16 @@ router.post('/announcements', async (req, res) => {
   }
 });
 
+router.delete('/announcements/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    await run('DELETE FROM announcements WHERE CAST(id AS TEXT) = CAST(? AS TEXT)', [id]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // -------------------------------------------------------------
 // REPORTS & DASHBOARD STATS
 // -------------------------------------------------------------
@@ -1839,18 +1849,20 @@ router.post('/database/import', authenticate, requireAdmin, async (req, res) => 
       }
     } catch (e) {}
 
-    // Immediately save imported snapshot to persistence files so container recycles preserve imported backup
-    try {
-      const persistence = require('../../database/persistence');
-      if (typeof persistence.writeSnapshotData === 'function') {
-        const fullSnapshot = {
-          ...snapshot,
-          last_synced: new Date().toISOString()
-        };
-        persistence.writeSnapshotData(fullSnapshot);
+    // Save imported snapshot to persistence files only for local SQLite development
+    if (!isPg) {
+      try {
+        const persistence = require('../../database/persistence');
+        if (typeof persistence.writeSnapshotData === 'function') {
+          const fullSnapshot = {
+            ...snapshot,
+            last_synced: new Date().toISOString()
+          };
+          persistence.writeSnapshotData(fullSnapshot);
+        }
+      } catch (e) {
+        console.error('[IMPORT PERSISTENCE ERROR]', e);
       }
-    } catch (e) {
-      console.error('[IMPORT PERSISTENCE ERROR]', e);
     }
 
     triggerPersistenceSync();

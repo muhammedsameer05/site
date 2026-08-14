@@ -8,7 +8,10 @@ const tmpSnapshotPath = path.join('/tmp', 'production_database_store.json');
 
 const allPaths = [persistentSnapshotPath, tmpSnapshotPath, localSnapshotPath].filter(Boolean);
 
+const isPg = Boolean(process.env.DATABASE_URL && process.env.DATABASE_URL.trim().length > 0);
+
 function getLatestSnapshotData() {
+  if (isPg) return null;
   let bestSnapshot = null;
   let bestTime = -1;
 
@@ -29,6 +32,7 @@ function getLatestSnapshotData() {
 }
 
 function writeSnapshotData(snapshotData) {
+  if (isPg) return;
   const jsonStr = JSON.stringify(snapshotData, null, 2);
   for (const filePath of allPaths) {
     try {
@@ -44,8 +48,9 @@ function writeSnapshotData(snapshotData) {
   }
 }
 
-// Save entire SQLite database state to JSON snapshot file
+// Save entire SQLite database state to JSON snapshot file (SQLite local development only)
 async function syncDatabaseSnapshot(dbHelpers) {
+  if (isPg) return;
   try {
     const { all } = dbHelpers;
     const snapshot = {
@@ -73,6 +78,10 @@ async function syncDatabaseSnapshot(dbHelpers) {
 
 // Restore SQLite tables from JSON snapshot if empty or after fresh deployment
 async function restoreFromDatabaseSnapshot(dbHelpers) {
+  if (isPg) {
+    console.log('[PERSISTENCE] PostgreSQL mode detected. Snapshot restoration is disabled. Neon is single source of truth.');
+    return;
+  }
   try {
     const snapshot = getLatestSnapshotData();
     if (!snapshot) {
