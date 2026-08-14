@@ -42,10 +42,20 @@ function translateQuery(sql, params = []) {
       pgSql = pgSql.replace('INSERT OR REPLACE INTO settings', 'INSERT INTO settings') + ' ON CONFLICT (key_name) DO UPDATE SET value = EXCLUDED.value';
     } else if (pgSql.includes('INSERT OR REPLACE INTO program_judges')) {
       pgSql = pgSql.replace('INSERT OR REPLACE INTO program_judges', 'INSERT INTO program_judges') + ' ON CONFLICT (program_id, judge_id) DO NOTHING';
+    } else if (pgSql.includes('INSERT OR REPLACE INTO program_participants')) {
+      pgSql = pgSql.replace('INSERT OR REPLACE INTO program_participants', 'INSERT INTO program_participants') + ' ON CONFLICT (program_id, student_id) DO UPDATE SET chest_no = EXCLUDED.chest_no, attendance = EXCLUDED.attendance';
+    } else if (pgSql.includes('INSERT OR REPLACE INTO marks')) {
+      pgSql = pgSql.replace('INSERT OR REPLACE INTO marks', 'INSERT INTO marks') + ' ON CONFLICT (program_id, student_id, judge_id) DO UPDATE SET total_mark = EXCLUDED.total_mark, total_score = COALESCE(EXCLUDED.total_score, EXCLUDED.total_mark)';
     } else if (pgSql.includes('INSERT OR REPLACE INTO users')) {
-      pgSql = pgSql.replace('INSERT OR REPLACE INTO users', 'INSERT INTO users') + ' ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, email = EXCLUDED.email';
+      pgSql = pgSql.replace('INSERT OR REPLACE INTO users', 'INSERT INTO users') + ' ON CONFLICT (id) DO UPDATE SET username = EXCLUDED.username, email = EXCLUDED.email, name = EXCLUDED.name';
+    } else if (pgSql.includes('INSERT OR REPLACE INTO students')) {
+      pgSql = pgSql.replace('INSERT OR REPLACE INTO students', 'INSERT INTO students') + ' ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, category_name = EXCLUDED.category_name';
+    } else if (pgSql.includes('INSERT OR REPLACE INTO programs')) {
+      pgSql = pgSql.replace('INSERT OR REPLACE INTO programs', 'INSERT INTO programs') + ' ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, status = EXCLUDED.status';
+    } else if (pgSql.includes('INSERT OR REPLACE INTO houses')) {
+      pgSql = pgSql.replace('INSERT OR REPLACE INTO houses', 'INSERT INTO houses') + ' ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, total_points = EXCLUDED.total_points';
     } else {
-      pgSql = pgSql.replace('INSERT OR REPLACE INTO', 'INSERT INTO') + ' ON CONFLICT (id) DO NOTHING';
+      pgSql = pgSql.replace('INSERT OR REPLACE INTO', 'INSERT INTO') + ' ON CONFLICT DO NOTHING';
     }
   }
 
@@ -55,6 +65,21 @@ function translateQuery(sql, params = []) {
   }
 
   return { sql: pgSql, params };
+}
+
+// Reset primary key sequences for PostgreSQL
+async function syncPgSequences() {
+  if (!isPg || !pgPool) return;
+  const tables = [
+    'users', 'houses', 'categories', 'venues', 'students', 
+    'judges', 'programs', 'program_participants', 'marks', 
+    'results', 'certificates', 'announcements', 'gallery', 'audit_logs'
+  ];
+  for (const tbl of tables) {
+    try {
+      await pgPool.query(`SELECT setval(pg_get_serial_sequence('${tbl}', 'id'), COALESCE((SELECT MAX(id) FROM ${tbl}), 1));`);
+    } catch (e) {}
+  }
 }
 
 // Unified run() helper
@@ -437,11 +462,18 @@ async function initDb() {
       ON CONFLICT DO NOTHING`);
   }
 
-  // Restore from production snapshot if SQLite tables are empty
+  // Restore from production snapshot if tables are empty
+  const persistence = require('./persistence');
   if (!isPg) {
-    const persistence = require('./persistence');
     await persistence.restoreFromDatabaseSnapshot({ run, get, all });
     await persistence.syncDatabaseSnapshot({ run, get, all });
+  } else {
+    const studentCount = await get('SELECT COUNT(*) as count FROM students');
+    if (!studentCount || parseInt(studentCount.count, 10) === 0) {
+      console.log('[DB] PostgreSQL student table is empty. Restoring baseline data from snapshot...');
+      await persistence.restoreFromDatabaseSnapshot({ run, get, all });
+    }
+    await syncPgSequences();
   }
 
   console.log(`[DB] Database initialized successfully. Mode: ${isPg ? 'PostgreSQL' : 'SQLite'}`);
@@ -457,5 +489,6 @@ module.exports = {
   get,
   all,
   initDb,
+  syncPgSequences,
   syncSnapshot: () => (!isPg ? persistence.syncDatabaseSnapshot({ run, get, all }) : Promise.resolve())
 };

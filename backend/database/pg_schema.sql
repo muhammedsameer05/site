@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS houses (
   motto TEXT,
   captain_name VARCHAR(150),
   total_points INT DEFAULT 0,
+  bonus_points INT DEFAULT 0,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -90,6 +91,8 @@ CREATE TABLE IF NOT EXISTS programs (
   category_id INT REFERENCES categories(id) ON DELETE SET NULL,
   age_group VARCHAR(100) DEFAULT 'Sub Junior',
   type VARCHAR(50) DEFAULT 'individual',
+  gender_category VARCHAR(50) DEFAULT 'Male',
+  stage_type VARCHAR(50) DEFAULT 'On Stage',
   venue_id INT REFERENCES venues(id) ON DELETE SET NULL,
   program_date DATE,
   start_time TIME,
@@ -135,11 +138,15 @@ CREATE TABLE IF NOT EXISTS marks (
   time_management NUMERIC(5, 2) DEFAULT 0,
   overall_impression NUMERIC(5, 2) DEFAULT 0,
   total_mark NUMERIC(6, 2) DEFAULT 0,
+  total_score NUMERIC(6, 2) DEFAULT 0,
+  criteria_scores TEXT,
+  remarks TEXT,
   status VARCHAR(50) DEFAULT 'draft',
   is_archived INT DEFAULT 0,
   archived_at TIMESTAMP,
   archived_by VARCHAR(100),
   submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP,
   UNIQUE (program_id, student_id, judge_id)
 );
 
@@ -161,13 +168,15 @@ CREATE TABLE IF NOT EXISTS results (
 -- 12. Certificates Table
 CREATE TABLE IF NOT EXISTS certificates (
   id SERIAL PRIMARY KEY,
-  certificate_no VARCHAR(100) UNIQUE NOT NULL,
+  certificate_no VARCHAR(100),
+  certificate_code VARCHAR(100),
   student_id INT REFERENCES students(id) ON DELETE SET NULL,
   program_id INT REFERENCES programs(id) ON DELETE SET NULL,
   type VARCHAR(50) NOT NULL,
-  recipient_name VARCHAR(200) NOT NULL,
-  issue_date DATE NOT NULL,
+  recipient_name VARCHAR(200),
+  issue_date DATE,
   pdf_url TEXT,
+  download_url TEXT,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -210,6 +219,17 @@ CREATE TABLE IF NOT EXISTS audit_logs (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Safe Column Additions for Existing PostgreSQL Databases
+ALTER TABLE houses ADD COLUMN IF NOT EXISTS bonus_points INT DEFAULT 0;
+ALTER TABLE programs ADD COLUMN IF NOT EXISTS gender_category VARCHAR(50) DEFAULT 'Male';
+ALTER TABLE programs ADD COLUMN IF NOT EXISTS stage_type VARCHAR(50) DEFAULT 'On Stage';
+ALTER TABLE marks ADD COLUMN IF NOT EXISTS total_score NUMERIC(6, 2) DEFAULT 0;
+ALTER TABLE marks ADD COLUMN IF NOT EXISTS criteria_scores TEXT;
+ALTER TABLE marks ADD COLUMN IF NOT EXISTS remarks TEXT;
+ALTER TABLE marks ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP;
+ALTER TABLE certificates ADD COLUMN IF NOT EXISTS certificate_code VARCHAR(100);
+ALTER TABLE certificates ADD COLUMN IF NOT EXISTS download_url TEXT;
+
 -- Performance Indexes
 CREATE INDEX IF NOT EXISTS idx_students_house_id ON students(house_id);
 CREATE INDEX IF NOT EXISTS idx_students_admission_no ON students(admission_no);
@@ -219,3 +239,4 @@ CREATE INDEX IF NOT EXISTS idx_programs_venue_id ON programs(venue_id);
 CREATE INDEX IF NOT EXISTS idx_program_participants_pid_sid ON program_participants(program_id, student_id);
 CREATE INDEX IF NOT EXISTS idx_marks_pid_sid ON marks(program_id, student_id);
 CREATE INDEX IF NOT EXISTS idx_results_pid ON results(program_id);
+
