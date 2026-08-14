@@ -469,8 +469,8 @@ async function recalculateAllHousePoints() {
       await run(`
         UPDATE houses 
         SET total_points = ? 
-        WHERE id = ? OR CAST(id AS TEXT) = CAST(? AS TEXT) OR code = ?
-      `, [totalPts, hId, hId, hId]);
+        WHERE CAST(id AS TEXT) = CAST(? AS TEXT) OR code = ?
+      `, [totalPts, hId, hId]);
     }
   } catch (err) {
     console.error('[HOUSE RECALC ERROR]', err.message);
@@ -513,7 +513,7 @@ router.get('/houses', async (req, res) => {
       if (!targetHouseId) {
         const stu = await get(`
           SELECT house_id FROM students 
-          WHERE id = ? OR student_id = ? OR admission_no = ? OR LOWER(TRIM(name)) = LOWER(TRIM(?))
+          WHERE CAST(id AS TEXT) = CAST(? AS TEXT) OR student_id = ? OR admission_no = ? OR LOWER(TRIM(name)) = LOWER(TRIM(?))
         `, [r.student_id, r.student_id, r.student_id, r.student_id]);
         if (stu) targetHouseId = stu.house_id;
       }
@@ -822,9 +822,9 @@ router.get('/programs', async (req, res) => {
       let winners = await all(`
         SELECT r.prize, r.total_score, r.points_awarded, s.name as student_name, s.admission_no, h.name as house_name, h.color_hex as house_color
         FROM results r
-        JOIN students s ON (r.student_id = s.id OR r.student_id = s.student_id OR CAST(r.student_id AS TEXT) = CAST(s.id AS TEXT))
-        LEFT JOIN houses h ON s.house_id = h.id
-        WHERE (r.program_id = ? OR CAST(r.program_id AS TEXT) = CAST(? AS TEXT))
+        JOIN students s ON (CAST(r.student_id AS TEXT) = CAST(s.id AS TEXT) OR r.student_id = s.student_id OR r.student_id = s.admission_no)
+        LEFT JOIN houses h ON (CAST(s.house_id AS TEXT) = CAST(h.id AS TEXT) OR s.house_id = h.code)
+        WHERE (CAST(r.program_id AS TEXT) = CAST(? AS TEXT) OR r.program_id = ?)
         ORDER BY r.total_score DESC
         LIMIT 3
       `, [p.id, p.id]);
@@ -836,9 +836,9 @@ router.get('/programs', async (req, res) => {
       const participants = await all(`
         SELECT pp.id as participant_id, pp.chest_no, s.id as student_id, s.name as student_name, s.admission_no, s.class_name, h.name as house_name, h.color_hex as house_color
         FROM program_participants pp
-        JOIN students s ON (pp.student_id = s.id OR pp.student_id = s.student_id OR CAST(pp.student_id AS TEXT) = CAST(s.id AS TEXT))
-        LEFT JOIN houses h ON s.house_id = h.id
-        WHERE (pp.program_id = ? OR CAST(pp.program_id AS TEXT) = CAST(? AS TEXT))
+        JOIN students s ON (CAST(pp.student_id AS TEXT) = CAST(s.id AS TEXT) OR pp.student_id = s.student_id OR pp.student_id = s.admission_no)
+        LEFT JOIN houses h ON (CAST(s.house_id AS TEXT) = CAST(h.id AS TEXT) OR s.house_id = h.code)
+        WHERE (CAST(pp.program_id AS TEXT) = CAST(? AS TEXT) OR pp.program_id = ?)
         ORDER BY pp.chest_no ASC, s.name ASC
       `, [p.id, p.id]);
 
