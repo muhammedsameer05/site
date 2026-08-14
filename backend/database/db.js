@@ -61,11 +61,15 @@ function translateQuery(sql, params = []) {
     } else if (pgSql.includes('INSERT OR REPLACE INTO users')) {
       pgSql = pgSql.replace('INSERT OR REPLACE INTO users', 'INSERT INTO users') + ' ON CONFLICT (id) DO UPDATE SET username = EXCLUDED.username, email = EXCLUDED.email, name = EXCLUDED.name';
     } else if (pgSql.includes('INSERT OR REPLACE INTO students')) {
-      pgSql = pgSql.replace('INSERT OR REPLACE INTO students', 'INSERT INTO students') + ' ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, category_name = EXCLUDED.category_name';
+      pgSql = pgSql.replace('INSERT OR REPLACE INTO students', 'INSERT INTO students') + ' ON CONFLICT (id) DO UPDATE SET student_id = EXCLUDED.student_id, admission_no = EXCLUDED.admission_no, name = EXCLUDED.name, category_name = EXCLUDED.category_name, house_id = EXCLUDED.house_id';
     } else if (pgSql.includes('INSERT OR REPLACE INTO programs')) {
-      pgSql = pgSql.replace('INSERT OR REPLACE INTO programs', 'INSERT INTO programs') + ' ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, status = EXCLUDED.status';
+      pgSql = pgSql.replace('INSERT OR REPLACE INTO programs', 'INSERT INTO programs') + ' ON CONFLICT (id) DO UPDATE SET code = EXCLUDED.code, name = EXCLUDED.name, category_id = EXCLUDED.category_id, venue_id = EXCLUDED.venue_id, status = EXCLUDED.status';
     } else if (pgSql.includes('INSERT OR REPLACE INTO houses')) {
-      pgSql = pgSql.replace('INSERT OR REPLACE INTO houses', 'INSERT INTO houses') + ' ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, total_points = EXCLUDED.total_points';
+      pgSql = pgSql.replace('INSERT OR REPLACE INTO houses', 'INSERT INTO houses') + ' ON CONFLICT (id) DO UPDATE SET code = EXCLUDED.code, name = EXCLUDED.name, color_hex = EXCLUDED.color_hex, motto = EXCLUDED.motto, captain_name = EXCLUDED.captain_name, total_points = EXCLUDED.total_points, bonus_points = EXCLUDED.bonus_points';
+    } else if (pgSql.includes('INSERT OR REPLACE INTO categories')) {
+      pgSql = pgSql.replace('INSERT OR REPLACE INTO categories', 'INSERT INTO categories') + ' ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, min_age = EXCLUDED.min_age, max_age = EXCLUDED.max_age, description = EXCLUDED.description';
+    } else if (pgSql.includes('INSERT OR REPLACE INTO venues')) {
+      pgSql = pgSql.replace('INSERT OR REPLACE INTO venues', 'INSERT INTO venues') + ' ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, stage_number = EXCLUDED.stage_number, capacity = EXCLUDED.capacity, location = EXCLUDED.location';
     } else {
       pgSql = pgSql.replace('INSERT OR REPLACE INTO', 'INSERT INTO') + ' ON CONFLICT DO NOTHING';
     }
