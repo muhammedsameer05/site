@@ -71,8 +71,11 @@ function translateQuery(sql, params = []) {
     }
   }
 
-  // Append RETURNING id for INSERT queries if not already present
-  if (/^\s*INSERT\s+INTO\s+/i.test(pgSql) && !/RETURNING/i.test(pgSql) && !/ON CONFLICT DO NOTHING/i.test(pgSql)) {
+  // Append RETURNING id for INSERT queries if table has an id column (exclude settings, program_judges)
+  if (/^\s*INSERT\s+INTO\s+/i.test(pgSql) && 
+      !/RETURNING/i.test(pgSql) && 
+      !/ON CONFLICT DO NOTHING/i.test(pgSql) &&
+      !/\bINSERT\s+INTO\s+(settings|program_judges)\b/i.test(pgSql)) {
     pgSql += ' RETURNING id';
   }
 

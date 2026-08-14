@@ -1852,6 +1852,12 @@ router.post('/database/import', authenticate, requireAdmin, async (req, res) => 
     }
 
     await recalculateAllHousePoints();
+    try {
+      const { syncPgSequences } = require('../../database/db');
+      if (typeof syncPgSequences === 'function') {
+        await syncPgSequences();
+      }
+    } catch (e) {}
 
     // Immediately save imported snapshot to persistence files so container recycles preserve imported backup
     try {
