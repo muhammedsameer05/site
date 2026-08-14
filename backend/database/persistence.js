@@ -1,7 +1,44 @@
 const fs = require('fs');
 const path = require('path');
 
-const snapshotPath = path.join(__dirname, 'production_database_store.json');
+const localSnapshotPath = path.join(__dirname, 'production_database_store.json');
+const tmpSnapshotPath = path.join('/tmp', 'production_database_store.json');
+
+function getLatestSnapshotData() {
+  let bestSnapshot = null;
+  let bestTime = -1;
+
+  for (const filePath of [tmpSnapshotPath, localSnapshotPath]) {
+    try {
+      if (fs.existsSync(filePath)) {
+        const raw = fs.readFileSync(filePath, 'utf-8');
+        const parsed = JSON.parse(raw);
+        const time = parsed && parsed.last_synced ? new Date(parsed.last_synced).getTime() : 0;
+        if (!bestSnapshot || time >= bestTime) {
+          bestSnapshot = parsed;
+          bestTime = time;
+        }
+      }
+    } catch (e) {}
+  }
+  return bestSnapshot;
+}
+
+function writeSnapshotData(snapshotData) {
+  const jsonStr = JSON.stringify(snapshotData, null, 2);
+  for (const filePath of [tmpSnapshotPath, localSnapshotPath]) {
+    try {
+      const dir = path.dirname(filePath);
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+      fs.writeFileSync(filePath, jsonStr, 'utf-8');
+      console.log(`[PERSISTENCE] Database snapshot saved to ${filePath}`);
+    } catch (e) {
+      // Ignore write errors for read-only static Vercel build dirs
+    }
+  }
+}
 
 // Save entire SQLite database state to JSON snapshot file
 async function syncDatabaseSnapshot(dbHelpers) {
@@ -19,12 +56,12 @@ async function syncDatabaseSnapshot(dbHelpers) {
       announcements: await all('SELECT * FROM announcements'),
       gallery: await all('SELECT * FROM gallery'),
       marks: await all('SELECT * FROM marks'),
+      certificates: await all('SELECT * FROM certificates'),
       audit_logs: await all('SELECT * FROM audit_logs'),
       last_synced: new Date().toISOString()
     };
 
-    fs.writeFileSync(snapshotPath, JSON.stringify(snapshot, null, 2), 'utf-8');
-    console.log('[PERSISTENCE] Database snapshot successfully saved to disk.');
+    writeSnapshotData(snapshot);
   } catch (err) {
     console.error('[PERSISTENCE ERROR] Failed to save database snapshot:', err.message);
   }
@@ -33,14 +70,13 @@ async function syncDatabaseSnapshot(dbHelpers) {
 // Restore SQLite tables from JSON snapshot if empty or after fresh deployment
 async function restoreFromDatabaseSnapshot(dbHelpers) {
   try {
-    if (!fs.existsSync(snapshotPath)) {
+    const snapshot = getLatestSnapshotData();
+    if (!snapshot) {
       console.log('[PERSISTENCE] No snapshot file found. Using standard initialization.');
       return;
     }
-
-    const rawData = fs.readFileSync(snapshotPath, 'utf-8');
-    const snapshot = JSON.parse(rawData);
     const { run, get } = dbHelpers;
+    console.log(`[PERSISTENCE] Restoring from latest snapshot (Last Synced: ${snapshot.last_synced || 'N/A'})...`);
 
     // Restore Settings
     if (Array.isArray(snapshot.settings) && snapshot.settings.length > 0) {
@@ -145,5 +181,7 @@ async function restoreFromDatabaseSnapshot(dbHelpers) {
 
 module.exports = {
   syncDatabaseSnapshot,
-  restoreFromDatabaseSnapshot
+  restoreFromDatabaseSnapshot,
+  writeSnapshotData,
+  getLatestSnapshotData
 };

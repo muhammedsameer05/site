@@ -1853,6 +1853,20 @@ router.post('/database/import', authenticate, requireAdmin, async (req, res) => 
 
     await recalculateAllHousePoints();
 
+    // Immediately save imported snapshot to persistence files so container recycles preserve imported backup
+    try {
+      const persistence = require('../../database/persistence');
+      if (typeof persistence.writeSnapshotData === 'function') {
+        const fullSnapshot = {
+          ...snapshot,
+          last_synced: new Date().toISOString()
+        };
+        persistence.writeSnapshotData(fullSnapshot);
+      }
+    } catch (e) {
+      console.error('[IMPORT PERSISTENCE ERROR]', e);
+    }
+
     triggerPersistenceSync();
     res.json({ success: true, message: 'Complete database backup imported successfully!' });
   } catch (err) {
