@@ -1007,10 +1007,10 @@ router.post('/programs', async (req, res) => {
 router.put('/programs/:id/status', authenticate, requireAdmin, async (req, res) => {
   try {
     const { status } = req.body;
-    await run('UPDATE programs SET status = ? WHERE id = ?', [status, req.params.id]);
+    await run('UPDATE programs SET status = ? WHERE id = ? OR CAST(id AS TEXT) = CAST(? AS TEXT)', [status, req.params.id, req.params.id]);
     const io = req.app.get('io');
     if (status === 'completed') {
-      await calculateProgramResults(req.params.id, io);
+      await recalculateAllHousePoints();
     }
 
     await logAuditAction(req.user?.name || 'Admin', 'Update Program Status', `Changed program ID ${req.params.id} status to ${status}`);
@@ -1032,12 +1032,12 @@ router.put('/programs/:id', authenticate, requireAdmin, async (req, res) => {
     await run(`
       UPDATE programs 
       SET code = ?, name = ?, category_id = ?, age_group = ?, type = ?, gender_category = ?, stage_type = ?, venue_id = ?, program_date = ?, start_time = ?, end_time = ?, max_participants = ?, status = ?
-      WHERE id = ?
-    `, [finalCode, name, category_id, age_group, type, gender_category || 'Male', finalStageType, venue_id, program_date, start_time, end_time, max_participants, status, req.params.id]);
+      WHERE id = ? OR CAST(id AS TEXT) = CAST(? AS TEXT)
+    `, [finalCode, name, category_id, age_group, type, gender_category || 'Male', finalStageType, venue_id, program_date, start_time, end_time, max_participants, status, req.params.id, req.params.id]);
     
     const io = req.app.get('io');
     if (status === 'completed') {
-      await calculateProgramResults(req.params.id, io);
+      await recalculateAllHousePoints();
     }
 
     await logAuditAction(req.user?.name || 'Admin', 'Update Program', `Updated program ID: ${req.params.id}`);
