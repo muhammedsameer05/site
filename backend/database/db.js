@@ -18,9 +18,13 @@ if (isPg) {
   console.log('[DB] Configured for PostgreSQL (DATABASE_URL)');
 } else {
   const sqlite3 = require('sqlite3').verbose();
-  const dbPath = path.join(__dirname, 'madrasa_milad.sqlite');
+  const dataDir = process.env.PERSISTENT_DATA_DIR || (fs.existsSync('/var/data') ? '/var/data' : __dirname);
+  if (!fs.existsSync(dataDir)) {
+    try { fs.mkdirSync(dataDir, { recursive: true }); } catch (e) {}
+  }
+  const dbPath = path.join(dataDir, 'madrasa_milad.sqlite');
   sqliteDb = new sqlite3.Database(dbPath);
-  console.log('[DB] Configured for local SQLite (madrasa_milad.sqlite)');
+  console.log(`[DB] Configured for SQLite at: ${dbPath}`);
 }
 
 // Convert SQLite ? placeholders and syntax to PostgreSQL syntax when isPg is true

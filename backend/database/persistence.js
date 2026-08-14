@@ -1,14 +1,18 @@
 const fs = require('fs');
 const path = require('path');
 
+const persistentDir = process.env.PERSISTENT_DATA_DIR || (fs.existsSync('/var/data') ? '/var/data' : null);
+const persistentSnapshotPath = persistentDir ? path.join(persistentDir, 'production_database_store.json') : null;
 const localSnapshotPath = path.join(__dirname, 'production_database_store.json');
 const tmpSnapshotPath = path.join('/tmp', 'production_database_store.json');
+
+const allPaths = [persistentSnapshotPath, tmpSnapshotPath, localSnapshotPath].filter(Boolean);
 
 function getLatestSnapshotData() {
   let bestSnapshot = null;
   let bestTime = -1;
 
-  for (const filePath of [tmpSnapshotPath, localSnapshotPath]) {
+  for (const filePath of allPaths) {
     try {
       if (fs.existsSync(filePath)) {
         const raw = fs.readFileSync(filePath, 'utf-8');
@@ -26,7 +30,7 @@ function getLatestSnapshotData() {
 
 function writeSnapshotData(snapshotData) {
   const jsonStr = JSON.stringify(snapshotData, null, 2);
-  for (const filePath of [tmpSnapshotPath, localSnapshotPath]) {
+  for (const filePath of allPaths) {
     try {
       const dir = path.dirname(filePath);
       if (!fs.existsSync(dir)) {
@@ -35,7 +39,7 @@ function writeSnapshotData(snapshotData) {
       fs.writeFileSync(filePath, jsonStr, 'utf-8');
       console.log(`[PERSISTENCE] Database snapshot saved to ${filePath}`);
     } catch (e) {
-      // Ignore write errors for read-only static Vercel build dirs
+      // Ignore write errors for read-only static dirs
     }
   }
 }
