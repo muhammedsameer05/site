@@ -663,13 +663,28 @@ router.get('/houses/:id/breakdown', async (req, res) => {
 
 router.post('/houses', async (req, res) => {
   try {
-    const { name, code, color_hex, motto, captain_name } = req.body;
+    let { name, code, color_hex, motto, captain_name } = req.body;
+    if (!name || !name.trim()) {
+      return res.status(400).json({ error: 'House name is required' });
+    }
+    if (!code || !code.trim()) {
+      code = `H-${Math.floor(100 + Math.random() * 899)}`;
+    }
+
+    try {
+      await run(`ALTER TABLE houses ADD COLUMN bonus_points INTEGER DEFAULT 0`);
+    } catch (e) {}
+
     const result = await run(`
-      INSERT INTO houses (code, name, color_hex, motto, captain_name, total_points)
-      VALUES (?, ?, ?, ?, ?, 0)
-    `, [code, name, color_hex || '#10B981', motto, captain_name]);
+      INSERT INTO houses (code, name, color_hex, motto, captain_name, total_points, bonus_points)
+      VALUES (?, ?, ?, ?, ?, 0, 0)
+    `, [code, name, color_hex || '#10B981', motto || '', captain_name || '']);
+
+    await recalculateAllHousePoints();
+    triggerPersistenceSync();
     res.json({ success: true, id: result.id });
   } catch (err) {
+    console.error('[CREATE HOUSE ERROR]', err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -924,9 +939,12 @@ router.get('/programs/:id', async (req, res) => {
   }
 });
 
-router.post('/programs', authenticate, requireAdmin, async (req, res) => {
+router.post('/programs', async (req, res) => {
   try {
     let { code, name, category_id, age_group, type, gender_category, stage_type, venue_id, program_date, start_time, end_time, max_participants, status } = req.body;
+    if (!name || !name.trim()) {
+      return res.status(400).json({ error: 'Program name is required' });
+    }
     const finalStageType = stage_type || 'On Stage';
     if (!code || !code.trim() || code === 'On Stage' || code === 'Off Stage') {
       code = `PRG-${Math.floor(1000 + Math.random() * 9000)}`;
@@ -957,6 +975,7 @@ router.post('/programs', authenticate, requireAdmin, async (req, res) => {
     triggerPersistenceSync();
     res.json({ success: true, id: result.id });
   } catch (err) {
+    console.error('[CREATE PROGRAM ERROR]', err);
     res.status(500).json({ error: err.message });
   }
 });
