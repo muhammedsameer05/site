@@ -1720,136 +1720,178 @@ router.post('/database/import', authenticate, requireAdmin, async (req, res) => 
     }
 
     // Restore Houses
-    if (Array.isArray(snapshot.houses)) {
-      for (const h of snapshot.houses) {
-        await run(`
-          INSERT OR REPLACE INTO houses (id, code, name, color_hex, motto, captain_name, total_points, bonus_points, created_at)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `, [h.id, h.code, h.name, h.color_hex, h.motto, h.captain_name, h.total_points || 0, h.bonus_points || 0, h.created_at || new Date().toISOString()]);
-      }
-    }
-
-    // Restore Categories
-    if (Array.isArray(snapshot.categories)) {
-      for (const c of snapshot.categories) {
-        await run(`
-          INSERT OR REPLACE INTO categories (id, name, min_age, max_age, description)
-          VALUES (?, ?, ?, ?, ?)
-        `, [c.id, c.name, c.min_age, c.max_age, c.description]);
-      }
-    }
-
-    // Restore Venues
-    if (Array.isArray(snapshot.venues)) {
-      for (const v of snapshot.venues) {
-        await run(`
-          INSERT OR REPLACE INTO venues (id, name, stage_number, capacity, location)
-          VALUES (?, ?, ?, ?, ?)
-        `, [v.id, v.name, v.stage_number, v.capacity, v.location]);
-      }
-    }
-
-    // Restore Students
-    if (Array.isArray(snapshot.students)) {
-      for (const s of snapshot.students) {
-        await run(`
-          INSERT OR REPLACE INTO students (id, student_id, admission_no, name, category_name, arabic_name, photo, gender, dob, age, class_name, division, house_id, parent_name, phone, email, address, qr_code, is_archived, archived_at, archived_by, created_at)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `, [s.id, s.student_id, s.admission_no, s.name, s.category_name, s.arabic_name, s.photo, s.gender, s.dob, s.age, s.class_name, s.division, s.house_id, s.parent_name, s.phone, s.email, s.address, s.qr_code, s.is_archived || 0, s.archived_at, s.archived_by, s.created_at || new Date().toISOString()]);
-      }
-    }
-
-    // Restore Programs
-    if (Array.isArray(snapshot.programs)) {
-      for (const p of snapshot.programs) {
-        await run(`
-          INSERT OR REPLACE INTO programs (id, code, name, category_id, age_group, type, gender_category, stage_type, venue_id, program_date, start_time, end_time, max_participants, status, duration_minutes, is_archived, archived_at, archived_by, created_at)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `, [p.id, p.code || p.stage_type || 'On Stage', p.name, p.category_id, p.age_group, p.type || 'individual', p.gender_category || 'Male', p.stage_type || p.code || 'On Stage', p.venue_id || 1, p.program_date, p.start_time, p.end_time, p.max_participants || 20, p.status || 'pending', p.duration_minutes || 10, p.is_archived || 0, p.archived_at, p.archived_by, p.created_at || new Date().toISOString()]);
-      }
-    }
-
-    // Restore Program Participants
-    if (Array.isArray(snapshot.program_participants)) {
-      for (const pp of snapshot.program_participants) {
-        await run(`
-          INSERT OR REPLACE INTO program_participants (id, program_id, student_id, chest_no, attendance)
-          VALUES (?, ?, ?, ?, ?)
-        `, [pp.id, pp.program_id, pp.student_id, pp.chest_no || pp.student_id, pp.attendance || 'present']);
-      }
-    }
-
-    // Restore Results (Winners)
-    if (Array.isArray(snapshot.results)) {
-      for (const r of snapshot.results) {
-        await run(`
-          INSERT OR REPLACE INTO results (id, program_id, student_id, total_score, prize, points_awarded, tie_breaker_note, published_at)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        `, [r.id, r.program_id, r.student_id, r.total_score || 0, r.prize, r.points_awarded || r.points || 0, r.tie_breaker_note || '', r.published_at || new Date().toISOString()]);
-      }
-    }
-
-    // Restore Marks
-    if (Array.isArray(snapshot.marks)) {
-      try {
-        await run("ALTER TABLE marks ADD COLUMN criteria_scores TEXT");
-      } catch (e) {}
-      try {
-        await run("ALTER TABLE marks ADD COLUMN total_score REAL DEFAULT 0");
-      } catch (e) {}
-      try {
-        await run("ALTER TABLE marks ADD COLUMN remarks TEXT");
-      } catch (e) {}
-      try {
-        await run("ALTER TABLE marks ADD COLUMN updated_at TIMESTAMP WITH TIME ZONE");
-      } catch (e) {}
-
-      for (const m of snapshot.marks) {
-        try {
-          await run(`
-            INSERT OR REPLACE INTO marks (id, program_id, student_id, judge_id, criteria_scores, total_score, remarks, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-          `, [m.id, m.program_id, m.student_id, m.judge_id || 1, typeof m.criteria_scores === 'object' ? JSON.stringify(m.criteria_scores) : m.criteria_scores, m.total_score || m.total_mark || 0, m.remarks || '', m.updated_at || m.submitted_at || new Date().toISOString()]);
-        } catch (e) {
+    try {
+      if (Array.isArray(snapshot.houses)) {
+        for (const h of snapshot.houses) {
           try {
             await run(`
-              INSERT OR REPLACE INTO marks (id, program_id, student_id, judge_id, total_mark, submitted_at)
-              VALUES (?, ?, ?, ?, ?, ?)
-            `, [m.id, m.program_id, m.student_id, m.judge_id || 1, m.total_score || m.total_mark || 0, m.submitted_at || new Date().toISOString()]);
-          } catch (e2) {}
+              INSERT OR REPLACE INTO houses (id, code, name, color_hex, motto, captain_name, total_points, bonus_points, created_at)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `, [h.id, h.code, h.name, h.color_hex, h.motto, h.captain_name, h.total_points || 0, h.bonus_points || 0, h.created_at || new Date().toISOString()]);
+          } catch (e) {}
         }
       }
-    }
+    } catch (e) {}
+
+    // Restore Categories
+    try {
+      if (Array.isArray(snapshot.categories)) {
+        for (const c of snapshot.categories) {
+          try {
+            await run(`
+              INSERT OR REPLACE INTO categories (id, name, min_age, max_age, description)
+              VALUES (?, ?, ?, ?, ?)
+            `, [c.id, c.name, c.min_age, c.max_age, c.description]);
+          } catch (e) {}
+        }
+      }
+    } catch (e) {}
+
+    // Restore Venues
+    try {
+      if (Array.isArray(snapshot.venues)) {
+        for (const v of snapshot.venues) {
+          try {
+            await run(`
+              INSERT OR REPLACE INTO venues (id, name, stage_number, capacity, location)
+              VALUES (?, ?, ?, ?, ?)
+            `, [v.id, v.name, v.stage_number, v.capacity, v.location]);
+          } catch (e) {}
+        }
+      }
+    } catch (e) {}
+
+    // Restore Students
+    try {
+      if (Array.isArray(snapshot.students)) {
+        for (const s of snapshot.students) {
+          try {
+            await run(`
+              INSERT OR REPLACE INTO students (id, student_id, admission_no, name, category_name, arabic_name, photo, gender, dob, age, class_name, division, house_id, parent_name, phone, email, address, qr_code, is_archived, archived_at, archived_by, created_at)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `, [s.id, s.student_id, s.admission_no, s.name, s.category_name, s.arabic_name, s.photo, s.gender, s.dob, s.age, s.class_name, s.division, s.house_id, s.parent_name, s.phone, s.email, s.address, s.qr_code, s.is_archived || 0, s.archived_at, s.archived_by, s.created_at || new Date().toISOString()]);
+          } catch (e) {}
+        }
+      }
+    } catch (e) {}
+
+    // Restore Programs
+    try {
+      if (Array.isArray(snapshot.programs)) {
+        for (const p of snapshot.programs) {
+          try {
+            await run(`
+              INSERT OR REPLACE INTO programs (id, code, name, category_id, age_group, type, gender_category, stage_type, venue_id, program_date, start_time, end_time, max_participants, status, duration_minutes, is_archived, archived_at, archived_by, created_at)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `, [p.id, p.code || p.stage_type || 'On Stage', p.name, p.category_id, p.age_group, p.type || 'individual', p.gender_category || 'Male', p.stage_type || p.code || 'On Stage', p.venue_id || 1, p.program_date, p.start_time, p.end_time, p.max_participants || 20, p.status || 'pending', p.duration_minutes || 10, p.is_archived || 0, p.archived_at, p.archived_by, p.created_at || new Date().toISOString()]);
+          } catch (e) {}
+        }
+      }
+    } catch (e) {}
+
+    // Restore Program Participants
+    try {
+      if (Array.isArray(snapshot.program_participants)) {
+        for (const pp of snapshot.program_participants) {
+          try {
+            await run(`
+              INSERT OR REPLACE INTO program_participants (id, program_id, student_id, chest_no, attendance)
+              VALUES (?, ?, ?, ?, ?)
+            `, [pp.id, pp.program_id, pp.student_id, pp.chest_no || pp.student_id, pp.attendance || 'present']);
+          } catch (e) {}
+        }
+      }
+    } catch (e) {}
+
+    // Restore Results (Winners)
+    try {
+      if (Array.isArray(snapshot.results)) {
+        for (const r of snapshot.results) {
+          try {
+            await run(`
+              INSERT OR REPLACE INTO results (id, program_id, student_id, total_score, prize, points_awarded, tie_breaker_note, published_at)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            `, [r.id, r.program_id, r.student_id, r.total_score || 0, r.prize, r.points_awarded || r.points || 0, r.tie_breaker_note || '', r.published_at || new Date().toISOString()]);
+          } catch (e) {}
+        }
+      }
+    } catch (e) {}
+
+    // Restore Marks
+    try {
+      if (Array.isArray(snapshot.marks)) {
+        try {
+          await run("ALTER TABLE marks ADD COLUMN criteria_scores TEXT");
+        } catch (e) {}
+        try {
+          await run("ALTER TABLE marks ADD COLUMN total_score REAL DEFAULT 0");
+        } catch (e) {}
+        try {
+          await run("ALTER TABLE marks ADD COLUMN remarks TEXT");
+        } catch (e) {}
+        try {
+          await run("ALTER TABLE marks ADD COLUMN updated_at TIMESTAMP WITH TIME ZONE");
+        } catch (e) {}
+
+        for (const m of snapshot.marks) {
+          try {
+            await run(`
+              INSERT OR REPLACE INTO marks (id, program_id, student_id, judge_id, criteria_scores, total_score, remarks, updated_at)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            `, [m.id, m.program_id, m.student_id, m.judge_id || 1, typeof m.criteria_scores === 'object' ? JSON.stringify(m.criteria_scores) : m.criteria_scores, m.total_score || m.total_mark || 0, m.remarks || '', m.updated_at || m.submitted_at || new Date().toISOString()]);
+          } catch (e) {
+            try {
+              await run(`
+                INSERT OR REPLACE INTO marks (id, program_id, student_id, judge_id, total_mark, submitted_at)
+                VALUES (?, ?, ?, ?, ?, ?)
+              `, [m.id, m.program_id, m.student_id, m.judge_id || 1, m.total_score || m.total_mark || 0, m.submitted_at || new Date().toISOString()]);
+            } catch (e2) {}
+          }
+        }
+      }
+    } catch (e) {}
 
     // Restore Certificates
-    if (Array.isArray(snapshot.certificates)) {
-      for (const cert of snapshot.certificates) {
-        await run(`
-          INSERT OR REPLACE INTO certificates (id, student_id, program_id, certificate_code, type, issue_date, download_url)
-          VALUES (?, ?, ?, ?, ?, ?, ?)
-        `, [cert.id, cert.student_id, cert.program_id, cert.certificate_code, cert.type, cert.issue_date, cert.download_url]);
+    try {
+      if (Array.isArray(snapshot.certificates)) {
+        for (const cert of snapshot.certificates) {
+          try {
+            await run(`
+              INSERT OR REPLACE INTO certificates (id, student_id, program_id, certificate_code, type, issue_date, download_url)
+              VALUES (?, ?, ?, ?, ?, ?, ?)
+            `, [cert.id, cert.student_id, cert.program_id, cert.certificate_code, cert.type, cert.issue_date, cert.download_url]);
+          } catch (e) {}
+        }
       }
-    }
+    } catch (e) {}
 
     // Restore Gallery Photos
-    if (Array.isArray(snapshot.gallery)) {
-      for (const g of snapshot.gallery) {
-        await run(`
-          INSERT OR REPLACE INTO gallery (id, album_name, title, media_type, url, caption, uploaded_at)
-          VALUES (?, ?, ?, ?, ?, ?, ?)
-        `, [g.id, g.album_name || 'Milad 2026', g.title, g.media_type || 'photo', g.url, g.caption || '', g.uploaded_at || g.created_at || new Date().toISOString()]);
+    try {
+      if (Array.isArray(snapshot.gallery)) {
+        for (const g of snapshot.gallery) {
+          try {
+            await run(`
+              INSERT OR REPLACE INTO gallery (id, album_name, title, media_type, url, caption, uploaded_at)
+              VALUES (?, ?, ?, ?, ?, ?, ?)
+            `, [g.id, g.album_name || 'Milad 2026', g.title, g.media_type || 'photo', g.url, g.caption || '', g.uploaded_at || g.created_at || new Date().toISOString()]);
+          } catch (e) {}
+        }
       }
-    }
+    } catch (e) {}
 
     // Restore Announcements
-    if (Array.isArray(snapshot.announcements)) {
-      for (const a of snapshot.announcements) {
-        await run(`
-          INSERT OR REPLACE INTO announcements (id, title, content, priority, posted_by, created_at)
-          VALUES (?, ?, ?, ?, ?, ?)
-        `, [a.id, a.title, a.content, a.priority || 'normal', a.posted_by || 'Admin', a.created_at || new Date().toISOString()]);
+    try {
+      if (Array.isArray(snapshot.announcements)) {
+        for (const a of snapshot.announcements) {
+          try {
+            await run(`
+              INSERT OR REPLACE INTO announcements (id, title, content, priority, posted_by, created_at)
+              VALUES (?, ?, ?, ?, ?, ?)
+            `, [a.id, a.title, a.content, a.priority || 'normal', a.posted_by || 'Admin', a.created_at || new Date().toISOString()]);
+          } catch (e) {}
+        }
       }
-    }
+    } catch (e) {}
 
     await recalculateAllHousePoints();
     try {
