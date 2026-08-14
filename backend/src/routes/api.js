@@ -680,16 +680,26 @@ router.post('/houses', async (req, res) => {
       await run(`ALTER TABLE houses ADD COLUMN bonus_points INTEGER DEFAULT 0`);
     } catch (e) {}
 
+    const maxRow = await get('SELECT MAX(id) as max_id FROM houses');
+    const nextId = (maxRow && maxRow.max_id) ? Number(maxRow.max_id) + 1 : 1;
     const initPts = Number(total_points) || 0;
 
-    const result = await run(`
-      INSERT INTO houses (code, name, color_hex, motto, captain_name, total_points, bonus_points)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
-    `, [code, name, color_hex || '#10B981', motto || '', captain_name || '', initPts, initPts]);
+    let result;
+    try {
+      result = await run(`
+        INSERT INTO houses (id, code, name, color_hex, motto, captain_name, total_points, bonus_points)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      `, [nextId, code, name, color_hex || '#10B981', motto || '', captain_name || '', initPts, initPts]);
+    } catch (insertErr) {
+      result = await run(`
+        INSERT INTO houses (code, name, color_hex, motto, captain_name, total_points, bonus_points)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+      `, [code, name, color_hex || '#10B981', motto || '', captain_name || '', initPts, initPts]);
+    }
 
     await recalculateAllHousePoints();
     triggerPersistenceSync();
-    res.json({ success: true, id: result.id, code });
+    res.json({ success: true, id: result.id || nextId, code });
   } catch (err) {
     console.error('[CREATE HOUSE ERROR]', err);
     res.status(500).json({ error: err.message });
@@ -969,14 +979,25 @@ router.post('/programs', async (req, res) => {
       await run(`ALTER TABLE programs ADD COLUMN stage_type TEXT DEFAULT 'On Stage'`);
     } catch (e) {}
 
-    const result = await run(`
-      INSERT INTO programs (code, name, category_id, age_group, type, gender_category, stage_type, venue_id, program_date, start_time, end_time, max_participants, status, is_archived)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
-    `, [code, name, category_id || 1, age_group || 'Sub Junior', type || 'individual', gender_category || 'Male', finalStageType, venue_id || 1, program_date || '2026-08-15', start_time || '09:00', end_time || '10:30', max_participants || 20, status || 'pending']);
+    const maxRow = await get('SELECT MAX(id) as max_id FROM programs');
+    const nextId = (maxRow && maxRow.max_id) ? Number(maxRow.max_id) + 1 : 1;
+
+    let result;
+    try {
+      result = await run(`
+        INSERT INTO programs (id, code, name, category_id, age_group, type, gender_category, stage_type, venue_id, program_date, start_time, end_time, max_participants, status, is_archived)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
+      `, [nextId, code, name, category_id || 1, age_group || 'Sub Junior', type || 'individual', gender_category || 'Male', finalStageType, venue_id || 1, program_date || '2026-08-15', start_time || '09:00', end_time || '10:30', max_participants || 20, status || 'pending']);
+    } catch (insertErr) {
+      result = await run(`
+        INSERT INTO programs (code, name, category_id, age_group, type, gender_category, stage_type, venue_id, program_date, start_time, end_time, max_participants, status, is_archived)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
+      `, [code, name, category_id || 1, age_group || 'Sub Junior', type || 'individual', gender_category || 'Male', finalStageType, venue_id || 1, program_date || '2026-08-15', start_time || '09:00', end_time || '10:30', max_participants || 20, status || 'pending']);
+    }
 
     await logAuditAction(req.user?.name || 'Admin', 'Create Program', `Created program ${name} (${code})`);
     triggerPersistenceSync();
-    res.json({ success: true, id: result.id, code });
+    res.json({ success: true, id: result.id || nextId, code });
   } catch (err) {
     console.error('[CREATE PROGRAM ERROR]', err);
     res.status(500).json({ error: err.message });
