@@ -663,7 +663,7 @@ router.get('/houses/:id/breakdown', async (req, res) => {
 
 router.post('/houses', async (req, res) => {
   try {
-    let { name, code, color_hex, motto, captain_name } = req.body;
+    let { name, code, color_hex, motto, captain_name, total_points } = req.body;
     if (!name || !name.trim()) {
       return res.status(400).json({ error: 'House name is required' });
     }
@@ -680,10 +680,12 @@ router.post('/houses', async (req, res) => {
       await run(`ALTER TABLE houses ADD COLUMN bonus_points INTEGER DEFAULT 0`);
     } catch (e) {}
 
+    const initPts = Number(total_points) || 0;
+
     const result = await run(`
       INSERT INTO houses (code, name, color_hex, motto, captain_name, total_points, bonus_points)
-      VALUES (?, ?, ?, ?, ?, 0, 0)
-    `, [code, name, color_hex || '#10B981', motto || '', captain_name || '']);
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `, [code, name, color_hex || '#10B981', motto || '', captain_name || '', initPts, initPts]);
 
     await recalculateAllHousePoints();
     triggerPersistenceSync();

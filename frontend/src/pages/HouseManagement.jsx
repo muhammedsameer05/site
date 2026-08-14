@@ -86,10 +86,17 @@ export default function HouseManagement() {
       body: JSON.stringify(formData)
     })
       .then(res => res.json())
-      .then(() => {
-        setShowModal(false);
-        setEditingHouseId(null);
-        loadHouses();
+      .then((data) => {
+        if (data.error) {
+          alert(`Error saving house: ${data.error}`);
+        } else {
+          setShowModal(false);
+          setEditingHouseId(null);
+          loadHouses();
+        }
+      })
+      .catch(err => {
+        alert(`Error saving house: ${err.message}`);
       });
   };
 
