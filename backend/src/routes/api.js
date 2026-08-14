@@ -1699,6 +1699,15 @@ router.post('/database/import', authenticate, requireAdmin, async (req, res) => 
       if (Array.isArray(snapshot.programs)) {
         await run('DELETE FROM programs');
       }
+      if (Array.isArray(snapshot.houses)) {
+        await run('DELETE FROM houses');
+      }
+      if (Array.isArray(snapshot.categories)) {
+        await run('DELETE FROM categories');
+      }
+      if (Array.isArray(snapshot.venues)) {
+        await run('DELETE FROM venues');
+      }
       if (Array.isArray(snapshot.announcements)) {
         await run('DELETE FROM announcements');
       }
