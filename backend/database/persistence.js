@@ -94,6 +94,30 @@ async function restoreFromDatabaseSnapshot(dbHelpers) {
       }
     }
 
+    // Restore Houses
+    if (Array.isArray(snapshot.houses) && snapshot.houses.length > 0) {
+      const currentCount = await get('SELECT COUNT(*) as count FROM houses');
+      if (!currentCount || parseInt(currentCount.count, 10) === 0 || parseInt(currentCount.count, 10) < snapshot.houses.length) {
+        console.log(`[PERSISTENCE] Restoring ${snapshot.houses.length} houses from snapshot...`);
+        for (const h of snapshot.houses) {
+          await run(`
+            INSERT OR REPLACE INTO houses (id, code, name, color_hex, motto, captain_name, total_points, bonus_points, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+          `, [h.id, h.code, h.name, h.color_hex, h.motto, h.captain_name, h.total_points || 0, h.bonus_points || 0, h.created_at || new Date().toISOString()]);
+        }
+      }
+    }
+
+    // Restore Categories
+    if (Array.isArray(snapshot.categories) && snapshot.categories.length > 0) {
+      for (const c of snapshot.categories) {
+        await run(`
+          INSERT OR REPLACE INTO categories (id, name, min_age, max_age, description)
+          VALUES (?, ?, ?, ?, ?)
+        `, [c.id, c.name, c.min_age, c.max_age, c.description]);
+      }
+    }
+
     // Restore Students
     if (Array.isArray(snapshot.students) && snapshot.students.length > 0) {
       const currentCount = await get('SELECT COUNT(*) as count FROM students');
