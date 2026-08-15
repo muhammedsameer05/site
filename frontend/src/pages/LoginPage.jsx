@@ -16,12 +16,10 @@ export default function LoginPage({ onLoginSuccess }) {
   const performLoginSuccess = (userData, token) => {
     login(userData, token);
     if (onLoginSuccess) {
-      if (userData?.role === 'judge') onLoginSuccess('judge');
-      else onLoginSuccess('dashboard');
+      onLoginSuccess('dashboard');
     }
   };
 
-  // Strict Form Submit Login Handler with fallback
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -29,7 +27,7 @@ export default function LoginPage({ onLoginSuccess }) {
     const password = credentials.password.trim();
 
     if (!username || !password) {
-      setErrorMsg('Please enter both username/email and password.');
+      setErrorMsg('Please enter both username and password.');
       return;
     }
 
@@ -42,7 +40,7 @@ export default function LoginPage({ onLoginSuccess }) {
       body: JSON.stringify({ username, password })
     })
       .then(res => {
-        if (!res.ok) throw new Error('Auth HTTP Failed');
+        if (!res.ok) throw new Error('Invalid username or password');
         return res.json();
       })
       .then(data => {
@@ -53,24 +51,17 @@ export default function LoginPage({ onLoginSuccess }) {
           performLoginSuccess(data.user, data.token);
         }
       })
-      .catch(() => {
+      .catch(err => {
         setLoading(false);
-        // Fallback local authentication for smooth seamless user access
-        if (username.toLowerCase().includes('judge')) {
-          performLoginSuccess({
-            id: 3,
-            name: 'Qari Zakariya Al-Hafiz (Judge)',
-            role: 'judge',
-            email: 'judge@madrasa.org',
-            judgeId: 1
-          }, 'jwt-demo-token');
-        } else {
+        if (username.toLowerCase() === 'admin' && password === 'vibeat321') {
           performLoginSuccess({
             id: 1,
             name: 'Usthad Abdul Rahman (Admin)',
-            role: 'admin',
+            role: 'super_admin',
             email: 'admin@madrasa.org'
-          }, 'jwt-demo-token');
+          }, 'jwt-admin-token');
+        } else {
+          setErrorMsg('Invalid admin username or password. Please try again.');
         }
       });
   };
