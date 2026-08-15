@@ -68,7 +68,7 @@ export default function HouseBreakdownModal({ house, houseId, onClose }) {
 
   const housePoints = currentHouse.total_points !== undefined 
     ? currentHouse.total_points 
-    : (count1st * 10 + count2nd * 7 + count3rd * 5);
+    : 0;
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-fade-in">
@@ -107,22 +107,22 @@ export default function HouseBreakdownModal({ house, houseId, onClose }) {
             <div className="p-2.5 sm:p-3 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 shadow-xs">
               <span className="text-[9px] sm:text-[10px] font-black uppercase block tracking-tight">1st Places</span>
               <span className="text-lg sm:text-xl font-black font-mono">🥇 {count1st}</span>
-              <span className="text-[9px] sm:text-[10px] block font-bold text-amber-700">({count1st * 10} Pts)</span>
+              <span className="text-[9px] sm:text-[10px] block font-bold text-amber-700">Gold Medals</span>
             </div>
             <div className="p-2.5 sm:p-3 rounded-2xl bg-slate-100 border border-slate-300 text-slate-900 shadow-xs">
               <span className="text-[9px] sm:text-[10px] font-black uppercase block tracking-tight">2nd Places</span>
               <span className="text-lg sm:text-xl font-black font-mono">🥈 {count2nd}</span>
-              <span className="text-[9px] sm:text-[10px] block font-bold text-slate-600">({count2nd * 7} Pts)</span>
+              <span className="text-[9px] sm:text-[10px] block font-bold text-slate-600">Silver Medals</span>
             </div>
             <div className="p-2.5 sm:p-3 rounded-2xl bg-amber-100/60 border border-amber-300 text-amber-950 shadow-xs">
               <span className="text-[9px] sm:text-[10px] font-black uppercase block tracking-tight">3rd Places</span>
               <span className="text-lg sm:text-xl font-black font-mono">🥉 {count3rd}</span>
-              <span className="text-[9px] sm:text-[10px] block font-bold text-amber-800">({count3rd * 5} Pts)</span>
+              <span className="text-[9px] sm:text-[10px] block font-bold text-amber-800">Bronze Medals</span>
             </div>
             <div className="p-2.5 sm:p-3 rounded-2xl bg-emerald-600 text-white shadow-md">
               <span className="text-[9px] sm:text-[10px] font-black uppercase block opacity-80 tracking-tight">Total Points</span>
               <span className="text-xl sm:text-2xl font-black font-mono block leading-tight">{housePoints}</span>
-              <span className="text-[8px] sm:text-[9px] block font-extrabold uppercase tracking-tight opacity-90">Calculated Live</span>
+              <span className="text-[8px] sm:text-[9px] block font-extrabold uppercase tracking-tight opacity-90">Championship Score</span>
             </div>
           </div>
 
@@ -130,12 +130,12 @@ export default function HouseBreakdownModal({ house, houseId, onClose }) {
           <div className="space-y-3">
             <h3 className="text-xs sm:text-sm font-black text-slate-900 uppercase tracking-wider flex items-center space-x-1.5">
               <Award className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span>Competition Result Point Breakdown ({results.length} Wins)</span>
+              <span>Competition Wins Breakdown ({results.length} Wins)</span>
             </h3>
 
             {loading && results.length === 0 ? (
               <div className="p-8 text-center text-slate-500 font-bold text-xs">
-                Fetching competition winners & point breakdown...
+                Fetching competition winners...
               </div>
             ) : results.length === 0 ? (
               <div className="p-6 bg-white rounded-2xl border border-slate-200 text-center text-slate-400 text-xs font-bold italic">
@@ -144,8 +144,6 @@ export default function HouseBreakdownModal({ house, houseId, onClose }) {
             ) : (
               <div className="space-y-2">
                 {results.map((r, idx) => {
-                  const pts = r.prize === '1st' ? 10 : r.prize === '2nd' ? 7 : r.prize === '3rd' ? 5 : Number(r.points_awarded) || 0;
-
                   return (
                     <div 
                       key={r.id || idx}
@@ -169,10 +167,11 @@ export default function HouseBreakdownModal({ house, houseId, onClose }) {
                       </div>
 
                       <div className="text-right shrink-0">
-                        <span className="px-2.5 py-1 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 font-mono font-black text-xs sm:text-sm block whitespace-nowrap">
-                          +{pts} Pts
-                        </span>
-                        <span className="text-[9px] sm:text-[10px] text-slate-400 block font-mono mt-0.5 whitespace-nowrap">
+                        <span className={`px-2.5 py-1 rounded-xl font-mono font-black text-xs sm:text-sm block whitespace-nowrap ${
+                          r.prize === '1st' ? 'bg-amber-100 text-amber-900 border border-amber-300' :
+                          r.prize === '2nd' ? 'bg-slate-100 text-slate-800 border border-slate-300' :
+                          'bg-amber-50 text-amber-950 border border-amber-200'
+                        }`}>
                           {r.prize === '1st' ? '1st Place' : r.prize === '2nd' ? '2nd Place' : '3rd Place'}
                         </span>
                       </div>

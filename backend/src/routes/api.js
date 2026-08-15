@@ -34,9 +34,9 @@ async function calculateProgramResults(programId, io) {
     await run('DELETE FROM results WHERE (program_id = ? OR CAST(program_id AS TEXT) = CAST(? AS TEXT))', [programId, programId]);
 
     const prizes = [
-      { prize: '1st', points: 10 },
-      { prize: '2nd', points: 7 },
-      { prize: '3rd', points: 5 }
+      { prize: '1st' },
+      { prize: '2nd' },
+      { prize: '3rd' }
     ];
 
     for (let i = 0; i < Math.min(3, studentScores.length); i++) {
@@ -55,17 +55,10 @@ async function calculateProgramResults(programId, io) {
       await run(`
         INSERT INTO results (program_id, student_id, total_score, prize, points_awarded)
         VALUES (?, ?, ?, ?, ?)
-      `, [programId, targetStudentDbId, sScore.avg_score, p.prize, p.points]);
+      `, [programId, targetStudentDbId, sScore.avg_score, p.prize, 0]);
     }
 
-    // Reset and recalculate house total points across all results
-    await run('UPDATE houses SET total_points = 0');
-    const allResults = await all('SELECT r.points_awarded, s.house_id FROM results r JOIN students s ON (CAST(r.student_id AS TEXT) = CAST(s.id AS TEXT) OR CAST(r.student_id AS TEXT) = CAST(s.student_id AS TEXT) OR CAST(r.student_id AS TEXT) = CAST(s.admission_no AS TEXT))');
-    for (let r of allResults) {
-      if (r.house_id) {
-        await run('UPDATE houses SET total_points = total_points + ? WHERE id = ?', [r.points_awarded, r.house_id]);
-      }
-    }
+    // House points are strictly manual - never auto-calculate or reset house points
 
     if (io) {
       io.emit('results_published', { programId });
@@ -359,86 +352,16 @@ router.delete('/students/:id', authenticate, requireAdmin, async (req, res) => {
 });
 
 async function recalculateAllHousePoints() {
-  try {
-    try {
-      await run(`ALTER TABLE houses ADD COLUMN bonus_points INTEGER DEFAULT 0`);
-    } catch (e) {}
-
-    const houses = await all('SELECT * FROM houses');
-    const houseTotals = {};
-    for (const h of houses) {
-      houseTotals[String(h.id)] = Number(h.bonus_points) || 0;
-    }
-
-    // Automatically purge old orphan results belonging to deleted students or deleted programs
-    try {
-      await run(`
-        DELETE FROM results 
-        WHERE student_id NOT IN (
-          SELECT CAST(id AS TEXT) FROM students 
-          UNION SELECT student_id FROM students 
-          UNION SELECT admission_no FROM students 
-          UNION SELECT LOWER(TRIM(name)) FROM students
-        )
-      `);
-    } catch (e) {}
-
-    const allResults = await all(`
-      SELECT r.points_awarded, r.prize, r.student_id, s.house_id 
-      FROM results r 
-      JOIN programs p ON CAST(r.program_id AS TEXT) = CAST(p.id AS TEXT)
-      LEFT JOIN students s ON (
-        CAST(r.student_id AS TEXT) = CAST(s.id AS TEXT) OR 
-        CAST(r.student_id AS TEXT) = CAST(s.student_id AS TEXT) OR 
-        CAST(r.student_id AS TEXT) = CAST(s.admission_no AS TEXT) OR
-        LOWER(TRIM(s.name)) = LOWER(TRIM(CAST(r.student_id AS TEXT)))
-      )
-      WHERE r.prize IN ('1st', '2nd', '3rd')
-        AND (p.is_archived = 0 OR p.is_archived IS NULL)
-    `);
-
-    // Sum points per house
-    if (allResults && allResults.length > 0) {
-      for (const r of allResults) {
-        const pts = r.prize === '1st' ? 10 : r.prize === '2nd' ? 7 : r.prize === '3rd' ? 5 : Number(r.points_awarded) || 0;
-        let targetHouseId = r.house_id;
-
-        if (!targetHouseId) {
-          const stu = await get(`
-            SELECT house_id FROM students 
-            WHERE CAST(id AS TEXT) = CAST(? AS TEXT) OR student_id = ? OR admission_no = ? OR LOWER(TRIM(name)) = LOWER(TRIM(?))
-          `, [r.student_id, String(r.student_id), String(r.student_id), String(r.student_id)]);
-
-          if (stu) {
-            targetHouseId = stu.house_id;
-          }
-        }
-
-        if (targetHouseId) {
-          const hKey = String(targetHouseId);
-          houseTotals[hKey] = (houseTotals[hKey] || 0) + pts;
-        }
-      }
-    }
-
-    for (const [hId, totalPts] of Object.entries(houseTotals)) {
-      await run(`
-        UPDATE houses 
-        SET total_points = ? 
-        WHERE CAST(id AS TEXT) = CAST(? AS TEXT)
-      `, [totalPts, hId]);
-    }
-  } catch (err) {
-    console.error('[HOUSE RECALC ERROR]', err.message);
-  }
+  // House championship points are managed 100% manually by administrators.
+  // No automatic points calculation or overwrites from 10/7/5 prizes.
+  return;
 }
 
 // -------------------------------------------------------------
-// HOUSES MANAGEMENT
+// HOUSE STANDINGS & SCORES
 // -------------------------------------------------------------
 router.get('/houses', async (req, res) => {
   try {
-    await recalculateAllHousePoints();
     const houses = await all('SELECT * FROM houses ORDER BY total_points DESC');
 
     // Fetch all winning results to calculate gold, silver, bronze counts
@@ -589,7 +512,7 @@ router.get('/houses/:id/breakdown', async (req, res) => {
           ...r,
           student_name: r.s_name || r.student_id,
           student_code: r.s_code || r.student_id,
-          points_awarded: r.prize === '1st' ? 10 : r.prize === '2nd' ? 7 : r.prize === '3rd' ? 5 : Number(r.points_awarded) || 0
+          points_awarded: Number(r.points_awarded) || 0
         });
       }
     }
@@ -647,7 +570,6 @@ router.post('/houses', async (req, res) => {
       `, [code, name, color_hex || '#10B981', motto || '', captain_name || '', initPts, initPts]);
     }
 
-    await recalculateAllHousePoints();
     triggerPersistenceSync();
     res.json({ success: true, id: result.id || nextId, code });
   } catch (err) {
@@ -669,40 +591,13 @@ router.put('/houses/:id', async (req, res) => {
     const updatedColor = (color_hex !== undefined && color_hex !== null) ? color_hex : existing.color_hex;
     const updatedMotto = (motto !== undefined && motto !== null) ? motto : existing.motto;
     const updatedCaptain = (captain_name !== undefined && captain_name !== null) ? captain_name : existing.captain_name;
-
-    let updatedBonusPoints = existing.bonus_points || 0;
-    let updatedPoints = existing.total_points;
-
-    if (total_points !== undefined && total_points !== null) {
-      const newTotal = Number(total_points);
-      // Calculate points earned from competition results
-      const resCount = await get(`
-        SELECT SUM(CASE WHEN r.prize = '1st' THEN 10 WHEN r.prize = '2nd' THEN 7 WHEN r.prize = '3rd' THEN 5 ELSE 0 END) as result_pts
-        FROM results r
-        JOIN students s ON (
-          CAST(r.student_id AS TEXT) = CAST(s.id AS TEXT) OR 
-          CAST(r.student_id AS TEXT) = CAST(s.student_id AS TEXT) OR 
-          CAST(r.student_id AS TEXT) = CAST(s.admission_no AS TEXT) OR
-          LOWER(TRIM(s.name)) = LOWER(TRIM(CAST(r.student_id AS TEXT)))
-        )
-        JOIN programs p ON (CAST(r.program_id AS TEXT) = CAST(p.id AS TEXT) OR CAST(r.program_id AS TEXT) = CAST(p.code AS TEXT))
-        WHERE (CAST(s.house_id AS TEXT) = CAST(? AS TEXT)) AND r.prize IN ('1st', '2nd', '3rd') AND (p.is_archived = 0 OR p.is_archived IS NULL)
-      `, [req.params.id]);
-
-      const earnedPts = Number(resCount?.result_pts) || 0;
-      updatedBonusPoints = newTotal - earnedPts;
-      updatedPoints = newTotal;
-    }
-
-    try {
-      await run(`ALTER TABLE houses ADD COLUMN bonus_points INTEGER DEFAULT 0`);
-    } catch (e) {}
+    const updatedPoints = (total_points !== undefined && total_points !== null) ? Number(total_points) : (existing.total_points || 0);
 
     await run(`
       UPDATE houses 
-      SET name = ?, code = ?, color_hex = ?, motto = ?, captain_name = ?, total_points = ?, bonus_points = ?
+      SET name = ?, code = ?, color_hex = ?, motto = ?, captain_name = ?, total_points = ?
       WHERE CAST(id AS TEXT) = CAST(? AS TEXT)
-    `, [updatedName, updatedCode, updatedColor, updatedMotto, updatedCaptain, updatedPoints, updatedBonusPoints, req.params.id]);
+    `, [updatedName, updatedCode, updatedColor, updatedMotto, updatedCaptain, updatedPoints, req.params.id]);
 
     const io = req.app.get('io');
     if (io) {
@@ -724,11 +619,7 @@ router.post('/houses/:id/adjust-points', async (req, res) => {
     const houseId = req.params.id;
     const pts = Number(points) || 0;
 
-    try {
-      await run(`ALTER TABLE houses ADD COLUMN bonus_points INTEGER DEFAULT 0`);
-    } catch (e) {}
-
-    await run('UPDATE houses SET bonus_points = bonus_points + ?, total_points = MAX(0, total_points + ?) WHERE CAST(id AS TEXT) = CAST(? AS TEXT)', [pts, pts, houseId]);
+    await run('UPDATE houses SET total_points = MAX(0, total_points + ?) WHERE CAST(id AS TEXT) = CAST(? AS TEXT)', [pts, houseId]);
 
     // Record audit action
     await logAuditAction(req.user?.name || 'Admin', 'House Live Point Adjustment', `Adjusted House ID ${houseId} by ${pts > 0 ? '+' : ''}${pts} pts. Reason: ${reason || 'Live Admin Scoring'}`);
