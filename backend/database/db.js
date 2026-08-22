@@ -173,6 +173,14 @@ async function initDb() {
     if (fs.existsSync(pgSchemaPath)) {
       const schemaSql = fs.readFileSync(pgSchemaPath, 'utf-8');
       await pgPool.query(schemaSql);
+      
+      try {
+        await pgPool.query(`ALTER TABLE students DROP CONSTRAINT IF EXISTS students_student_id_key`);
+      } catch (e) {}
+      try {
+        await pgPool.query(`ALTER TABLE students DROP CONSTRAINT IF EXISTS students_admission_no_key`);
+      } catch (e) {}
+
       console.log('[DB] PostgreSQL schema verified successfully.');
     }
 

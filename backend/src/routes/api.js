@@ -251,17 +251,32 @@ router.post('/students', authenticate, requireAdmin, async (req, res) => {
       division, house_id, parent_name, phone, email, address, registered_program_ids
     } = req.body;
 
-    const count = await get('SELECT COUNT(*) as c FROM students');
-    const student_id = `STU-${1000 + (count?.c || 0) + 1}`;
+    let student_id = req.body.student_id;
+    if (!student_id || !student_id.trim()) {
+      student_id = `STU-${Date.now().toString().slice(-4)}${Math.floor(100 + Math.random() * 899)}`;
+    }
+
+    const finalAdmNo = (admission_no && String(admission_no).trim()) || student_id;
 
     try {
       await run(`ALTER TABLE students ADD COLUMN category_name TEXT DEFAULT 'Sub Junior'`);
     } catch (e) {}
 
-    const result = await run(`
-      INSERT INTO students (student_id, admission_no, name, category_name, arabic_name, photo, gender, dob, age, class_name, division, house_id, parent_name, phone, email, address, is_archived)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
-    `, [student_id, admission_no, name, category_name || 'Sub Junior', arabic_name || '', photo || '', gender || 'male', dob, age || 10, class_name || 'Class 6', division || 'A', house_id || 1, parent_name || '', phone || '', email || '', address || '']);
+    let result;
+    try {
+      result = await run(`
+        INSERT INTO students (student_id, admission_no, name, category_name, arabic_name, photo, gender, dob, age, class_name, division, house_id, parent_name, phone, email, address, is_archived)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
+      `, [student_id, finalAdmNo, name, category_name || 'Sub Junior', arabic_name || '', photo || '', gender || 'male', dob, age || 10, class_name || 'Class 6', division || 'A', house_id || 1, parent_name || '', phone || '', email || '', address || '']);
+    } catch (insertErr) {
+      // If student_id collided with older record, generate guaranteed timestamped ID
+      const retryId = `STU-${Date.now()}-${Math.floor(100 + Math.random() * 899)}`;
+      result = await run(`
+        INSERT INTO students (student_id, admission_no, name, category_name, arabic_name, photo, gender, dob, age, class_name, division, house_id, parent_name, phone, email, address, is_archived)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
+      `, [retryId, finalAdmNo, name, category_name || 'Sub Junior', arabic_name || '', photo || '', gender || 'male', dob, age || 10, class_name || 'Class 6', division || 'A', house_id || 1, parent_name || '', phone || '', email || '', address || '']);
+      student_id = retryId;
+    }
 
     const newStudentId = result.id;
 
@@ -271,7 +286,7 @@ router.post('/students', authenticate, requireAdmin, async (req, res) => {
         await run(`
           INSERT INTO program_participants (program_id, student_id, chest_no, attendance)
           VALUES (?, ?, ?, 'present')
-        `, [progId, newStudentId, admission_no || newStudentId]);
+        `, [progId, newStudentId, finalAdmNo || newStudentId]);
       }
     }
 
@@ -279,6 +294,7 @@ router.post('/students', authenticate, requireAdmin, async (req, res) => {
     triggerPersistenceSync();
     res.json({ success: true, id: newStudentId, student_id });
   } catch (err) {
+    console.error('[STUDENT CREATE ERROR]', err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -312,6 +328,7 @@ router.put('/students/:id', authenticate, requireAdmin, async (req, res) => {
     triggerPersistenceSync();
     res.json({ success: true });
   } catch (err) {
+    console.error('[STUDENT UPDATE ERROR]', err);
     res.status(500).json({ error: err.message });
   }
 });

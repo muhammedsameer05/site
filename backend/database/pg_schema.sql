@@ -48,8 +48,8 @@ CREATE TABLE IF NOT EXISTS venues (
 -- 5. Students Table
 CREATE TABLE IF NOT EXISTS students (
   id SERIAL PRIMARY KEY,
-  student_id TEXT UNIQUE NOT NULL,
-  admission_no TEXT UNIQUE NOT NULL,
+  student_id TEXT NOT NULL,
+  admission_no TEXT NOT NULL,
   name TEXT NOT NULL,
   category_name TEXT DEFAULT 'Kiddies',
   arabic_name TEXT,
