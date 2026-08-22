@@ -367,57 +367,43 @@ export default function ProgramManagement() {
     ));
   };
 
+  const getProgramCategory = (p) => {
+    const name = String(p.category_name || '').toLowerCase().trim();
+    const age = String(p.age_group || '').toLowerCase().trim();
+
+    // 1. Check category_name first (matches displayed badge)
+    if (name) {
+      if (name.includes('super') && name.includes('senior')) return 'Super Senior';
+      if (name.includes('sub') && name.includes('junior')) return 'Sub Junior';
+      if (name === 'junior' || (name.includes('junior') && !name.includes('sub'))) return 'Junior';
+      if (name === 'senior' || (name.includes('senior') && !name.includes('super'))) return 'Senior';
+      if (name.includes('kiddies') || name.includes('kids')) return 'Kiddies';
+    }
+
+    // 2. Check age_group
+    if (age) {
+      if (age.includes('super') && age.includes('senior')) return 'Super Senior';
+      if (age.includes('sub') && age.includes('junior')) return 'Sub Junior';
+      if (age === 'junior' || (age.includes('junior') && !age.includes('sub'))) return 'Junior';
+      if (age === 'senior' || (age.includes('senior') && !age.includes('super'))) return 'Senior';
+      if (age.includes('kiddies') || age.includes('kids')) return 'Kiddies';
+    }
+
+    // 3. Fallback to category_id
+    const cId = Number(p.category_id);
+    if (cId === 1) return 'Kiddies';
+    if (cId === 2) return 'Sub Junior';
+    if (cId === 3) return 'Junior';
+    if (cId === 4) return 'Senior';
+    if (cId === 5) return 'Super Senior';
+
+    return 'Sub Junior';
+  };
+
   const matchesCategory = (p, selectedCat) => {
     if (!selectedCat || selectedCat === 'All') return true;
-
-    const target = selectedCat.toLowerCase().replace(/[-_\s]/g, '');
-    const pName = (p.category_name || '').toLowerCase().replace(/[-_\s]/g, '');
-    const pAge = (p.age_group || '').toLowerCase().replace(/[-_\s]/g, '');
-    
-    // Direct category_id matching
-    const catIdMap = {
-      'kiddies': [1],
-      'subjunior': [2],
-      'junior': [3],
-      'senior': [4],
-      'supersenior': [5]
-    };
-
-    if (catIdMap[target] && catIdMap[target].includes(Number(p.category_id))) {
-      return true;
-    }
-
-    // Kiddies & Kids equivalence
-    if (target === 'kiddies' || target === 'kids') {
-      if (pName === 'kiddies' || pName === 'kids' || pAge === 'kiddies' || pAge === 'kids') return true;
-      return false;
-    }
-
-    // Exact matching for junior (ensure subjunior doesn't falsely match junior)
-    if (target === 'junior') {
-      if ((pName === 'junior' || pAge === 'junior') && !pName.includes('sub') && !pAge.includes('sub')) return true;
-      return false;
-    }
-
-    // Exact matching for senior (ensure supersenior doesn't falsely match senior)
-    if (target === 'senior') {
-      if ((pName === 'senior' || pAge === 'senior') && !pName.includes('super') && !pAge.includes('super')) return true;
-      return false;
-    }
-
-    // Sub Junior
-    if (target === 'subjunior') {
-      if (pName === 'subjunior' || pAge === 'subjunior' || pName.includes('sub') || pAge.includes('sub')) return true;
-      return false;
-    }
-
-    // Super Senior
-    if (target === 'supersenior') {
-      if (pName === 'supersenior' || pAge === 'supersenior' || pName.includes('super') || pAge.includes('super')) return true;
-      return false;
-    }
-
-    return pName === target || pAge === target;
+    const progCat = getProgramCategory(p);
+    return progCat.toLowerCase() === selectedCat.toLowerCase();
   };
 
   const filteredPrograms = programs.filter(p => {
