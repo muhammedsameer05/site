@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import Hero from '../components/Hero';
-import HouseBreakdownModal from '../components/HouseBreakdownModal';
 import { 
   Trophy, Calendar, Clock, ArrowRight, Award, Sparkles, Image as ImageIcon, Edit3, Check, Plus, Minus
 } from 'lucide-react';
@@ -16,7 +15,6 @@ export default function HomePage({ onNavigate }) {
   const [gallery, setGallery] = useState([]);
   const [editingScoreHouseId, setEditingScoreHouseId] = useState(null);
   const [inputScore, setInputScore] = useState('');
-  const [selectedHouseObj, setSelectedHouseObj] = useState(null);
 
   const loadData = () => {
     fetch('/api/houses', { cache: 'no-store' })
@@ -105,17 +103,16 @@ export default function HomePage({ onNavigate }) {
           {houses.map((house, idx) => (
             <div 
               key={house.id} 
-              onClick={() => setSelectedHouseObj(house)}
-              className="glass-panel card-hover-effect btn-interactive p-5 rounded-2xl border bg-white shadow-sm flex flex-col justify-between cursor-pointer group"
+              className="glass-panel p-5 rounded-2xl border bg-white shadow-sm flex flex-col justify-between"
               style={{ borderColor: `${house.color_hex}60` }}
             >
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <span className="w-8 h-8 rounded-full flex items-center justify-center text-white font-extrabold text-sm shadow-md transition-transform duration-300 group-hover:scale-110" style={{ backgroundColor: house.color_hex }}>
+                  <span className="w-8 h-8 rounded-full flex items-center justify-center text-white font-extrabold text-sm shadow-md" style={{ backgroundColor: house.color_hex }}>
                     #{idx + 1}
                   </span>
                 </div>
-                <h3 className="text-lg font-extrabold mb-1 group-hover:underline" style={{ color: house.color_hex }}>
+                <h3 className="text-lg font-extrabold mb-1" style={{ color: house.color_hex }}>
                   {house.name}
                 </h3>
                 <p className="text-xs text-slate-500 italic mb-3 line-clamp-1 font-medium">{house.motto || 'Virtue & Faith'}</p>
@@ -133,26 +130,12 @@ export default function HomePage({ onNavigate }) {
                     </div>
                   </div>
                 </div>
-
-                <div className="mt-2 text-right">
-                  <span className="text-[10px] font-black text-emerald-700 underline group-hover:text-emerald-900 transition">
-                    View Score Breakdown →
-                  </span>
-                </div>
               </div>
 
             </div>
           ))}
         </div>
       </section>
-
-      {/* House Breakdown Modal */}
-      {selectedHouseObj && (
-        <HouseBreakdownModal 
-          house={selectedHouseObj} 
-          onClose={() => setSelectedHouseObj(null)} 
-        />
-      )}
 
       {/* Upcoming & Completed Programs Grid */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

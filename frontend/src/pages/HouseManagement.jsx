@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Shield, Plus, Edit, Award, Trophy, Users, CheckCircle, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import HouseBreakdownModal from '../components/HouseBreakdownModal';
 
 export default function HouseManagement() {
   const { user } = useAuth();
@@ -10,7 +9,6 @@ export default function HouseManagement() {
   const [houses, setHouses] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [editingHouseId, setEditingHouseId] = useState(null);
-  const [selectedHouseObj, setSelectedHouseObj] = useState(null);
   
   const [formData, setFormData] = useState({
     code: '',
@@ -129,8 +127,7 @@ export default function HouseManagement() {
         {houses.map((house, idx) => (
           <div 
             key={house.id}
-            onClick={() => setSelectedHouseObj(house)}
-            className="glass-panel p-6 sm:p-8 rounded-3xl border-2 bg-white shadow-sm relative overflow-hidden flex flex-col justify-between cursor-pointer hover:shadow-xl transition-all duration-300 group"
+            className="glass-panel p-6 sm:p-8 rounded-3xl border-2 bg-white shadow-sm relative overflow-hidden flex flex-col justify-between"
             style={{ borderColor: `${house.color_hex}90` }}
           >
             <div className="absolute top-0 right-0 w-48 h-48 rounded-full blur-3xl pointer-events-none opacity-10" style={{ backgroundColor: house.color_hex }} />
@@ -139,7 +136,7 @@ export default function HouseManagement() {
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center space-x-3">
                   <span 
-                    className="w-12 h-12 rounded-2xl flex items-center justify-center font-black text-white text-xl shadow-md transition-transform duration-300 group-hover:scale-110"
+                    className="w-12 h-12 rounded-2xl flex items-center justify-center font-black text-white text-xl shadow-md"
                     style={{ backgroundColor: house.color_hex }}
                   >
                     #{idx + 1}
@@ -160,7 +157,7 @@ export default function HouseManagement() {
                 )}
               </div>
 
-              <h3 className="text-3xl font-black mb-1 tracking-tight group-hover:underline" style={{ color: house.color_hex }}>
+              <h3 className="text-3xl font-black mb-1 tracking-tight" style={{ color: house.color_hex }}>
                 {house.name}
               </h3>
               <p className="text-xs text-slate-500 italic mb-6 font-medium">"{house.motto || 'Faith & Dedication'}"</p>
@@ -170,31 +167,12 @@ export default function HouseManagement() {
                   <span>House Captain:</span>
                   <span className="font-bold text-slate-800">{house.captain_name || 'N/A'}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span>Enrolled Students:</span>
-                  <span className="font-bold text-emerald-700">{house.student_count || 0} Students</span>
-                </div>
               </div>
             </div>
 
-            {/* Medals & Score */}
+            {/* Score Display */}
             <div>
-              <div className="grid grid-cols-3 gap-2 py-3 bg-slate-50 rounded-2xl border border-slate-200 text-center mb-4">
-                <div>
-                  <span className="text-[10px] text-amber-700 font-extrabold block">🥇 1ST</span>
-                  <span className="text-lg font-black text-slate-900 font-mono">{house.gold || 0}</span>
-                </div>
-                <div>
-                  <span className="text-[10px] text-slate-600 font-extrabold block">🥈 2ND</span>
-                  <span className="text-lg font-black text-slate-900 font-mono">{house.silver || 0}</span>
-                </div>
-                <div>
-                  <span className="text-[10px] text-amber-800 font-extrabold block">🥉 3RD</span>
-                  <span className="text-lg font-black text-slate-900 font-mono">{house.bronze || 0}</span>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between border-t border-slate-200 pt-3 mb-2">
+              <div className="flex items-center justify-between border-t border-slate-200 pt-3">
                 <div className="flex items-center space-x-2">
                   <span className="text-xs font-bold text-slate-600">Total Championship Points</span>
                   {isAdmin && (
@@ -212,12 +190,6 @@ export default function HouseManagement() {
                   )}
                 </div>
                 <span className="text-4xl font-black emerald-gradient-text font-mono">{house.total_points || 0}</span>
-              </div>
-
-              <div className="text-right mb-2">
-                <span className="text-[10px] font-black text-emerald-700 underline group-hover:text-emerald-900 transition">
-                  View Full Score Breakdown →
-                </span>
               </div>
             </div>
 
@@ -339,14 +311,6 @@ export default function HouseManagement() {
               </form>
             </div>
         </div>
-      )}
-
-      {/* House Breakdown Modal */}
-      {selectedHouseObj && (
-        <HouseBreakdownModal 
-          house={selectedHouseObj} 
-          onClose={() => setSelectedHouseObj(null)} 
-        />
       )}
 
     </div>
