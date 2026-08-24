@@ -16,7 +16,7 @@ export default function Navbar({ activeTab, setActiveTab, onOpenSearch }) {
   const navItems = [
     { id: 'home', label: t('home'), icon: BookOpen, roles: ['all'] },
     { id: 'houses', label: 'Houses', icon: Shield, roles: ['all'] },
-    { id: 'students', label: t('students'), icon: User, roles: ['all'] },
+    { id: 'students', label: t('students'), icon: User, roles: ['super_admin', 'admin', 'stage_coordinator'] },
     { id: 'programs', label: t('programs'), icon: Calendar, roles: ['all'] },
     { id: 'results', label: t('results'), icon: Trophy, roles: ['all'] },
     { id: 'gallery', label: t('gallery'), icon: Sparkles, roles: ['all'] },
@@ -26,7 +26,7 @@ export default function Navbar({ activeTab, setActiveTab, onOpenSearch }) {
 
   const visibleNav = navItems.filter(item => {
     if (role === 'public') {
-      return ['home', 'houses', 'students', 'programs', 'results', 'gallery', 'dashboard'].includes(item.id);
+      return ['home', 'houses', 'programs', 'results', 'gallery', 'dashboard'].includes(item.id);
     }
     return item.roles.includes('all') || item.roles.includes(role);
   });

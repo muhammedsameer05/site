@@ -41,8 +41,14 @@ export default function StudentManagement() {
   });
 
   const loadData = () => {
-    fetch('/api/students', { cache: 'no-store' })
-      .then(res => res.json())
+    fetch('/api/students', { 
+      cache: 'no-store',
+      headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) }
+    })
+      .then(res => {
+        if (!res.ok) return [];
+        return res.json();
+      })
       .then(data => {
         const backendItems = Array.isArray(data) ? data : [];
         const uniqueMap = new Map();
@@ -104,7 +110,9 @@ export default function StudentManagement() {
       photo: student.photo || ''
     });
 
-    fetch(`/api/students/${student.id}`)
+    fetch(`/api/students/${student.id}`, {
+      headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) }
+    })
       .then(res => res.json())
       .then(data => {
         if (data.registered_program_ids) {
@@ -240,6 +248,24 @@ export default function StudentManagement() {
 
     return true;
   });
+
+  if (!isAdmin) {
+    return (
+      <div className="glass-panel p-8 sm:p-12 text-center rounded-3xl border border-amber-500/40 max-w-lg mx-auto my-12 bg-white shadow-2xl animate-fade-in">
+        <div className="w-16 h-16 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center mx-auto mb-4 text-amber-600">
+          <User className="w-8 h-8 opacity-80" />
+        </div>
+        <h3 className="text-xl font-extrabold text-slate-900 mb-2">Admin Portal Authentication Required</h3>
+        <p className="text-xs text-slate-500 mb-6 font-medium">Student records and directory details are confidential and accessible exclusively by festival administrators.</p>
+        <button
+          onClick={() => { window.location.hash = 'login'; window.location.reload(); }}
+          className="px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-md transition"
+        >
+          Sign In to Admin Portal
+        </button>
+      </div>
+    );
+  }
 
   // Admin / Full View
   return (

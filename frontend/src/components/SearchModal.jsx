@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Search, X, User, Calendar, Trophy, Award } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 export default function SearchModal({ isOpen, onClose, onSelectResult }) {
+  const { user, token } = useAuth();
+  const role = user?.role || 'public';
+  const isAdmin = ['super_admin', 'admin', 'stage_coordinator'].includes(role);
+
   const [query, setQuery] = useState('');
   const [results, setResults] = useState({
     students: [],
@@ -18,19 +23,25 @@ export default function SearchModal({ isOpen, onClose, onSelectResult }) {
 
     setLoading(true);
     const timer = setTimeout(() => {
-      // Perform client side search fetch
-      fetch('/api/students')
-        .then(res => res.json())
-        .then(data => {
-          const q = query.toLowerCase();
-          const matchedStudents = (data || []).filter(s => 
-            s.name.toLowerCase().includes(q) || 
-            s.student_id.toLowerCase().includes(q) ||
-            (s.arabic_name && s.arabic_name.includes(q))
-          );
-          setResults(prev => ({ ...prev, students: matchedStudents.slice(0, 5) }));
+      // Perform client side search fetch for students only if admin
+      if (isAdmin) {
+        fetch('/api/students', {
+          headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) }
         })
-        .catch(() => {});
+          .then(res => res.json())
+          .then(data => {
+            const q = query.toLowerCase();
+            const matchedStudents = (data || []).filter(s => 
+              s.name?.toLowerCase().includes(q) || 
+              s.student_id?.toLowerCase().includes(q) ||
+              (s.arabic_name && s.arabic_name.includes(q))
+            );
+            setResults(prev => ({ ...prev, students: matchedStudents.slice(0, 5) }));
+          })
+          .catch(() => {});
+      } else {
+        setResults(prev => ({ ...prev, students: [] }));
+      }
 
       fetch('/api/programs')
         .then(res => res.json())

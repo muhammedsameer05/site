@@ -202,7 +202,7 @@ router.get('/auth/me', authenticate, async (req, res) => {
 // -------------------------------------------------------------
 // STUDENTS MANAGEMENT
 // -------------------------------------------------------------
-router.get('/students', async (req, res) => {
+router.get('/students', authenticate, requireAdmin, async (req, res) => {
   try {
     const students = await all(`
       SELECT s.*, h.name as house_name, h.color_hex as house_color 
@@ -217,7 +217,7 @@ router.get('/students', async (req, res) => {
   }
 });
 
-router.get('/students/:id', async (req, res) => {
+router.get('/students/:id', authenticate, requireAdmin, async (req, res) => {
   try {
     const student = await get(`
       SELECT s.*, h.name as house_name, h.color_hex as house_color 
