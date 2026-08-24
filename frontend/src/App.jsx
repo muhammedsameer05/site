@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Analytics } from '@vercel/analytics/react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { LanguageProvider } from './context/LanguageContext';
 import Navbar from './components/Navbar';
@@ -129,6 +130,7 @@ export default function App() {
     <AuthProvider>
       <LanguageProvider>
         <MainContent />
+        <Analytics />
       </LanguageProvider>
     </AuthProvider>
   );
