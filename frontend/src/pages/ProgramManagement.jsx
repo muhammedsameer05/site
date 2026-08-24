@@ -654,20 +654,15 @@ export default function ProgramManagement() {
                     </div>
                     <div className="space-y-1">
                       {p.winners.map((w, idx) => (
-                        <div key={idx} className="flex items-center justify-between text-xs">
-                          <div className="flex items-center space-x-2">
-                            <span className={`px-1.5 py-0.2 rounded font-black text-[9px] uppercase ${
-                              w.prize === '1st' ? 'bg-amber-400 text-slate-950' :
-                              w.prize === '2nd' ? 'bg-slate-300 text-slate-950' :
-                              'bg-amber-700 text-white'
-                            }`}>
-                              {w.prize === '1st' ? '🥇 1st' : w.prize === '2nd' ? '🥈 2nd' : '🥉 3rd'}
-                            </span>
-                            <span className="text-slate-900 font-bold">{w.student_name}</span>
-                          </div>
-                          <span className="text-[9px] font-bold px-1.5 py-0.2 rounded border" style={{ color: w.house_color || '#10b981', borderColor: `${w.house_color || '#10b981'}50` }}>
-                            {w.house_name}
+                        <div key={idx} className="flex items-center space-x-2 text-xs">
+                          <span className={`px-1.5 py-0.2 rounded font-black text-[9px] uppercase ${
+                            w.prize === '1st' ? 'bg-amber-400 text-slate-950' :
+                            w.prize === '2nd' ? 'bg-slate-300 text-slate-950' :
+                            'bg-amber-700 text-white'
+                          }`}>
+                            {w.prize === '1st' ? '🥇 1st' : w.prize === '2nd' ? '🥈 2nd' : '🥉 3rd'}
                           </span>
+                          <span className="text-slate-900 font-bold">{w.student_name}</span>
                         </div>
                       ))}
                     </div>
