@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Trophy, Radio, Sparkles, Award, RefreshCw, Search, Calendar, User, Shield } from 'lucide-react';
 import { io } from 'socket.io-client';
 import confetti from 'canvas-confetti';
-import HouseBreakdownModal from '../components/HouseBreakdownModal';
 
 export default function LiveScoring() {
   const [houses, setHouses] = useState([]);
@@ -10,7 +9,6 @@ export default function LiveScoring() {
   const [results, setResults] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedHouseObj, setSelectedHouseObj] = useState(null);
   const [liveLog, setLiveLog] = useState([
     { id: 1, time: 'System Ready', text: 'Live scoring websocket stream active. Real-time updates enabled.' }
   ]);
@@ -121,21 +119,19 @@ export default function LiveScoring() {
           {houses.map((house, idx) => (
             <div
               key={house.id}
-              onClick={() => setSelectedHouseObj(house)}
-              className="glass-panel p-6 rounded-3xl border-2 bg-white shadow-md relative overflow-hidden flex flex-col justify-between cursor-pointer hover:shadow-xl transition-all duration-300 group"
+              className="glass-panel p-6 rounded-3xl border-2 bg-white shadow-md relative overflow-hidden flex flex-col justify-between"
               style={{ borderColor: `${house.color_hex}80` }}
-              title="Click to view full house score breakdown & winner results"
             >
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center space-x-3">
                   <span 
-                    className="w-12 h-12 rounded-2xl flex items-center justify-center font-black text-white text-xl shadow-md transition-transform duration-300 group-hover:scale-110"
+                    className="w-12 h-12 rounded-2xl flex items-center justify-center font-black text-white text-xl shadow-md"
                     style={{ backgroundColor: house.color_hex }}
                   >
                     #{idx + 1}
                   </span>
                   <div>
-                    <h3 className="text-2xl font-black group-hover:underline" style={{ color: house.color_hex }}>
+                    <h3 className="text-2xl font-black" style={{ color: house.color_hex }}>
                       {house.name}
                     </h3>
                   </div>
@@ -151,22 +147,13 @@ export default function LiveScoring() {
                 </div>
               </div>
 
-              <div className="text-xs text-slate-600 font-medium border-t border-slate-100 pt-3 flex justify-between items-center">
+              <div className="text-xs text-slate-600 font-medium border-t border-slate-100 pt-3">
                 <span className="italic">"{house.motto || 'Faith & Devotion'}"</span>
-                <span className="font-bold text-emerald-700 underline text-xs group-hover:text-emerald-900 transition">View Breakdown →</span>
               </div>
             </div>
           ))}
         </div>
       </div>
-
-      {/* House Breakdown Modal */}
-      {selectedHouseObj && (
-        <HouseBreakdownModal 
-          house={selectedHouseObj} 
-          onClose={() => setSelectedHouseObj(null)} 
-        />
-      )}
 
       {/* SECTION 2: OFFICIAL COMPETITION RESULTS & STUDENT WINNERS */}
       <div className="space-y-6 pt-4">
@@ -253,21 +240,12 @@ export default function LiveScoring() {
                       progWinners.map(w => (
                         <div 
                           key={w.id || `${w.program_id}-${w.prize}`}
-                          className="flex items-center justify-between text-xs py-1.5 border-b border-slate-200/60 last:border-0"
+                          className="flex items-center space-x-2 text-xs py-1.5 border-b border-slate-200/60 last:border-0"
                         >
-                          <div className="flex items-center space-x-2">
-                            <span className="font-mono text-sm">
-                              {w.prize === '1st' ? '🥇' : w.prize === '2nd' ? '🥈' : '🥉'}
-                            </span>
-                            <span className="font-extrabold text-slate-900">{w.student_name || w.name || 'Participant'}</span>
-                          </div>
-
-                          <span 
-                            className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider text-white"
-                            style={{ backgroundColor: (w.house_name && w.house_name.includes('Blue')) || w.house_id === 2 ? '#3B82F6' : '#10B981' }}
-                          >
-                            {w.house_name || (w.house_id === 2 ? 'Blue House' : 'Green House')}
+                          <span className="font-mono text-sm">
+                            {w.prize === '1st' ? '🥇' : w.prize === '2nd' ? '🥈' : '🥉'}
                           </span>
+                          <span className="font-extrabold text-slate-900">{w.student_name || w.name || 'Participant'}</span>
                         </div>
                       ))
                     )}
