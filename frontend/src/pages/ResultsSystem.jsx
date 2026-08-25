@@ -148,16 +148,14 @@ export default function ResultsSystem() {
               <tr>
                 <th className="p-3 sm:p-4">Rank / Prize</th>
                 <th className="p-3 sm:p-4">Student Name</th>
-                <th className="p-3 sm:p-4">Class</th>
-                <th className="p-3 sm:p-4">House</th>
                 {isAdmin && <th className="p-3 sm:p-4 text-center">Action / Certificate</th>}
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {loading ? (
-                <tr><td colSpan={isAdmin ? "5" : "4"} className="p-8 text-center text-emerald-700 font-mono font-bold">Loading Results...</td></tr>
+                <tr><td colSpan={isAdmin ? "3" : "2"} className="p-8 text-center text-emerald-700 font-mono font-bold">Loading Results...</td></tr>
               ) : results.length === 0 ? (
-                <tr><td colSpan={isAdmin ? "5" : "4"} className="p-8 text-center text-slate-500 font-medium">No results calculated yet for this program.</td></tr>
+                <tr><td colSpan={isAdmin ? "3" : "2"} className="p-8 text-center text-slate-500 font-medium">No results calculated yet for this program.</td></tr>
               ) : (
                 results.map((r) => (
                   <tr key={r.id} className="hover:bg-emerald-50/30 transition">
@@ -173,15 +171,6 @@ export default function ResultsSystem() {
                     <td className="p-3 sm:p-4">
                       <div className="font-bold text-slate-900 text-xs sm:text-sm">{r.student_name}</div>
                       {r.arabic_name && <div className="text-[11px] font-serif text-emerald-800">{r.arabic_name}</div>}
-                    </td>
-                    <td className="p-3 sm:p-4 font-mono font-bold text-slate-700 whitespace-nowrap">{r.class_name || '-'}</td>
-                    <td className="p-3 sm:p-4 whitespace-nowrap">
-                      <span 
-                        className="px-2.5 py-0.5 rounded text-[10px] font-bold uppercase whitespace-nowrap inline-block"
-                        style={{ color: r.house_color || '#10b981' }}
-                      >
-                        {r.house_name}
-                      </span>
                     </td>
                     {isAdmin && (
                       <td className="p-3 sm:p-4 text-center whitespace-nowrap">
