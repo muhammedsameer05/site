@@ -9,11 +9,61 @@ export default function ResultsSystem() {
   const isAdmin = ['super_admin', 'admin', 'stage_coordinator'].includes(role);
 
   const [programs, setPrograms] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedProgramId, setSelectedProgramId] = useState(null);
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState(null);
   const [selectedCert, setSelectedCert] = useState(null); // For certificate modal
+
+  const getProgramCategory = (p) => {
+    const name = String(p.category_name || '').toLowerCase().trim();
+    const age = String(p.age_group || '').toLowerCase().trim();
+
+    if (name) {
+      if (name.includes('super') && name.includes('senior')) return 'Super Senior';
+      if (name.includes('sub') && name.includes('junior')) return 'Sub Junior';
+      if (name === 'junior' || (name.includes('junior') && !name.includes('sub'))) return 'Junior';
+      if (name === 'senior' || (name.includes('senior') && !name.includes('super'))) return 'Senior';
+      if (name.includes('kiddies') || name.includes('kids')) return 'Kiddies';
+    }
+
+    if (age) {
+      if (age.includes('super') && age.includes('senior')) return 'Super Senior';
+      if (age.includes('sub') && age.includes('junior')) return 'Sub Junior';
+      if (age === 'junior' || (age.includes('junior') && !age.includes('sub'))) return 'Junior';
+      if (age === 'senior' || (age.includes('senior') && !age.includes('super'))) return 'Senior';
+      if (age.includes('kiddies') || age.includes('kids')) return 'Kiddies';
+    }
+
+    const cId = Number(p.category_id);
+    if (cId === 1) return 'Kiddies';
+    if (cId === 2) return 'Sub Junior';
+    if (cId === 3) return 'Junior';
+    if (cId === 4) return 'Senior';
+    if (cId === 5) return 'Super Senior';
+
+    return 'Sub Junior';
+  };
+
+  const matchesCategory = (p, selectedCat) => {
+    if (!selectedCat || selectedCat === 'All') return true;
+    const progCat = getProgramCategory(p);
+    return progCat.toLowerCase() === selectedCat.toLowerCase();
+  };
+
+  const filteredPrograms = programs.filter(p => matchesCategory(p, selectedCategory));
+
+  const handleCategoryChange = (cat) => {
+    setSelectedCategory(cat);
+    const categoryProgs = programs.filter(p => matchesCategory(p, cat));
+    if (categoryProgs.length > 0) {
+      const isCurrentInCat = categoryProgs.some(p => String(p.id) === String(selectedProgramId));
+      if (!isCurrentInCat) {
+        setSelectedProgramId(categoryProgs[0].id);
+      }
+    }
+  };
 
   useEffect(() => {
     fetch('/api/programs')
@@ -60,6 +110,7 @@ export default function ResultsSystem() {
   }, [selectedProgramId]);
 
   const handleAutoCalculate = () => {
+    if (!selectedProgramId) return;
     setLoading(true);
     fetch(`/api/results/calculate/${selectedProgramId}`, { method: 'POST' })
       .then(res => res.json())
@@ -111,6 +162,36 @@ export default function ResultsSystem() {
         </div>
       )}
 
+      {/* Category Filter Tabs Bar */}
+      <div className="flex items-center space-x-1.5 overflow-x-auto pb-1 bg-white p-3 rounded-2xl border border-slate-200 shadow-xs scrollbar-thin">
+        {['All', 'Kiddies', 'Sub Junior', 'Junior', 'Senior', 'Super Senior'].map((cat) => {
+          const isSelected = selectedCategory.toLowerCase() === cat.toLowerCase();
+          const count = cat === 'All' 
+            ? programs.length 
+            : programs.filter(p => matchesCategory(p, cat)).length;
+
+          return (
+            <button
+              key={cat}
+              type="button"
+              onClick={() => handleCategoryChange(cat)}
+              className={`px-3.5 py-2 rounded-xl text-xs font-black transition-all whitespace-nowrap flex items-center space-x-1.5 ${
+                isSelected
+                  ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20'
+                  : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200'
+              }`}
+            >
+              <span>{cat === 'All' ? 'All Categories' : cat}</span>
+              <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold ${
+                isSelected ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'
+              }`}>
+                {count}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
       {/* Program Selector Bar */}
       <div className="glass-panel p-4 rounded-2xl border border-slate-200 bg-white flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
         <div className="flex items-center space-x-3 w-full sm:w-auto">
@@ -120,19 +201,26 @@ export default function ResultsSystem() {
             onChange={e => setSelectedProgramId(e.target.value)}
             className="w-full sm:w-96 bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 focus:border-emerald-500"
           >
-            {programs.map(p => (
-              <option key={p.id} value={p.id}>{p.name}</option>
-            ))}
+            {filteredPrograms.length === 0 ? (
+              <option value="">No programs in {selectedCategory}</option>
+            ) : (
+              filteredPrograms.map(p => (
+                <option key={p.id} value={p.id}>{p.name} ({getProgramCategory(p)})</option>
+              ))
+            )}
           </select>
         </div>
 
-        <button
-          onClick={handleAutoCalculate}
-          className="flex items-center space-x-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-md transition"
-        >
-          <RefreshCw className="w-4 h-4" />
-          <span>Calculate & Award Prizes</span>
-        </button>
+        {isAdmin && (
+          <button
+            onClick={handleAutoCalculate}
+            disabled={!selectedProgramId}
+            className="flex items-center space-x-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-md transition disabled:opacity-50"
+          >
+            <RefreshCw className="w-4 h-4" />
+            <span>Calculate & Award Prizes</span>
+          </button>
+        )}
       </div>
 
       {/* Results Table */}
