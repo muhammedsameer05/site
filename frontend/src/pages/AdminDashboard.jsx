@@ -3,8 +3,13 @@ import {
   Users, Calendar, Award, Shield, Layers, Play, CheckCircle, 
   Clock, Trophy, BarChart3, PieChart 
 } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 export default function AdminDashboard() {
+  const { user, token } = useAuth();
+  const role = user?.role || 'public';
+  const isAdmin = ['super_admin', 'admin', 'stage_coordinator'].includes(role);
+
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -13,7 +18,10 @@ export default function AdminDashboard() {
 
     const loadDashboardStats = async () => {
       try {
-        const res = await fetch('/api/reports/dashboard-stats', { cache: 'no-store' });
+        const res = await fetch('/api/reports/dashboard-stats', { 
+          cache: 'no-store',
+          headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) }
+        });
         if (res.ok) {
           const data = await res.json();
           if (data && data.cards && (data.cards.totalStudents > 0 || data.cards.totalPrograms > 0 || data.cards.totalHouses > 0)) {
@@ -100,6 +108,24 @@ export default function AdminDashboard() {
     loadDashboardStats();
     return () => { isSubscribed = false; };
   }, []);
+
+  if (!isAdmin) {
+    return (
+      <div className="glass-panel p-8 sm:p-12 text-center rounded-3xl border border-amber-500/40 max-w-lg mx-auto my-12 bg-white shadow-2xl animate-fade-in">
+        <div className="w-16 h-16 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center mx-auto mb-4 text-amber-600">
+          <Shield className="w-8 h-8 opacity-80" />
+        </div>
+        <h3 className="text-xl font-extrabold text-slate-900 mb-2">Admin Portal Authentication Required</h3>
+        <p className="text-xs text-slate-500 mb-6 font-medium">The Admin Control Dashboard and festival overview analytics are confidential and restricted to authorized administrators.</p>
+        <button
+          onClick={() => { window.location.hash = 'login'; window.location.reload(); }}
+          className="px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-md transition"
+        >
+          Sign In to Admin Portal
+        </button>
+      </div>
+    );
+  }
 
   if (loading) {
     return (

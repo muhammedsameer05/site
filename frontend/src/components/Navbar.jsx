@@ -20,13 +20,13 @@ export default function Navbar({ activeTab, setActiveTab, onOpenSearch }) {
     { id: 'programs', label: t('programs'), icon: Calendar, roles: ['all'] },
     { id: 'results', label: t('results'), icon: Trophy, roles: ['all'] },
     { id: 'gallery', label: t('gallery'), icon: Sparkles, roles: ['all'] },
-    { id: 'dashboard', label: 'Overview', icon: Layers, roles: ['all'] },
+    { id: 'dashboard', label: 'Overview', icon: Layers, roles: ['super_admin', 'admin', 'stage_coordinator'] },
     { id: 'settings', label: t('settings'), icon: Shield, roles: ['super_admin', 'admin'] }
   ];
 
   const visibleNav = navItems.filter(item => {
     if (role === 'public') {
-      return ['home', 'houses', 'programs', 'results', 'gallery', 'dashboard'].includes(item.id);
+      return ['home', 'houses', 'programs', 'results', 'gallery'].includes(item.id);
     }
     return item.roles.includes('all') || item.roles.includes(role);
   });

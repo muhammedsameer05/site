@@ -43,12 +43,12 @@ function MainContent() {
 
     // Public / Unauthenticated User Restriction Guard for Admin Only modules
     if (role === 'public') {
-      const protectedAdminTabs = ['students', 'settings', 'archive', 'audit-logs'];
+      const protectedAdminTabs = ['dashboard', 'students', 'settings', 'archive', 'audit-logs'];
       if (protectedAdminTabs.includes(activeTab)) {
         return (
           <div className="glass-panel p-8 text-center rounded-3xl border border-amber-500/40 max-w-lg mx-auto my-12 bg-white shadow-2xl">
             <h3 className="text-xl font-bold text-slate-900 mb-2">Admin Portal Authentication Required</h3>
-            <p className="text-xs text-slate-500 mb-6">Administrator credentials required to access student directory, system settings & management modules.</p>
+            <p className="text-xs text-slate-500 mb-6">Administrator credentials required to access festival overview, student directory, system settings & management modules.</p>
             <button
               onClick={() => setActiveTab('login')}
               className="px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-md transition"
